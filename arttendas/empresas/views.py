@@ -32,9 +32,8 @@ def cadastro_locadora(request):
                     first_name=nome,
                     organizacao=org
                 )
-            
             login(request, user)
-            messages.success(request, f'Bem-vindo(a) ao Art.Tendas, {nome}! Sua conta da empresa {empresa_nome} foi criada.')
+            messages.success(request, f'Bem-vindo(a) ao TendaPro, {nome}! Sua conta da empresa {empresa_nome} foi criada.')
             return redirect('eventos:dashboard')
         except Exception as e:
             messages.error(request, f'Erro ao criar conta: {str(e)}')
@@ -56,3 +55,24 @@ def configuracoes_empresa(request):
     else:
         form = OrganizacaoForm(instance=org)
     return render(request, 'empresas/configuracoes.html', {'form': form})
+
+from django.db.models import Count
+from django.core.exceptions import PermissionDenied
+
+@login_required
+def super_admin_dashboard(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied("Acesso restrito ao dono do SaaS.")
+    
+    orgs = Organizacao.objects.annotate(
+        total_usuarios=Count('usuarios', distinct=True),
+        total_eventos=Count('eventos', distinct=True),
+        total_tendas=Count('tendas', distinct=True)
+    ).order_by('-criado_em')
+    
+    context = {
+        'orgs': orgs,
+        'total_clientes': orgs.count(),
+        'total_eventos_global': sum(o.total_eventos for o in orgs)
+    }
+    return render(request, 'empresas/super_admin.html', context)

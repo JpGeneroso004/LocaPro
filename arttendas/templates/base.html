@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>{% block title %}Art.Tendas{% endblock %} | Sistema de Gestão</title>
+  <title>{% block title %}TendaPro{% endblock %} | SaaS de Locação</title>
   <script>
     const theme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-bs-theme', theme);
@@ -184,7 +184,8 @@
 <nav class="navbar navbar-expand-md navbar-top d-none d-md-flex mb-4">
   <div class="container">
     <a class="navbar-brand" href="{% url 'eventos:dashboard' %}">
-      <img src="{% static 'img/logo.png' %}" alt="Art.Tendas" height="40">
+      <!-- <img src="{% static 'img/logo.png' %}" alt="TendaPro" height="40"> -->
+      <span class="fs-4 fw-bold">⛺ TendaPro</span>
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
@@ -206,6 +207,11 @@
         <li class="nav-item">
           <a class="nav-link fw-bold" href="{% url 'empresas:configuracoes' %}"><i class="bi bi-gear-fill"></i> Empresa</a>
         </li>
+        {% if user.is_superuser %}
+        <li class="nav-item">
+          <a class="nav-link fw-bold text-danger" href="{% url 'empresas:super_admin' %}"><i class="bi bi-shield-lock-fill"></i> Super-Admin</a>
+        </li>
+        {% endif %}
       </ul>
       <a href="{% url 'eventos:novo' %}" class="btn btn-dark fw-bold me-3">+ Novo Evento</a>
       <button class="btn btn-link theme-toggle-icon text-decoration-none theme-toggle p-0 fs-5" title="Alternar tema">
@@ -217,8 +223,8 @@
 
 <div class="d-md-none navbar-top p-3 sticky-top mb-3 shadow-sm d-flex justify-content-between align-items-center">
   <div style="width: 32px;"></div> <!-- Spacer -->
-  <a href="{% url 'eventos:dashboard' %}" class="text-decoration-none">
-    <h4 class="m-0 fw-bold"><img src="{% static 'img/logo.png' %}" alt="Art.Tendas" height="36"></h4>
+  <a href="{% url 'eventos:dashboard' %}" class="text-decoration-none text-dark">
+    <h4 class="m-0 fw-bold">⛺ TendaPro</h4>
   </a>
   <button class="btn btn-link theme-toggle-icon text-decoration-none theme-toggle p-0 fs-4" title="Alternar tema">
     <i class="bi bi-moon-stars-fill"></i>

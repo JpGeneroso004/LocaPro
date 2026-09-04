@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Painel do Dono - TendaPro{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col">
+            <h2 class="fw-bold"><i class="bi bi-rocket-takeoff-fill text-warning"></i> Painel do SaaS (Dono)</h2>
+            <p class="text-muted">Visão global de todos os clientes assinantes da plataforma.</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card bg-warning text-dark border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Locadoras Ativas</h5>
+                    <h2 class="display-4 fw-bold mb-0">{{ total_clientes }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card bg-dark text-white border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-warning">Total de Eventos Geridos</h5>
+                    <h2 class="display-4 fw-bold mb-0">{{ total_eventos_global }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Empresa Locadora</th>
+                            <th>CNPJ / Telefone</th>
+                            <th class="text-center">Usuários</th>
+                            <th class="text-center">Tendas</th>
+                            <th class="text-center">Eventos</th>
+                            <th>Data de Cadastro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for org in orgs %}
+                        <tr>
+                            <td class="text-muted fw-bold">#{{ org.id }}</td>
+                            <td>
+                                <strong>{{ org.nome }}</strong>
+                            </td>
+                            <td>
+                                <div><small class="text-muted">CNPJ:</small> {{ org.cnpj|default:"-" }}</div>
+                                <div><small class="text-muted">Tel:</small> {{ org.telefone|default:"-" }}</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-secondary">{{ org.total_usuarios }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-primary">{{ org.total_tendas }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success">{{ org.total_eventos }}</span>
+                            </td>
+                            <td>{{ org.criado_em|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">Nenhuma locadora cadastrada ainda.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
