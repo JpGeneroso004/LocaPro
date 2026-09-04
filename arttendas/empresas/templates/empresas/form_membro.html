@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}Novo Membro da Equipe - LocaPro{% endblock %}
+{% block title %}{% if membro %}Editar Membro{% else %}Novo Membro{% endif %} - LocaPro{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="row mb-4">
         <div class="col-12">
-            <h2><i class="bi bi-person-plus-fill text-warning"></i> Adicionar Membro</h2>
-            <p class="text-muted">Crie um login para um novo funcionário da sua empresa.</p>
+            <h2><i class="bi bi-person-{% if membro %}gear{% else %}plus{% endif %}-fill text-warning"></i> {% if membro %}Editar Membro{% else %}Adicionar Membro{% endif %}</h2>
+            <p class="text-muted">{% if membro %}Atualize os dados e acessos deste funcionário.{% else %}Crie um login para um novo funcionário da sua empresa.{% endif %}</p>
         </div>
     </div>
 
@@ -19,24 +19,26 @@
                         
                         <div class="mb-3">
                             <label class="form-label fw-bold">Nome do Funcionário</label>
-                            <input type="text" name="nome" class="form-control" required placeholder="Ex: Maria Souza">
+                            <input type="text" name="nome" class="form-control" required placeholder="Ex: Maria Souza" value="{{ membro.first_name|default:'' }}">
                         </div>
                         
                         <div class="mb-3">
                             <label class="form-label fw-bold">E-mail (Login)</label>
-                            <input type="email" name="email" class="form-control" required placeholder="maria@suaempresa.com">
+                            <input type="email" name="email" class="form-control" {% if membro %}disabled{% else %}required{% endif %} placeholder="maria@suaempresa.com" value="{{ membro.email|default:'' }}">
+                            {% if membro %}<small class="text-muted">Não é possível alterar o e-mail de um cadastro existente.</small>{% endif %}
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Senha de Acesso</label>
-                            <input type="password" name="senha" class="form-control" required>
+                            <input type="password" name="senha" class="form-control" {% if not membro %}required{% endif %}>
+                            {% if membro %}<small class="text-muted">Deixe em branco para manter a senha atual.</small>{% endif %}
                         </div>
 
                         <div class="mb-4">
                             <label class="form-label fw-bold">Nível de Acesso (Cargo)</label>
-                            <select name="cargo" class="form-select" required>
-                                <option value="funcionario">Funcionário (Acesso normal)</option>
-                                <option value="dono">Dono / Administrador (Pode gerenciar equipe e excluir eventos)</option>
+                            <select name="cargo" class="form-select" required {% if membro == user %}disabled{% endif %}>
+                                <option value="funcionario" {% if membro.cargo == 'funcionario' %}selected{% endif %}>Funcionário (Acesso normal)</option>
+                                <option value="dono" {% if membro.cargo == 'dono' %}selected{% endif %}>Dono / Administrador (Pode gerenciar equipe e excluir eventos)</option>
                             </select>
                         </div>
 
@@ -44,7 +46,7 @@
                         <div class="d-flex justify-content-between">
                             <a href="{% url 'empresas:equipe' %}" class="btn btn-outline-secondary">Cancelar</a>
                             <button type="submit" class="btn btn-warning fw-bold text-dark">
-                                <i class="bi bi-check-circle"></i> Criar Login
+                                <i class="bi bi-check-circle"></i> {% if membro %}Salvar Alterações{% else %}Criar Login{% endif %}
                             </button>
                         </div>
                     </form>

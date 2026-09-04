@@ -50,7 +50,7 @@ def dashboard(request):
         status__in=['agendado', 'em_andamento'],
         data_inicio__lte=hoje,
         data_fim__gte=hoje
-    )
+    ).prefetch_related('tendas', 'conjuntos')
     
     tendas_ids_em_uso = set(tid for tid in eventos_ativos_hoje.values_list('tendas__id', flat=True) if tid)
     total_tendas = Tenda.objects.count()

@@ -45,6 +45,9 @@
                             </td>
                             {% if user.cargo == 'dono' %}
                             <td class="text-end">
+                                <a href="{% url 'empresas:editar_membro' membro.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar Usuário">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
                                 {% if membro != user %}
                                 <form method="post" action="{% url 'empresas:remover_membro' membro.pk %}" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja remover este membro da equipe?');">
                                     {% csrf_token %}

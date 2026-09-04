@@ -120,3 +120,25 @@ def remover_membro(request, pk):
         messages.success(request, 'Membro removido.')
     return redirect('empresas:equipe')
 
+
+@login_required
+def editar_membro(request, pk):
+    if request.user.cargo != 'dono':
+        messages.error(request, 'Apenas o dono pode editar membros.')
+        return redirect('empresas:equipe')
+        
+    membro = get_object_or_404(Usuario, pk=pk, organizacao=request.user.organizacao)
+    
+    if request.method == 'POST':
+        membro.first_name = request.POST.get('nome')
+        senha = request.POST.get('senha')
+        if senha:
+            membro.set_password(senha)
+        if membro != request.user:
+            membro.cargo = request.POST.get('cargo')
+        membro.save()
+        messages.success(request, 'Membro atualizado.')
+        return redirect('empresas:equipe')
+        
+    return render(request, 'empresas/form_membro.html', {'membro': membro})
+
