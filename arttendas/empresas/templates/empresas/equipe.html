@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Minha Equipe - LocaPro{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col">
+            <h2 class="fw-bold"><i class="bi bi-people-fill text-warning"></i> Minha Equipe</h2>
+            <p class="text-muted">Gerencie os usuários que têm acesso ao sistema da sua locadora.</p>
+        </div>
+        {% if user.cargo == 'dono' %}
+        <div class="col-auto">
+            <a href="{% url 'empresas:novo_membro' %}" class="btn btn-warning fw-bold text-dark">
+                <i class="bi bi-plus-circle-fill"></i> Novo Membro
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nome</th>
+                            <th>E-mail (Login)</th>
+                            <th>Nível de Acesso</th>
+                            {% if user.cargo == 'dono' %}
+                            <th class="text-end">Ações</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for membro in usuarios %}
+                        <tr>
+                            <td class="fw-bold">{{ membro.first_name }}</td>
+                            <td>{{ membro.email }}</td>
+                            <td>
+                                {% if membro.cargo == 'dono' %}
+                                <span class="badge bg-danger">Dono / Admin</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Funcionário</span>
+                                {% endif %}
+                            </td>
+                            {% if user.cargo == 'dono' %}
+                            <td class="text-end">
+                                {% if membro != user %}
+                                <form method="post" action="{% url 'empresas:remover_membro' membro.pk %}" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja remover este membro da equipe?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Remover Usuário">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

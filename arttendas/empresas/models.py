@@ -18,6 +18,11 @@ class Organizacao(models.Model):
         return self.nome
 
 class Usuario(AbstractUser):
+    CARGOS = [
+        ('dono', 'Dono/Administrador'),
+        ('funcionario', 'Funcionário')
+    ]
+    
     organizacao = models.ForeignKey(
         Organizacao, 
         on_delete=models.CASCADE, 
@@ -25,6 +30,8 @@ class Usuario(AbstractUser):
         blank=True,
         related_name='usuarios'
     )
+    
+    cargo = models.CharField('Cargo na Empresa', max_length=20, choices=CARGOS, default='dono')
     
     class Meta:
         verbose_name = 'Usuário'

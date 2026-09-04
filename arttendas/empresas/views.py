@@ -33,7 +33,7 @@ def cadastro_locadora(request):
                     organizacao=org
                 )
             login(request, user)
-            messages.success(request, f'Bem-vindo(a) ao TendaPro, {nome}! Sua conta da empresa {empresa_nome} foi criada.')
+            messages.success(request, f'Bem-vindo(a) ao LocaPro, {nome}! Sua conta da empresa {empresa_nome} foi criada.')
             return redirect('eventos:dashboard')
         except Exception as e:
             messages.error(request, f'Erro ao criar conta: {str(e)}')
@@ -76,3 +76,47 @@ def super_admin_dashboard(request):
         'total_eventos_global': sum(o.total_eventos for o in orgs)
     }
     return render(request, 'empresas/super_admin.html', context)
+
+@login_required
+def lista_equipe(request):
+    usuarios = Usuario.objects.filter(organizacao=request.user.organizacao).order_by('first_name')
+    return render(request, 'empresas/equipe.html', {'usuarios': usuarios})
+
+@login_required
+def novo_membro(request):
+    if request.user.cargo != 'dono':
+        messages.error(request, 'Apenas o dono pode adicionar membros.')
+        return redirect('empresas:equipe')
+        
+    if request.method == 'POST':
+        nome = request.POST.get('nome')
+        email = request.POST.get('email')
+        senha = request.POST.get('senha')
+        cargo = request.POST.get('cargo')
+        
+        if Usuario.objects.filter(username=email).exists():
+            messages.error(request, 'Este e-mail já está em uso.')
+        else:
+            Usuario.objects.create_user(
+                username=email, email=email, password=senha,
+                first_name=nome, organizacao=request.user.organizacao, cargo=cargo
+            )
+            messages.success(request, f'Membro {nome} adicionado com sucesso!')
+            return redirect('empresas:equipe')
+            
+    return render(request, 'empresas/form_membro.html')
+
+@login_required
+def remover_membro(request, pk):
+    if request.user.cargo != 'dono':
+        messages.error(request, 'Apenas o dono pode remover membros.')
+        return redirect('empresas:equipe')
+        
+    membro = get_object_or_404(Usuario, pk=pk, organizacao=request.user.organizacao)
+    if membro == request.user:
+        messages.error(request, 'Você não pode remover a si mesmo.')
+    else:
+        membro.delete()
+        messages.success(request, 'Membro removido.')
+    return redirect('empresas:equipe')
+
