@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from inventario.models import Tenda, ConjuntoPalco
 from eventos.models import Evento
+from empresas.models import Organizacao, Usuario
 from datetime import date, timedelta
 
 
@@ -9,6 +10,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         self.stdout.write('🌱 Criando dados de demonstração...')
+
+        org, _ = Organizacao.objects.get_or_create(nome='Art.Tendas Locações')
+        
+        # Cria superusuário para testes
+        if not Usuario.objects.filter(username='admin').exists():
+            Usuario.objects.create_superuser('admin', 'admin@example.com', 'admin', organizacao=org)
+            self.stdout.write('  ✅ Superusuário "admin" criado (senha: admin)')
 
         # ── Tendas ────────────────────────────────────────────
         tendas_data = [
@@ -25,7 +33,7 @@ class Command(BaseCommand):
             ('T-020','3x3','piramidal'),('T-021','3x3','piramidal'),
         ]
         for codigo, tamanho, tipo in tendas_data:
-            Tenda.objects.get_or_create(codigo=codigo, defaults={
+            Tenda.objects.get_or_create(codigo=codigo, organizacao=org, defaults={
                 'tamanho': tamanho, 'tipo': tipo, 'status': 'ativo'
             })
         self.stdout.write(f'  ✅ {len(tendas_data)} tendas')
@@ -35,6 +43,7 @@ class Command(BaseCommand):
         for qtd in range(1, 31):
             _, novo = ConjuntoPalco.objects.get_or_create(
                 quantidade_placas=qtd,
+                organizacao=org,
                 defaults={'nome': f'Conjunto {qtd}', 'status': 'ativo'}
             )
             if novo:
@@ -58,6 +67,7 @@ class Command(BaseCommand):
                 'observacoes': 'Evento de grande porte.',
                 'tendas_ids': ['T-001','T-005','T-006'],
                 'conjuntos_placas': [20],
+                'organizacao': org,
             },
             {
                 'nome': 'Casamento Silva & Santos',
@@ -72,6 +82,7 @@ class Command(BaseCommand):
                 'observacoes': 'Entrega um dia antes.',
                 'tendas_ids': ['T-011','T-012'],
                 'conjuntos_placas': [10],
+                'organizacao': org,
             },
             {
                 'nome': 'Expo Agropecuária',
@@ -86,6 +97,7 @@ class Command(BaseCommand):
                 'observacoes': 'Evento de 5 dias.',
                 'tendas_ids': ['T-002','T-003','T-004'],
                 'conjuntos_placas': [],
+                'organizacao': org,
             },
             {
                 'nome': 'Show Gospel Renovar',
@@ -100,19 +112,20 @@ class Command(BaseCommand):
                 'observacoes': 'Realizado com sucesso.',
                 'tendas_ids': [],
                 'conjuntos_placas': [],
+                'organizacao': org,
             },
         ]
 
         for ev_data in eventos_data:
             tendas_ids      = ev_data.pop('tendas_ids')
             conjuntos_placas = ev_data.pop('conjuntos_placas')
-            ev, criado = Evento.objects.get_or_create(nome=ev_data['nome'], defaults=ev_data)
+            ev, criado = Evento.objects.get_or_create(nome=ev_data['nome'], organizacao=org, defaults=ev_data)
             if criado:
                 for cod in tendas_ids:
-                    try: ev.tendas.add(Tenda.objects.get(codigo=cod))
+                    try: ev.tendas.add(Tenda.objects.get(codigo=cod, organizacao=org))
                     except Tenda.DoesNotExist: pass
                 for qtd in conjuntos_placas:
-                    try: ev.conjuntos.add(ConjuntoPalco.objects.get(quantidade_placas=qtd))
+                    try: ev.conjuntos.add(ConjuntoPalco.objects.get(quantidade_placas=qtd, organizacao=org))
                     except ConjuntoPalco.DoesNotExist: pass
 
         self.stdout.write('  ✅ 4 eventos de demonstração')

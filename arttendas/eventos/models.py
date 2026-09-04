@@ -30,6 +30,7 @@ class Evento(models.Model):
     conjuntos   = models.ManyToManyField(ConjuntoPalco, blank=True,
                                          verbose_name='Conjuntos de Palco/Piso', related_name='eventos')
     criado_em   = models.DateTimeField(auto_now_add=True)
+    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='eventos', null=True)
 
     class Meta:
         verbose_name = 'Evento'

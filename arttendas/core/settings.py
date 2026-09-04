@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'empresas',
     'eventos',
     'inventario',
 ]
@@ -104,3 +105,5 @@ LOGGING = {
         'level': 'ERROR',
     },
 }
+
+AUTH_USER_MODEL = 'empresas.Usuario'

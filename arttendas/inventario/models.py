@@ -2,14 +2,16 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
-def gerar_codigo_tenda():
+def gerar_codigo_tenda(organizacao):
     """Gera automaticamente o próximo código disponível: T-001, T-002..."""
-    ultimo = Tenda.objects.order_by('-id').first()
+    if not organizacao:
+        return 'T-001'
+    ultimo = Tenda.objects.filter(organizacao=organizacao).order_by('-id').first()
     if not ultimo:
         return 'T-001'
     # Pega todos os códigos numéricos existentes
     codigos = []
-    for t in Tenda.objects.all():
+    for t in Tenda.objects.filter(organizacao=organizacao):
         try:
             num = int(t.codigo.replace('T-', ''))
             codigos.append(num)
@@ -40,16 +42,18 @@ class Tenda(models.Model):
         ('manutencao', 'Em Manutenção'),
     ]
 
-    codigo    = models.CharField('Código', max_length=20, unique=True)
+    codigo    = models.CharField('Código', max_length=20)
     tamanho   = models.CharField('Tamanho', max_length=10, choices=TAMANHOS)
     tipo      = models.CharField('Tipo', max_length=20, choices=TIPOS, default='piramidal')
     status    = models.CharField('Status', max_length=20, choices=STATUS, default='ativo')
     observacoes = models.TextField('Observações', blank=True)
+    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='tendas', null=True)
 
     class Meta:
         verbose_name = 'Tenda'
         verbose_name_plural = 'Tendas'
         ordering = ['tamanho', 'tipo', 'codigo']
+        unique_together = ('codigo', 'organizacao')
 
     def __str__(self):
         return f'{self.codigo} – {self.get_tamanho_display()} {self.get_tipo_display()}'
@@ -63,7 +67,7 @@ class Tenda(models.Model):
     def save(self, *args, **kwargs):
         # Gera código automático se não informado
         if not self.codigo:
-            self.codigo = gerar_codigo_tenda()
+            self.codigo = gerar_codigo_tenda(self.organizacao)
         super().save(*args, **kwargs)
 
 
@@ -85,6 +89,7 @@ class ConjuntoPalco(models.Model):
     )
     status      = models.CharField('Status', max_length=20, choices=STATUS, default='ativo')
     observacoes = models.TextField('Observações', blank=True)
+    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='conjuntos', null=True)
 
     class Meta:
         verbose_name = 'Conjunto de Palco/Piso'
