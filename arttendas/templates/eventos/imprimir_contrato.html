@@ -208,7 +208,13 @@
 
       <h2>4. VALORES E CONDIÇÕES DE PAGAMENTO</h2>
       <div class="box">
-        <p><strong>Valor Total:</strong> R$ {{ contrato.valor_total|floatformat:2 }}</p>
+        <p><strong>Valor Total (Base):</strong> R$ {{ contrato.valor_total|floatformat:2 }}</p>
+        
+        {% if contrato.desconto_fidelidade > 0 %}
+          <p style="color: #2e7d32; font-weight: bold;"><strong>Desconto Fidelidade (LocaPoints):</strong> - R$ {{ contrato.desconto_fidelidade|floatformat:2 }}</p>
+          <p><strong>Valor Final:</strong> R$ {{ contrato.valor_final|floatformat:2 }}</p>
+        {% endif %}
+        
         {% if contrato.sinal %}
           <p><strong>Sinal / Entrada Pago:</strong> R$ {{ contrato.sinal|floatformat:2 }}</p>
           <p><strong>Saldo Restante a Pagar:</strong> R$ {{ contrato.saldo_restante|floatformat:2 }}</p>

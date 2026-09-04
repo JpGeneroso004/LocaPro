@@ -3,6 +3,24 @@ from inventario.models import Tenda, ConjuntoPalco
 from empresas.models import TenantManager
 
 
+class Cliente(models.Model):
+    nome = models.CharField('Nome', max_length=200)
+    telefone = models.CharField('Telefone', max_length=20, blank=True)
+    cpf_cnpj = models.CharField('CPF/CNPJ', max_length=30, blank=True)
+    locapoints = models.PositiveIntegerField('LocaPoints Acumulados', default=0)
+    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='clientes', null=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    
+    objects = TenantManager()
+
+    class Meta:
+        verbose_name = 'Cliente'
+        verbose_name_plural = 'Clientes'
+        ordering = ['nome']
+
+    def __str__(self):
+        return f"{self.nome} - {self.locapoints} pts"
+
 class Evento(models.Model):
     STATUS = [
         ('agendado',     'Agendado'),
@@ -12,7 +30,8 @@ class Evento(models.Model):
     ]
 
     nome       = models.CharField('Nome do Evento', max_length=200)
-    cliente    = models.CharField('Cliente / Responsável', max_length=200)
+    cliente_fidelidade = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True, blank=True, related_name='eventos', verbose_name='Cliente (Sistema Fidelidade)')
+    cliente    = models.CharField('Cliente / Responsável (Legado)', max_length=200, blank=True)
     telefone   = models.CharField('Telefone', max_length=20, blank=True)
     rua        = models.CharField('Rua', max_length=200, default='')
     numero     = models.CharField('Número', max_length=20, default='')
@@ -73,14 +92,18 @@ class Contrato(models.Model):
     endereco_montagem = models.CharField('Endereço da Montagem', max_length=300)
     
     # Valores e Pagamento
-    valor_total = models.DecimalField('Valor Total', max_digits=10, decimal_places=2, default=0.00)
+    valor_total = models.DecimalField('Valor Total (Base)', max_digits=10, decimal_places=2, default=0.00)
     sinal = models.DecimalField('Sinal', max_digits=10, decimal_places=2, default=0.00, null=True, blank=True)
     forma_pagamento = models.CharField('Forma de Pagamento', max_length=100)
     
-    # Itens (Texto para o contrato, pode ser gerado automaticamente e editado)
-    itens_locados = models.TextField('Itens Locados')
+    # Fidelidade (LocaPoints)
+    pontos_utilizados = models.PositiveIntegerField('Pontos Utilizados (Desconto)', default=0)
+    desconto_fidelidade = models.DecimalField('Desconto Fidelidade (R$)', max_digits=10, decimal_places=2, default=0.00)
+    pontos_gerados = models.PositiveIntegerField('Pontos Gerados (Para o futuro)', default=0)
+    pontos_creditados = models.BooleanField('Pontos já creditados na carteira?', default=False)
     
-    # Cláusulas e Observações (Texto completo para ser editável)
+    # Itens e Cláusulas
+    itens_locados = models.TextField('Itens Locados')
     clausulas = models.TextField('Cláusulas')
 
     criado_em = models.DateTimeField(auto_now_add=True)
@@ -97,6 +120,10 @@ class Contrato(models.Model):
         return f"Contrato - {self.evento.nome}"
         
     @property
+    def valor_final(self):
+        return self.valor_total - self.desconto_fidelidade
+
+    @property
     def saldo_restante(self):
         sinal_val = self.sinal if self.sinal else 0
-        return self.valor_total - sinal_val
+        return self.valor_final - sinal_val

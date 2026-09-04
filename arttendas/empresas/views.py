@@ -54,7 +54,19 @@ def configuracoes_empresa(request):
             return redirect('empresas:configuracoes')
     else:
         form = OrganizacaoForm(instance=org)
-    return render(request, 'empresas/configuracoes.html', {'form': form})
+        
+    # Lógica do Indique e Ganhe (B2B)
+    eventos_concluidos = org.eventos.filter(status='concluido').count()
+    pode_indicar = eventos_concluidos >= 5 or org.status_assinatura == 'ativa'
+    link_indicacao = f"{request.scheme}://{request.get_host()}/empresas/cadastro/?ref={org.pk}"
+    
+    context = {
+        'form': form,
+        'eventos_concluidos': eventos_concluidos,
+        'pode_indicar': pode_indicar,
+        'link_indicacao': link_indicacao
+    }
+    return render(request, 'empresas/configuracoes.html', context)
 
 from django.db.models import Count
 from django.core.exceptions import PermissionDenied

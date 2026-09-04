@@ -58,6 +58,31 @@
   </ul>
 </div>
 
+{% if user.organizacao.fidelidade_ativa and evento.cliente_fidelidade %}
+<div class="card shadow-sm p-4 mb-4 border-top border-primary border-4 bg-light">
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <h5 class="fw-bold text-primary mb-1"><i class="bi bi-star-fill text-warning"></i> LocaPoints - Programa de Fidelidade</h5>
+      <p class="mb-0 text-muted small">Cliente: <strong>{{ evento.cliente_fidelidade.nome }}</strong></p>
+      <h3 class="fw-bold mt-2">{{ evento.cliente_fidelidade.locapoints }} <span class="fs-6 text-muted fw-normal">pontos disponíveis</span></h3>
+    </div>
+    
+    {% if evento.contrato %}
+      {% if evento.cliente_fidelidade.locapoints > 0 %}
+      <form method="POST" action="{% url 'eventos:aplicar_pontos' evento.contrato.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary fw-bold rounded-pill px-4 shadow-sm" onclick="return confirm('Aplicar desconto usando os pontos deste cliente no contrato atual?')">
+          Resgatar Desconto
+        </button>
+      </form>
+      {% endif %}
+    {% else %}
+      <small class="text-muted">Gere o contrato para resgatar</small>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
 <div class="row g-4 mb-5">
   <div class="col-12 col-md-6">
     <div class="card shadow-sm h-100 p-3">
@@ -100,10 +125,17 @@
     <i class="bi bi-file-earmark-text"></i> {% if evento.contrato %}Ver Contrato{% else %}Gerar Contrato{% endif %}
   </a>
   <a href="{% url 'eventos:novo' %}?reutilizar={{ evento.pk }}" class="btn btn-warning btn-lg fw-bold flex-grow-1 shadow-sm">
-    <i class="bi bi-arrow-repeat"></i> Reutilizar Cliente/Local
+    <i class="bi bi-arrow-repeat"></i> Reutilizar 
   </a>
+  
+  {% if evento.status != 'concluido' %}
+  <a href="{% url 'eventos:concluir' evento.pk %}" onclick="return confirm('Marcar como concluído? Isso irá gerar os pontos de fidelidade do cliente (se ativado).')" class="btn btn-success btn-lg fw-bold flex-grow-1 shadow-sm">
+    <i class="bi bi-check-circle"></i> Concluir
+  </a>
+  {% endif %}
+  
   <a href="{% url 'eventos:excluir' evento.pk %}" class="btn btn-outline-danger btn-lg fw-bold shadow-sm">
-    <i class="bi bi-trash"></i> Excluir Evento
+    <i class="bi bi-trash"></i>
   </a>
 </div>
 {% endblock %}

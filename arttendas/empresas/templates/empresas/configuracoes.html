@@ -54,7 +54,32 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">Cláusulas Padrão (Para novos contratos)</label>
                             {{ form.clausulas_padrao }}
-                            <small class="text-muted">Você pode alterar essas cláusulas a qualquer momento. Elas servirão de base para todo novo contrato gerado.</small>
+                            <small class="text-muted">Você pode alterar essas cláusulas a qualquer momento.</small>
+                        </div>
+
+                        <hr>
+                        <h4 class="fw-bold text-primary mb-3"><i class="bi bi-star-fill text-warning"></i> LocaPoints (Fidelidade do Cliente)</h4>
+                        <div class="bg-light p-3 rounded mb-3 border">
+                            <div class="form-check form-switch mb-3">
+                                {{ form.fidelidade_ativa }}
+                                <label class="form-check-label fw-bold">Ativar Programa de Fidelidade para meus clientes</label>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">A cada R$ 1 pago, o cliente ganha:</label>
+                                    <div class="input-group">
+                                        {{ form.pontos_por_real }}
+                                        <span class="input-group-text">pontos</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Quantos pontos valem R$ 1,00 de desconto?</label>
+                                    <div class="input-group">
+                                        {{ form.taxa_resgate }}
+                                        <span class="input-group-text">pontos</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <hr>
@@ -65,6 +90,38 @@
                 </div>
             </div>
         </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 bg-dark text-white mb-4">
+                <div class="card-body">
+                    <h5 class="fw-bold text-warning"><i class="bi bi-gift-fill"></i> Indique e Ganhe (SaaS)</h5>
+                    <p class="small">Indique o LocaPro para outras locadoras e ganhe <strong>1 MÊS GRÁTIS</strong> na sua assinatura por cada amigo que assinar!</p>
+                    
+                    {% if pode_indicar %}
+                        <div class="bg-black p-2 rounded text-center mb-2">
+                            <small class="text-white-50 d-block mb-1">Seu Link Exclusivo:</small>
+                            <input type="text" class="form-control form-control-sm text-center bg-dark text-white border-secondary mb-2" value="{{ link_indicacao }}" readonly id="refLink">
+                            <button class="btn btn-outline-warning btn-sm w-100" onclick="copiarLink()">Copiar Link</button>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-secondary border-0 p-2 text-center text-dark">
+                            <i class="bi bi-lock-fill"></i><br>
+                            <small>Complete <strong>5 eventos</strong> (você tem {{ eventos_concluidos }}) ou assine o plano premium para desbloquear seu link de indicação.</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+function copiarLink() {
+    var copyText = document.getElementById("refLink");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); 
+    document.execCommand("copy");
+    alert("Link de indicação copiado!");
+}
+</script>
 {% endblock %}

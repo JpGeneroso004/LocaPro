@@ -140,6 +140,14 @@ def novo_evento(request):
             evento = form.save(commit=False)
             if hasattr(request.user, 'organizacao'):
                 evento.organizacao = request.user.organizacao
+                
+            # Smart LocaPoints Cliente Generation
+            if evento.cliente:
+                from .models import Cliente
+                cli = Cliente.objects.filter(nome__iexact=evento.cliente, organizacao=evento.organizacao).first()
+                if not cli:
+                    cli = Cliente.objects.create(nome=evento.cliente, telefone=evento.telefone, organizacao=evento.organizacao)
+                evento.cliente_fidelidade = cli
             
             from inventario.utils import verificar_disponibilidade_item
             from datetime import datetime, time
@@ -193,6 +201,14 @@ def editar_evento(request, pk):
         if form.is_valid():
             ev = form.save(commit=False)
             
+            # Smart LocaPoints Cliente Generation
+            if ev.cliente:
+                from .models import Cliente
+                cli = Cliente.objects.filter(nome__iexact=ev.cliente, organizacao=ev.organizacao).first()
+                if not cli:
+                    cli = Cliente.objects.create(nome=ev.cliente, telefone=ev.telefone, organizacao=ev.organizacao)
+                ev.cliente_fidelidade = cli
+            
             from inventario.utils import verificar_disponibilidade_item
             from datetime import datetime, time
             data_montagem_nova = datetime.combine(ev.data_inicio, ev.hora_inicio if ev.hora_inicio else time.min)
@@ -235,6 +251,76 @@ def excluir_evento(request, pk):
         messages.success(request, f'Evento "{nome}" removido com sucesso!')
         return redirect('eventos:lista')
     return render(request, 'eventos/confirmar_exclusao.html', {'evento': evento})
+
+@login_required
+def concluir_evento(request, pk):
+    # Quando o evento é concluído, gera os LocaPoints para o cliente
+    evento = get_object_or_404(Evento, pk=pk)
+    org = request.user.organizacao
+    
+    if evento.status != 'concluido':
+        evento.status = 'concluido'
+        evento.save()
+        
+        # Gera LocaPoints se tiver contrato e fidelidade ativa
+        if hasattr(evento, 'contrato') and org and org.fidelidade_ativa:
+            contrato = evento.contrato
+            if not contrato.pontos_creditados and evento.cliente_fidelidade:
+                pontos = int(contrato.valor_final * org.pontos_por_real)
+                
+                # Soma na carteira do cliente
+                cliente = evento.cliente_fidelidade
+                cliente.locapoints += pontos
+                cliente.save()
+                
+                # Registra no contrato
+                contrato.pontos_gerados = pontos
+                contrato.pontos_creditados = True
+                contrato.save()
+                
+                messages.success(request, f'Evento concluído! {pontos} LocaPoints foram adicionados à carteira de {cliente.nome}.')
+            else:
+                messages.success(request, 'Evento marcado como concluído!')
+        else:
+            messages.success(request, 'Evento marcado como concluído!')
+            
+    return redirect('eventos:detalhe', pk=evento.pk)
+
+@login_required
+def aplicar_desconto_fidelidade(request, pk):
+    # Aplica o desconto usando os pontos do cliente no contrato atual
+    contrato = get_object_or_404(Contrato, pk=pk)
+    evento = contrato.evento
+    org = request.user.organizacao
+    
+    if request.method == 'POST' and org and org.fidelidade_ativa and evento.cliente_fidelidade:
+        cliente = evento.cliente_fidelidade
+        
+        if cliente.locapoints > 0:
+            # Calcula o valor do desconto
+            desconto = cliente.locapoints / org.taxa_resgate
+            
+            # Limita o desconto ao valor do contrato
+            if desconto > contrato.valor_total:
+                desconto = contrato.valor_total
+                pontos_gastos = int(desconto * org.taxa_resgate)
+            else:
+                pontos_gastos = cliente.locapoints
+                
+            # Desconta da carteira
+            cliente.locapoints -= pontos_gastos
+            cliente.save()
+            
+            # Aplica no contrato
+            contrato.pontos_utilizados += pontos_gastos
+            contrato.desconto_fidelidade += desconto
+            contrato.save()
+            
+            messages.success(request, f'Sucesso! {pontos_gastos} pontos foram resgatados, gerando R$ {desconto:.2f} de desconto.')
+        else:
+            messages.warning(request, 'Este cliente não possui pontos suficientes.')
+            
+    return redirect('eventos:detalhe', pk=evento.pk)
 
 def contratos_lista(request):
     from .models import Contrato, Evento

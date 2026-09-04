@@ -10,6 +10,8 @@ urlpatterns = [
     path('novo/', views.novo_evento, name='novo'),
     path('<int:pk>/editar/', views.editar_evento, name='editar'),
     path('<int:pk>/excluir/', views.excluir_evento, name='excluir'),
+    path('<int:pk>/concluir/', views.concluir_evento, name='concluir'),
+    path('contrato/<int:pk>/aplicar-pontos/', views.aplicar_desconto_fidelidade, name='aplicar_pontos'),
     
     # Contratos
     path('contratos/', views.contratos_lista, name='contratos_lista'),

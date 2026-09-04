@@ -22,6 +22,11 @@ class Organizacao(models.Model):
     asaas_customer_id = models.CharField('Asaas Customer ID', max_length=100, blank=True)
     asaas_subscription_id = models.CharField('Asaas Subscription ID', max_length=100, blank=True)
     
+    # Configurações do LocaPoints (Fidelidade)
+    fidelidade_ativa = models.BooleanField('Ativar LocaPoints', default=True)
+    pontos_por_real = models.PositiveIntegerField('Quantos pontos o cliente ganha a cada R$ 1 pago?', default=1)
+    taxa_resgate = models.PositiveIntegerField('Quantos pontos equivalem a R$ 1 de desconto?', default=100)
+    
     criado_em = models.DateTimeField(auto_now_add=True)
     
     class Meta:
