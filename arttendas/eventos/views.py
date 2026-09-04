@@ -81,6 +81,17 @@ def dashboard(request):
             'url': f'/eventos/{e.pk}/',
         })
 
+    # Calcular faturamento mensal
+    from .models import Contrato
+    mes_atual = hoje.month
+    ano_atual = hoje.year
+    contratos_mes = Contrato.objects.filter(criado_em__year=ano_atual, criado_em__month=mes_atual)
+    faturamento_mes = sum(c.valor_final for c in contratos_mes)
+    
+    # Previsão baseada nos agendados/em andamento
+    eventos_futuros = eventos.filter(status__in=['agendado', 'em_andamento'])
+    previsao_faturamento = sum(e.contrato.valor_final for e in eventos_futuros if hasattr(e, 'contrato'))
+
     context = {
         'total_eventos': total_eventos, 'ativos': ativos,
         'concluidos': concluidos, 'cancelados': cancelados,
@@ -90,6 +101,8 @@ def dashboard(request):
         'total_placas': total_placas,
         'placas_em_uso': placas_em_uso, 'placas_disponiveis': placas_disponiveis,
         'eventos_mapa_json': json.dumps(eventos_mapa, ensure_ascii=False),
+        'faturamento_mes': faturamento_mes,
+        'previsao_faturamento': previsao_faturamento,
     }
     return render(request, 'eventos/dashboard.html', context)
 

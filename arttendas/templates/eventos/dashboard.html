@@ -8,7 +8,22 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
   <div>
     <h3 class="fw-bold mb-0">Dashboard</h3>
-    <span class="text-muted small">Resumo da operação</span>
+    <span class="text-muted small">Visão Geral da Locadora</span>
+  </div>
+</div>
+
+<div class="row g-2 mb-3">
+  <div class="col-6">
+    <div class="card h-100 bg-success text-white p-3 shadow-sm border-0">
+      <small class="fw-bold text-white-50 text-uppercase">Faturamento no Mês</small>
+      <h3 class="fw-bold mb-0 mt-1">R$ {{ faturamento_mes|floatformat:2 }}</h3>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="card h-100 bg-dark text-white p-3 shadow-sm border-0">
+      <small class="fw-bold text-white-50 text-uppercase">Receita Futura Prevista</small>
+      <h3 class="fw-bold text-warning mb-0 mt-1">R$ {{ previsao_faturamento|floatformat:2 }}</h3>
+    </div>
   </div>
 </div>
 
@@ -33,7 +48,20 @@
   </div>
 </div>
 
-<h5 class="fw-bold mb-3 mt-2 text-secondary">Eventos da Semana</h5>
+{% if total_eventos == 0 %}
+<div class="card p-5 text-center text-muted mb-4 border border-dashed bg-body-tertiary shadow-none rounded-4">
+  <i class="bi bi-rocket-takeoff-fill fs-1 text-warning mb-3"></i>
+  <h4 class="fw-bold text-dark">Bem-vindo(a) ao LocaPro!</h4>
+  <p class="mb-4">Parece que sua locadora ainda não tem nenhum evento cadastrado.<br>Vamos cadastrar o seu primeiro aluguel e gerar seu primeiro contrato automatizado?</p>
+  <div>
+    <a href="{% url 'eventos:novo' %}" class="btn btn-warning btn-lg fw-bold shadow-sm px-5">
+      <i class="bi bi-plus-circle"></i> Criar Meu Primeiro Evento
+    </a>
+  </div>
+</div>
+{% else %}
+
+<h5 class="fw-bold mb-3 mt-4 text-secondary">Eventos da Semana</h5>
 {% if proximos %}
   <div class="row g-3 mb-4">
     {% for evento in proximos %}
@@ -64,6 +92,8 @@
 <div class="card overflow-hidden shadow-sm border-0 mb-4">
   <div id="map" style="height: 250px; width: 100%; z-index: 1;"></div>
 </div>
+
+{% endif %}
 
 <a href="{% url 'eventos:novo' %}" class="fab">
   <i class="bi bi-plus"></i>
