@@ -16,7 +16,10 @@
 
 {% block form_top %}
   {{ block.super }}
-  <!-- We can leave this empty -->
+  <div style="text-align: center; margin-bottom: 20px;">
+    {% load static %}
+    <img src="{% static 'img/locapro_logo.jpg' %}" alt="LocaPro" style="max-height: 80px; border-radius: 8px;">
+  </div>
 {% endblock %}
 
 {% block submit_row %}

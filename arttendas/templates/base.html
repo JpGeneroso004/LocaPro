@@ -147,7 +147,7 @@
     }
     .btn-lg {
       border-radius: 12px;
-      font-weight: 600;
+      color: #ffffff !important;
     }
     
     .fab {
@@ -155,7 +155,7 @@
       bottom: 80px;
       right: 20px;
       background-color: var(--bs-warning);
-      color: #000;
+      color: #fff;
       width: 60px;
       height: 60px;
       border-radius: 50%;
@@ -193,12 +193,17 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-md navbar-top d-none d-md-flex mb-4">
-  <div class="container">
-    <a class="navbar-brand" href="{% url 'eventos:dashboard' %}">
-      <!-- <img src="{% static 'img/logo.png' %}" alt="TendaPro" height="40"> -->
-      <span class="fs-4 fw-bold">🚀 LocaPro</span>
-    </a>
+  <!-- Sidebar e Header -->
+  <nav class="navbar navbar-expand-md navbar-dark navbar-top d-none d-md-flex sticky-top shadow-sm py-2">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="{% url 'eventos:dashboard' %}">
+        {% if user.is_authenticated and user.organizacao and user.organizacao.logo %}
+          <img src="{{ user.organizacao.logo.url }}" alt="Logo" height="40" class="me-2 rounded">
+        {% else %}
+          <img src="{% static 'img/locapro_logo.jpg' %}" alt="LocaPro" height="40" class="me-2 rounded">
+        {% endif %}
+        <span class="fs-4 fw-bold">LocaPro</span>
+      </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -236,10 +241,16 @@
   </div>
 </nav>
 
+<!-- Mobile Navbar Top -->
 <div class="d-md-none navbar-top p-3 sticky-top mb-3 shadow-sm d-flex justify-content-between align-items-center">
   <div style="width: 32px;"></div> <!-- Spacer -->
-  <a href="{% url 'eventos:dashboard' %}" class="text-decoration-none text-dark">
-    <h4 class="m-0 fw-bold">🚀 LocaPro</h4>
+  <a href="{% url 'eventos:dashboard' %}" class="text-decoration-none text-light d-flex align-items-center">
+    {% if user.is_authenticated and user.organizacao and user.organizacao.logo %}
+      <img src="{{ user.organizacao.logo.url }}" alt="Logo" height="30" class="me-2 rounded">
+    {% else %}
+      <img src="{% static 'img/locapro_logo.jpg' %}" alt="LocaPro" height="30" class="me-2 rounded">
+    {% endif %}
+    <h4 class="m-0 fw-bold">LocaPro</h4>
   </a>
   <button class="btn btn-link theme-toggle-icon text-decoration-none theme-toggle p-0 fs-4" title="Alternar tema">
     <i class="bi bi-moon-stars-fill"></i>

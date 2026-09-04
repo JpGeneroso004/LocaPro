@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -8,16 +9,16 @@
   <style>
     body { background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
     .card-cadastro { max-width: 450px; width: 100%; border-radius: 1rem; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-    .logo-header { background: #0A0A0A; color: #FFD600; padding: 20px; text-align: center; border-radius: 1rem 1rem 0 0; }
   </style>
 </head>
 <body>
 
 <div class="card-cadastro card">
-  <div class="logo-header">
-    <h2 class="fw-bold mb-0">🚀 LocaPro SaaS</h2>
-    <small class="text-white-50">Sua locadora de estruturas no piloto automático</small>
-  </div>
+    <div class="text-center mb-4">
+      <img src="{% static 'img/locapro_logo.jpg' %}" alt="LocaPro" class="mb-3 rounded" style="max-height: 80px;">
+      <h2 class="fw-bold">Criar conta LocaPro</h2>
+      <p class="text-muted">A plataforma definitiva para empresas de locação</p>
+    </div>
   <div class="card-body p-4">
     
     {% if messages %}
