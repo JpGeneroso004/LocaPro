@@ -22,6 +22,10 @@
 {% block submit_row %}
   {{ block.super }}
   <div class="submit-row" style="text-align: center; border: none; padding-top: 0; background: none;">
+      {% load socialaccount %}
+      <a href="{% provider_login_url 'google' %}" class="password-reset-link" style="color: #db4437; font-weight: bold; margin-bottom: 15px;">
+        Entrar com Google
+      </a>
       <a href="{% url 'password_reset' %}" class="password-reset-link">{% trans "Esqueci minha senha" %}</a>
       <a href="{% url 'empresas:cadastro' %}" class="password-reset-link" style="margin-top: 5px;">{% trans "Ainda não tem conta? Crie uma Locadora" %}</a>
   </div>

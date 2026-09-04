@@ -10,6 +10,7 @@ urlpatterns = [
     path('eventos/', include('eventos.urls', namespace='eventos')),
     path('inventario/', include('inventario.urls', namespace='inventario')),
     path('empresas/', include('empresas.urls', namespace='empresas')),
+    path('accounts/', include('allauth.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
 ]
 
