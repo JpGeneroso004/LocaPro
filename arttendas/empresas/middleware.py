@@ -22,5 +22,6 @@ class LoginRequiredMiddleware(MiddlewareMixin):
     def process_request(self, request):
         path = request.path_info
         if not request.user.is_authenticated:
-            if not path.startswith('/admin') and not path.startswith(getattr(settings, 'LOGIN_URL', '/accounts/login/')):
+            allowed = ['/admin', getattr(settings, 'LOGIN_URL', '/accounts/login/'), '/empresas/cadastro']
+            if not any(path.startswith(p) for p in allowed):
                 return redirect(f"/admin/login/?next={path}")

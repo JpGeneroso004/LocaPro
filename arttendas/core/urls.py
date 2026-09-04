@@ -9,6 +9,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('eventos/', include('eventos.urls', namespace='eventos')),
     path('inventario/', include('inventario.urls', namespace='inventario')),
+    path('empresas/', include('empresas.urls', namespace='empresas')),
 ]
 
 # Serve estáticos e mídia sempre (inclusive com DEBUG=False, pois é uso local)
