@@ -177,6 +177,18 @@
       }
     }
   </style>
+  {% if user.is_authenticated and user.organizacao and user.organizacao.cor_primaria %}
+  <style>
+    :root, [data-bs-theme="light"], [data-bs-theme="dark"] {
+      --bs-warning: {{ user.organizacao.cor_primaria }};
+      --bs-primary: {{ user.organizacao.cor_primaria }};
+    }
+    .btn-warning {
+      background-color: var(--bs-warning) !important;
+      border-color: var(--bs-warning) !important;
+    }
+  </style>
+  {% endif %}
   {% block extra_head %}{% endblock %}
 </head>
 <body>

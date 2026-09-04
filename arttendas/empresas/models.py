@@ -6,6 +6,7 @@ class Organizacao(models.Model):
     cnpj = models.CharField('CNPJ', max_length=20, blank=True)
     telefone = models.CharField('Telefone Principal', max_length=20, blank=True)
     logo = models.ImageField('Logo da Empresa', upload_to='logos/', null=True, blank=True)
+    cor_primaria = models.CharField('Cor Principal', max_length=7, default='#FFD600', help_text='Cor tema da locadora')
     clausulas_padrao = models.TextField('Cláusulas Padrão do Contrato', blank=True, 
         default="1. RESPONSABILIDADE DO LOCAL: O Contratante é responsável por autorizações...\n2. FORÇA MAIOR: A Contratada isenta-se...")
     criado_em = models.DateTimeField(auto_now_add=True)

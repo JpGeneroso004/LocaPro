@@ -33,15 +33,22 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Logo da Empresa</label>
-                            {% if form.instance.logo %}
-                                <div class="mb-2">
-                                    <img src="{{ form.instance.logo.url }}" alt="Logo" style="max-height: 80px;">
-                                </div>
-                            {% endif %}
-                            {{ form.logo }}
-                            <small class="text-muted">Esta logo aparecerá no cabeçalho dos seus contratos.</small>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Logo da Empresa</label>
+                                {% if form.instance.logo %}
+                                    <div class="mb-2">
+                                        <img src="{{ form.instance.logo.url }}" alt="Logo" style="max-height: 80px;">
+                                    </div>
+                                {% endif %}
+                                {{ form.logo }}
+                                <small class="text-muted">Aparecerá nos contratos.</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Cor Tema da Plataforma</label>
+                                {{ form.cor_primaria }}
+                                <small class="text-muted">Escolha a cor predominante do seu sistema.</small>
+                            </div>
                         </div>
 
                         <div class="mb-3">
