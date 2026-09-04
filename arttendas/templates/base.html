@@ -235,6 +235,9 @@
           <a class="nav-link fw-bold text-danger" href="{% url 'empresas:super_admin' %}"><i class="bi bi-shield-lock-fill"></i> Super-Admin</a>
         </li>
         {% endif %}
+        <li class="nav-item">
+          <a class="nav-link fw-bold text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Sair</a>
+        </li>
       </ul>
       <a href="{% url 'eventos:novo' %}" class="btn btn-dark fw-bold me-3">+ Novo Evento</a>
       <button class="btn btn-link theme-toggle-icon text-decoration-none theme-toggle p-0 fs-5" title="Alternar tema">
@@ -255,9 +258,12 @@
     {% endif %}
     <h4 class="m-0 fw-bold">LocaPro</h4>
   </a>
-  <button class="btn btn-link theme-toggle-icon text-decoration-none theme-toggle p-0 fs-4" title="Alternar tema">
-    <i class="bi bi-moon-stars-fill"></i>
-  </button>
+  <div>
+      <button class="btn btn-link theme-toggle-icon text-decoration-none theme-toggle p-0 fs-4 me-2" title="Alternar tema">
+        <i class="bi bi-moon-stars-fill"></i>
+      </button>
+      <a href="{% url 'logout' %}" class="text-danger fs-4 text-decoration-none" title="Sair"><i class="bi bi-box-arrow-right"></i></a>
+  </div>
 </div>
 
 <div class="container pb-5">
