@@ -25,3 +25,25 @@ class LoginRequiredMiddleware(MiddlewareMixin):
             allowed = ['/admin', getattr(settings, 'LOGIN_URL', '/accounts/login/'), '/empresas/cadastro', '/accounts/']
             if not any(path.startswith(p) for p in allowed):
                 return redirect(f"/admin/login/?next={path}")
+
+class BloqueioInadimplenteMiddleware(MiddlewareMixin):
+    def process_request(self, request):
+        if request.user.is_authenticated and hasattr(request.user, 'organizacao') and request.user.organizacao:
+            path = request.path_info
+            
+            # Rotas permitidas mesmo se bloqueado
+            allowed = [
+                '/empresas/assinatura/', 
+                '/admin/logout/', 
+                '/accounts/logout/'
+            ]
+            
+            if any(path.startswith(p) for p in allowed):
+                return None
+                
+            # Se for superuser, não bloqueia (para suporte)
+            if request.user.is_superuser:
+                return None
+                
+            if request.user.organizacao.is_bloqueada:
+                return redirect('empresas:assinatura')

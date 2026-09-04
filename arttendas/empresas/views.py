@@ -142,3 +142,19 @@ def editar_membro(request, pk):
         
     return render(request, 'empresas/form_membro.html', {'membro': membro})
 
+def assinatura(request):
+    org = request.user.organizacao
+    if not org:
+        return redirect('empresas:cadastro')
+        
+    context = {
+        'org': org,
+        'dias_trial': 0
+    }
+    
+    if org.status_assinatura == 'trial' and org.vencimento_trial:
+        from django.utils import timezone
+        delta = org.vencimento_trial - timezone.localdate()
+        context['dias_trial'] = max(0, delta.days)
+        
+    return render(request, 'empresas/assinatura.html', context)

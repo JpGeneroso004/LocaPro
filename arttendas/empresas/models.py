@@ -9,6 +9,19 @@ class Organizacao(models.Model):
     cor_primaria = models.CharField('Cor Principal', max_length=7, default='#004581', help_text='Cor tema da locadora')
     clausulas_padrao = models.TextField('Cláusulas Padrão do Contrato', blank=True, 
         default="1. RESPONSABILIDADE DO LOCAL: O Contratante é responsável por autorizações...\n2. FORÇA MAIOR: A Contratada isenta-se...")
+    
+    # Campos de SaaS (Assinatura)
+    STATUS_ASSINATURA = [
+        ('trial', 'Em Teste (Trial)'),
+        ('ativa', 'Ativa'),
+        ('inadimplente', 'Inadimplente (Bloqueada)'),
+        ('cancelada', 'Cancelada'),
+    ]
+    status_assinatura = models.CharField('Status da Assinatura', max_length=15, choices=STATUS_ASSINATURA, default='trial')
+    vencimento_trial = models.DateField('Vencimento do Trial', null=True, blank=True)
+    asaas_customer_id = models.CharField('Asaas Customer ID', max_length=100, blank=True)
+    asaas_subscription_id = models.CharField('Asaas Subscription ID', max_length=100, blank=True)
+    
     criado_em = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -17,6 +30,23 @@ class Organizacao(models.Model):
         
     def __str__(self):
         return self.nome
+
+    def save(self, *args, **kwargs):
+        if not self.pk and not self.vencimento_trial:
+            from django.utils import timezone
+            import datetime
+            self.vencimento_trial = timezone.localdate() + datetime.timedelta(days=7)
+        super().save(*args, **kwargs)
+
+    @property
+    def is_bloqueada(self):
+        from django.utils import timezone
+        if self.status_assinatura == 'inadimplente' or self.status_assinatura == 'cancelada':
+            return True
+        if self.status_assinatura == 'trial' and self.vencimento_trial:
+            if timezone.localdate() > self.vencimento_trial:
+                return True
+        return False
 
 class Usuario(AbstractUser):
     CARGOS = [

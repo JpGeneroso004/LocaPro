@@ -77,6 +77,7 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
     'empresas.middleware.TenantMiddleware',
     'empresas.middleware.LoginRequiredMiddleware',
+    'empresas.middleware.BloqueioInadimplenteMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'

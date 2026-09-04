@@ -225,6 +225,9 @@
           <a class="nav-link fw-bold" href="{% url 'empresas:configuracoes' %}"><i class="bi bi-gear-fill"></i> Empresa</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link fw-bold text-warning" href="{% url 'empresas:assinatura' %}"><i class="bi bi-credit-card-2-front-fill"></i> Assinatura</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link fw-bold" href="{% url 'empresas:equipe' %}"><i class="bi bi-people-fill"></i> Equipe</a>
         </li>
         {% if user.is_superuser %}
