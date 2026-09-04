@@ -22,9 +22,9 @@ class LoginRequiredMiddleware(MiddlewareMixin):
     def process_request(self, request):
         path = request.path_info
         if not request.user.is_authenticated:
-            allowed = ['/admin', getattr(settings, 'LOGIN_URL', '/accounts/login/'), '/empresas/cadastro', '/accounts/']
+            allowed = ['/admin', getattr(settings, 'LOGIN_URL', '/accounts/login/'), '/empresas/cadastro', '/accounts/', '/static/', '/media/']
             if not any(path.startswith(p) for p in allowed):
-                return redirect(f"/admin/login/?next={path}")
+                return redirect(f"/accounts/login/?next={path}")
 
 class BloqueioInadimplenteMiddleware(MiddlewareMixin):
     def process_request(self, request):
