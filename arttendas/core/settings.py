@@ -47,6 +47,25 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 SOCIALACCOUNT_ADAPTER = 'empresas.adapters.MySocialAccountAdapter'
 LOGIN_REDIRECT_URL = '/eventos/'
 
+# O Google exige o Client ID e Secret. Como estamos usando variáveis de ambiente (.env), 
+# você não precisa usar o painel do Admin, basta colocar no arquivo .env
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': env('GOOGLE_CLIENT_ID', default='cole_seu_client_id_aqui'),
+            'secret': env('GOOGLE_SECRET', default='cole_seu_secret_aqui'),
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
