@@ -3,74 +3,108 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Cadastre sua Locadora - Art.Tendas</title>
+  <title>Cadastre sua Locadora - LocaPro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <style>
-    body { background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-    .card-cadastro { max-width: 450px; width: 100%; border-radius: 1rem; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    body { background-color: #f4f7f6; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .split-layout { display: flex; min-height: 100vh; }
+    .left-panel {
+      background: linear-gradient(135deg, #002240 0%, #004581 100%);
+      color: white; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; text-align: center;
+    }
+    .right-panel {
+      flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; background: #ffffff;
+    }
+    .form-container { max-width: 450px; width: 100%; }
+    .btn-brand { background-color: #004581; color: white; border: none; }
+    .btn-brand:hover { background-color: #003366; color: white; }
+    .form-control:focus { border-color: #004581; box-shadow: 0 0 0 0.25rem rgba(0, 69, 129, 0.25); }
+    @media (max-width: 768px) {
+      .split-layout { flex-direction: column; }
+      .left-panel { padding: 40px 20px; flex: none; min-height: 30vh; }
+    }
   </style>
 </head>
 <body>
 
-<div class="card-cadastro card">
-    <div class="text-center mb-4">
-      <img src="{% static 'img/locapro_logo.jpg' %}" alt="LocaPro" class="mb-3 rounded" style="max-height: 80px;">
-      <h2 class="fw-bold">Criar conta LocaPro</h2>
-      <p class="text-muted">A plataforma definitiva para empresas de locação</p>
+<div class="split-layout">
+  <!-- Left Panel: Branding -->
+  <div class="left-panel d-none d-md-flex">
+    <img src="{% static 'img/locapro_logo.jpg' %}" alt="LocaPro" class="mb-4 rounded shadow-lg" style="max-height: 120px; border: 3px solid rgba(255,255,255,0.2);">
+    <h1 class="fw-bold mb-3">LocaPro SaaS</h1>
+    <p class="fs-5 text-white-50 mb-0">A plataforma definitiva para gerenciar sua locadora de tendas e estruturas.</p>
+    <div class="mt-5 text-start">
+      <p><i class="bi bi-check-circle-fill text-success me-2"></i> Contratos Automatizados</p>
+      <p><i class="bi bi-check-circle-fill text-success me-2"></i> Controle de Estoque Inteligente</p>
+      <p><i class="bi bi-check-circle-fill text-success me-2"></i> Programa de Fidelidade Integrado</p>
     </div>
-  <div class="card-body p-4">
-    
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-      {% endfor %}
-    {% endif %}
+  </div>
 
-    <form method="post">
-        {% csrf_token %}
-        <div class="d-grid mb-3">
-          {% load socialaccount %}
-          <a href="{% provider_login_url 'google' %}" class="btn btn-outline-dark fw-bold">
-            <i class="bi bi-google text-danger"></i> Cadastrar com Google
-          </a>
-        </div>
+  <!-- Right Panel: Form -->
+  <div class="right-panel">
+    <div class="form-container">
+      <div class="text-center mb-4 d-md-none">
+        <img src="{% static 'img/locapro_logo.jpg' %}" alt="LocaPro" class="mb-3 rounded shadow-sm" style="max-height: 80px;">
+        <h3 class="fw-bold text-dark">LocaPro</h3>
+      </div>
+      
+      <h3 class="fw-bold text-dark mb-1">Crie sua conta</h3>
+      <p class="text-muted mb-4">Comece agora seu teste gratuito de 7 dias.</p>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post">
+          {% csrf_token %}
+          <div class="d-grid mb-4">
+            {% load socialaccount %}
+            <a href="{% provider_login_url 'google' %}" class="btn btn-outline-dark fw-bold py-2 shadow-sm">
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width: 18px; margin-right: 8px; margin-top: -2px;">
+              Cadastrar com Google
+            </a>
+          </div>
+          
+          <div class="d-flex align-items-center mb-4">
+            <hr class="flex-grow-1 opacity-25">
+            <span class="mx-3 text-muted small fw-bold text-uppercase">ou e-mail</span>
+            <hr class="flex-grow-1 opacity-25">
+          </div>
+
+          <div class="form-floating mb-3">
+            <input type="text" name="empresa_nome" class="form-control fw-bold" id="empresa" required placeholder="Ex: Central Tendas">
+            <label for="empresa">Nome da Locadora</label>
+          </div>
         
-        <div class="d-flex align-items-center mb-3">
-          <hr class="flex-grow-1">
-          <span class="mx-2 text-muted small">ou use seu e-mail</span>
-          <hr class="flex-grow-1">
-        </div>
+          <div class="form-floating mb-3">
+            <input type="text" name="nome" class="form-control" id="nome" required placeholder="João">
+            <label for="nome">Seu Nome Completo</label>
+          </div>
 
-        <div class="mb-3">
-        <label class="form-label fw-bold">Nome da Empresa (Locadora)</label>
-        <input type="text" name="empresa_nome" class="form-control" required placeholder="Ex: Central Tendas">
-      </div>
-      
-      <div class="mb-3">
-        <label class="form-label fw-bold">Seu Nome</label>
-        <input type="text" name="nome" class="form-control" required placeholder="Ex: João da Silva">
-      </div>
+          <div class="form-floating mb-3">
+            <input type="email" name="email" class="form-control" id="email" required placeholder="joao@exemplo.com">
+            <label for="email">E-mail Corporativo</label>
+          </div>
 
-      <div class="mb-3">
-        <label class="form-label fw-bold">E-mail (Será seu login)</label>
-        <input type="email" name="email" class="form-control" required placeholder="joao@exemplo.com">
-      </div>
+          <div class="form-floating mb-4">
+            <input type="password" name="senha" class="form-control" id="senha" required placeholder="Senha">
+            <label for="senha">Crie uma Senha</label>
+          </div>
 
-      <div class="mb-4">
-        <label class="form-label fw-bold">Senha</label>
-        <input type="password" name="senha" class="form-control" required>
-      </div>
-
-      <button type="submit" class="btn btn-warning w-100 fw-bold fs-5 shadow-sm text-dark">Criar Minha Conta</button>
-      
-      <div class="text-center mt-3">
-        <small class="text-muted">Já tem uma conta? <a href="/admin/login/">Faça Login</a></small>
-      </div>
-    </form>
+          <button type="submit" class="btn btn-brand w-100 fw-bold fs-5 py-3 shadow-sm rounded-3">Criar Minha Conta</button>
+          
+          <div class="text-center mt-4">
+            <p class="text-muted fw-medium">Já tem uma conta? <a href="/admin/login/" class="text-decoration-none" style="color: #004581; font-weight: bold;">Faça Login</a></p>
+          </div>
+      </form>
+    </div>
   </div>
 </div>
 
