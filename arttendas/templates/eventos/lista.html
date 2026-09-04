@@ -45,6 +45,33 @@
       </div>
     {% endfor %}
   </div>
+
+  <!-- Paginação -->
+  {% if eventos.has_other_pages %}
+  <nav aria-label="Navegação de páginas" class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if eventos.has_previous %}
+        <li class="page-item"><a class="page-link text-dark" href="?page={{ eventos.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}">Anterior</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+      {% endif %}
+      
+      {% for i in eventos.paginator.page_range %}
+        {% if eventos.number == i %}
+          <li class="page-item active" aria-current="page"><span class="page-link bg-warning border-warning text-dark">{{ i }}</span></li>
+        {% else %}
+          <li class="page-item"><a class="page-link text-dark" href="?page={{ i }}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}">{{ i }}</a></li>
+        {% endif %}
+      {% endfor %}
+      
+      {% if eventos.has_next %}
+        <li class="page-item"><a class="page-link text-dark" href="?page={{ eventos.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}">Próxima</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Próxima</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
 {% else %}
   <div class="text-center p-5 text-muted">
     <i class="bi bi-search fs-1 mb-3"></i>

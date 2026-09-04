@@ -1,0 +1,28 @@
+{% extends "admin/login.html" %}
+{% load i18n %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  .password-reset-link {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    font-size: 14px;
+    color: #447e9b;
+  }
+</style>
+{% endblock %}
+
+{% block form_top %}
+  {{ block.super }}
+  <!-- We can leave this empty -->
+{% endblock %}
+
+{% block submit_row %}
+  {{ block.super }}
+  <div class="submit-row" style="text-align: center; border: none; padding-top: 0; background: none;">
+      <a href="{% url 'password_reset' %}" class="password-reset-link">{% trans "Esqueci minha senha" %}</a>
+      <a href="{% url 'empresas:cadastro' %}" class="password-reset-link" style="margin-top: 5px;">{% trans "Ainda não tem conta? Crie uma Locadora" %}</a>
+  </div>
+{% endblock %}

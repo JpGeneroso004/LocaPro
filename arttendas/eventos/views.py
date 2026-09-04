@@ -94,24 +94,29 @@ def dashboard(request):
     return render(request, 'eventos/dashboard.html', context)
 
 
+from django.core.paginator import Paginator
+
 def lista_eventos(request):
     q = request.GET.get('q', '').strip()
     status = request.GET.get('status', '')
-    eventos = Evento.objects.all()
+    eventos_list = Evento.objects.all()
     if q:
-        eventos = eventos.filter(
+        eventos_list = eventos_list.filter(
             Q(nome__icontains=q) | Q(cliente__icontains=q) |
             Q(rua__icontains=q) | Q(setor__icontains=q) | Q(cidade__icontains=q))
     if status:
-        eventos = eventos.filter(status=status)
+        eventos_list = eventos_list.filter(status=status)
+        
+    paginator = Paginator(eventos_list, 20)
+    page_number = request.GET.get('page')
+    eventos = paginator.get_page(page_number)
+    
     return render(request, 'eventos/lista.html', {'eventos': eventos, 'q': q, 'status': status})
 
 
 def detalhe_evento(request, pk):
     evento = get_object_or_404(Evento, pk=pk)
     return render(request, 'eventos/detalhe.html', {'evento': evento})
-
-
 
 
 def novo_evento(request):
@@ -233,8 +238,13 @@ def excluir_evento(request, pk):
 
 def contratos_lista(request):
     from .models import Contrato, Evento
-    contratos = Contrato.objects.all().order_by('-criado_em')
-    eventos_sem_contrato = Evento.objects.filter(contrato__isnull=True).exclude(status='cancelado').order_by('-data_inicio')
+    contratos_list = Contrato.objects.all().order_by('-criado_em')
+    
+    paginator = Paginator(contratos_list, 20)
+    page_number = request.GET.get('page')
+    contratos = paginator.get_page(page_number)
+    
+    eventos_sem_contrato = Evento.objects.filter(contrato__isnull=True).exclude(status='cancelado').order_by('-data_inicio')[:20]
     return render(request, 'eventos/contratos_lista.html', {
         'contratos': contratos, 
         'eventos_sem_contrato': eventos_sem_contrato
