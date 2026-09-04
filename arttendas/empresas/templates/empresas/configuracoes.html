@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Configurações da Empresa{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="bi bi-gear-fill text-warning"></i> Configurações da Empresa</h2>
+            <p class="text-muted">Personalize os dados e contratos da sua locadora.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nome da Empresa</label>
+                            {{ form.nome }}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">CNPJ</label>
+                                {{ form.cnpj }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Telefone</label>
+                                {{ form.telefone }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Logo da Empresa</label>
+                            {% if form.instance.logo %}
+                                <div class="mb-2">
+                                    <img src="{{ form.instance.logo.url }}" alt="Logo" style="max-height: 80px;">
+                                </div>
+                            {% endif %}
+                            {{ form.logo }}
+                            <small class="text-muted">Esta logo aparecerá no cabeçalho dos seus contratos.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Cláusulas Padrão (Para novos contratos)</label>
+                            {{ form.clausulas_padrao }}
+                            <small class="text-muted">Você pode alterar essas cláusulas a qualquer momento. Elas servirão de base para todo novo contrato gerado.</small>
+                        </div>
+
+                        <hr>
+                        <button type="submit" class="btn btn-warning fw-bold w-100 text-dark">
+                            <i class="bi bi-save"></i> Salvar Configurações
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

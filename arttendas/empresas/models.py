@@ -5,6 +5,9 @@ class Organizacao(models.Model):
     nome = models.CharField('Nome da Empresa', max_length=150)
     cnpj = models.CharField('CNPJ', max_length=20, blank=True)
     telefone = models.CharField('Telefone Principal', max_length=20, blank=True)
+    logo = models.ImageField('Logo da Empresa', upload_to='logos/', null=True, blank=True)
+    clausulas_padrao = models.TextField('Cláusulas Padrão do Contrato', blank=True, 
+        default="1. RESPONSABILIDADE DO LOCAL: O Contratante é responsável por autorizações...\n2. FORÇA MAIOR: A Contratada isenta-se...")
     criado_em = models.DateTimeField(auto_now_add=True)
     
     class Meta:

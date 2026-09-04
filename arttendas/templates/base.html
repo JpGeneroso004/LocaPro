@@ -203,6 +203,9 @@
         <li class="nav-item">
           <a class="nav-link fw-bold {% block nav_contratos %}{% endblock %}" href="{% url 'eventos:contratos_lista' %}">Contratos</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link fw-bold" href="{% url 'empresas:configuracoes' %}"><i class="bi bi-gear-fill"></i> Empresa</a>
+        </li>
       </ul>
       <a href="{% url 'eventos:novo' %}" class="btn btn-dark fw-bold me-3">+ Novo Evento</a>
       <button class="btn btn-link theme-toggle-icon text-decoration-none theme-toggle p-0 fs-5" title="Alternar tema">
@@ -251,6 +254,10 @@
   <a href="{% url 'eventos:contratos_lista' %}" class="bottom-nav-item {% block mob_contratos %}{% endblock %}">
     <i class="bi bi-file-earmark-text-fill"></i>
     Contratos
+  </a>
+  <a href="{% url 'empresas:configuracoes' %}" class="bottom-nav-item">
+    <i class="bi bi-gear-fill"></i>
+    Empresa
   </a>
 </nav>
 

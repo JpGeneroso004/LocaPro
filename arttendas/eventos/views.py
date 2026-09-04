@@ -262,10 +262,9 @@ def gerar_contrato(request, evento_id):
             itens.append(f"Conjunto {c.nome} ({c.quantidade_placas} placas de 1x1m)")
     itens_locados = "\n".join(itens) if itens else "Nenhum item especificado."
     
-    clausulas_padrao = """1. RESPONSABILIDADE DO LOCAL: O Contratante é o único responsável por autorizações e alvarás junto a órgãos públicos (prefeitura, trânsito/tráfego, polícia) para interdição de via pública e realização do evento.
-2. FORÇA MAIOR / CONDIÇÕES CLIMÁTICAS: A Contratada isenta-se de culpa por vendavais extremos, tempestades ou desabamentos causados por caso fortuito, força maior ou mau uso das estruturas por terceiros.
-3. ESTRUTURAS E SEGURANÇA: O Contratante assume a guarda e integridade dos materiais (tendas, palcos, pisos) durante todo o período do evento até a finalização da desmontagem.
-4. INSTALAÇÕES ELÉTRICAS E DE SOM: Fica terminantemente proibida a sobrecarga das estruturas ou a fixação indevida de equipamentos pesados sem prévia autorização técnica da Contratada."""
+    clausulas_padrao = ""
+    if hasattr(request.user, 'organizacao') and request.user.organizacao:
+        clausulas_padrao = request.user.organizacao.clausulas_padrao
 
     data_montagem_padrao = ''
     data_desmontagem_padrao = ''

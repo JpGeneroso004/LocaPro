@@ -171,12 +171,15 @@
     
     <div class="content">
       <div class="header">
-        <img src="{% static 'img/logo.png' %}" alt="Art.Tendas">
+        {% if contrato.organizacao.logo %}
+          <img src="{{ contrato.organizacao.logo.url }}" alt="{{ contrato.organizacao.nome }}">
+        {% else %}
+          <img src="{% static 'img/logo.png' %}" alt="{{ contrato.organizacao.nome|default:'Logo' }}">
+        {% endif %}
         <div class="header-text">
-          <strong>ART TENDAS LOCAÇÕES</strong><br>
-          CNPJ: 26.471.123/0001-02<br>
-          Formosa - GO<br>
-          Contato: (61) 9-9809-7474
+          <strong>{{ contrato.organizacao.nome|default:"A Empresa"|upper }}</strong><br>
+          {% if contrato.organizacao.cnpj %}CNPJ: {{ contrato.organizacao.cnpj }}<br>{% endif %}
+          {% if contrato.organizacao.telefone %}Contato: {{ contrato.organizacao.telefone }}<br>{% endif %}
         </div>
       </div>
 
@@ -221,7 +224,7 @@
       <div class="signatures">
         <div class="signature-box">
           <div class="signature-line"></div>
-          <strong>ART TENDAS LOCAÇÕES</strong><br>
+          <strong>{{ contrato.organizacao.nome|default:"A Empresa"|upper }}</strong><br>
           Contratada
         </div>
         <div class="signature-box">

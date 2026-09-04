@@ -40,3 +40,19 @@ def cadastro_locadora(request):
             messages.error(request, f'Erro ao criar conta: {str(e)}')
 
     return render(request, 'empresas/cadastro.html')
+
+from django.contrib.auth.decorators import login_required
+from .forms import OrganizacaoForm
+
+@login_required
+def configuracoes_empresa(request):
+    org = request.user.organizacao
+    if request.method == 'POST':
+        form = OrganizacaoForm(request.POST, request.FILES, instance=org)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Configurações da empresa atualizadas!')
+            return redirect('empresas:configuracoes')
+    else:
+        form = OrganizacaoForm(instance=org)
+    return render(request, 'empresas/configuracoes.html', {'form': form})
