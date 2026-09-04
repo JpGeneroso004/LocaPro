@@ -40,10 +40,11 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+# Configurações do AllAuth
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+ACCOUNT_UNIQUE_EMAIL = True
 SOCIALACCOUNT_ADAPTER = 'empresas.adapters.MySocialAccountAdapter'
 LOGIN_REDIRECT_URL = '/eventos/'
 
