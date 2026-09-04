@@ -133,6 +133,8 @@ def novo_evento(request):
         form = EventoForm(request.POST)
         if form.is_valid():
             evento = form.save(commit=False)
+            if hasattr(request.user, 'organizacao'):
+                evento.organizacao = request.user.organizacao
             
             from inventario.utils import verificar_disponibilidade_item
             from datetime import datetime, time
@@ -306,6 +308,8 @@ def salvar_contrato(request, evento_id):
     if request.method == 'POST':
         try:
             contrato, created = Contrato.objects.get_or_create(evento=evento)
+            if created or not contrato.organizacao:
+                contrato.organizacao = evento.organizacao
             contrato.contratante_nome = request.POST.get('contratante_nome', '')
             contrato.contratante_cpf_cnpj = request.POST.get('contratante_cpf_cnpj', '')
             contrato.contratante_telefone = request.POST.get('contratante_telefone', '')

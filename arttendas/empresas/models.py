@@ -26,3 +26,13 @@ class Usuario(AbstractUser):
     class Meta:
         verbose_name = 'Usuário'
         verbose_name_plural = 'Usuários'
+
+class TenantManager(models.Manager):
+    def get_queryset(self):
+        qs = super().get_queryset()
+        from .middleware import get_current_user
+        user = get_current_user()
+        if user and user.is_authenticated and getattr(user, 'organizacao_id', None):
+            return qs.filter(organizacao=user.organizacao)
+        # Se for um comando de management (sem request), ou superuser sem tenant, retorna tudo.
+        return qs

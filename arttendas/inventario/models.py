@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from empresas.models import TenantManager
 
 
 def gerar_codigo_tenda(organizacao):
@@ -49,6 +50,12 @@ class Tenda(models.Model):
     observacoes = models.TextField('Observações', blank=True)
     organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='tendas', null=True)
 
+    objects = models.Manager() # The default one is needed sometimes
+    tenant_objects = models.Manager() # Wait, just override default manager
+    
+    # Actually let's just override objects
+    objects = TenantManager()
+
     class Meta:
         verbose_name = 'Tenda'
         verbose_name_plural = 'Tendas'
@@ -90,6 +97,8 @@ class ConjuntoPalco(models.Model):
     status      = models.CharField('Status', max_length=20, choices=STATUS, default='ativo')
     observacoes = models.TextField('Observações', blank=True)
     organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='conjuntos', null=True)
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = 'Conjunto de Palco/Piso'

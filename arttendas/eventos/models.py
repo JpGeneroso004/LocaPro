@@ -1,5 +1,6 @@
 from django.db import models
 from inventario.models import Tenda, ConjuntoPalco
+from empresas.models import TenantManager
 
 
 class Evento(models.Model):
@@ -31,6 +32,8 @@ class Evento(models.Model):
                                          verbose_name='Conjuntos de Palco/Piso', related_name='eventos')
     criado_em   = models.DateTimeField(auto_now_add=True)
     organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='eventos', null=True)
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = 'Evento'
@@ -82,6 +85,9 @@ class Contrato(models.Model):
 
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
+    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='contratos', null=True)
+
+    objects = TenantManager()
 
     class Meta:
         verbose_name = 'Contrato'

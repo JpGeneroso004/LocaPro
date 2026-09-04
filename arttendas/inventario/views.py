@@ -115,7 +115,10 @@ def nova_tenda(request):
     if request.method == 'POST':
         form = TendaForm(request.POST)
         if form.is_valid():
-            form.save()
+            tenda = form.save(commit=False)
+            if hasattr(request.user, 'organizacao'):
+                tenda.organizacao = request.user.organizacao
+            tenda.save()
             messages.success(request, 'Tenda cadastrada com sucesso!')
             return redirect('inventario:inventario')
     else:
@@ -152,7 +155,10 @@ def novo_conjunto(request):
     if request.method == 'POST':
         form = ConjuntoPalcoForm(request.POST)
         if form.is_valid():
-            form.save()
+            conjunto = form.save(commit=False)
+            if hasattr(request.user, 'organizacao'):
+                conjunto.organizacao = request.user.organizacao
+            conjunto.save()
             messages.success(request, 'Conjunto cadastrado com sucesso!')
             return redirect('inventario:inventario')
     else:
