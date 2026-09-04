@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+  <a href="javascript:history.back()" class="btn btn-outline-secondary border-0 rounded-circle me-3"><i class="bi bi-arrow-left"></i></a>
+  <h3 class="fw-bold mb-0">{{ titulo }}</h3>
+</div>
+
+<div class="card shadow-sm border-0 p-4 mb-5">
+  <form method="post">
+    {% csrf_token %}
+    
+    {% if form.errors %}
+      <div class="alert alert-danger mb-4">
+        <strong>Verifique os erros abaixo:</strong>
+        {{ form.errors }}
+      </div>
+    {% endif %}
+
+    <h5 class="fw-bold mb-3 text-secondary border-bottom pb-2">Informações Gerais</h5>
+    
+    <div class="mb-3">
+      <label class="form-label fw-bold">Nome do Evento</label>
+      {{ form.nome }}
+    </div>
+    
+    <div class="row g-3 mb-4 {% if is_reutilizar %}border border-warning rounded p-3 bg-warning bg-opacity-10{% endif %}">
+      {% if is_reutilizar %}
+        <div class="col-12 text-warning fw-bold mb-0">Defina as datas para o novo evento:</div>
+      {% endif %}
+      <div class="col-12 col-md-3">
+        <label class="form-label fw-bold">Data Início</label>
+        {{ form.data_inicio }}
+      </div>
+      <div class="col-12 col-md-3">
+        <label class="form-label fw-bold">Hora Início (Opc.)</label>
+        {{ form.hora_inicio }}
+      </div>
+      <div class="col-12 col-md-3">
+        <label class="form-label fw-bold">Data Fim</label>
+        {{ form.data_fim }}
+      </div>
+      <div class="col-12 col-md-3">
+        <label class="form-label fw-bold">Hora Fim (Opc.)</label>
+        {{ form.hora_fim }}
+      </div>
+    </div>
+    
+    <h5 class="fw-bold mb-3 text-secondary border-bottom pb-2 mt-4">Localização & Cliente</h5>
+
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-md-6">
+        <label class="form-label fw-bold">Cliente / Responsável</label>
+        {{ form.cliente }}
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label fw-bold">Telefone (Opcional)</label>
+        {{ form.telefone }}
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-8">
+        <label class="form-label fw-bold">Nome da Rua / Endereço</label>
+        {{ form.rua }}
+      </div>
+      <div class="col-4">
+        <label class="form-label fw-bold">Número</label>
+        {{ form.numero }}
+      </div>
+    </div>
+    <div class="row g-3 mb-4">
+      <div class="col-6">
+        <label class="form-label fw-bold">Setor / Bairro</label>
+        {{ form.setor }}
+      </div>
+      <div class="col-6">
+        <label class="form-label fw-bold">Complemento (Opcional)</label>
+        {{ form.complemento }}
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-bold">Cidade</label>
+      {{ form.cidade }}
+    </div>
+
+    <h5 class="fw-bold mb-3 text-secondary border-bottom pb-2 mt-4">Status & Obs</h5>
+    <div class="mb-3">
+      <label class="form-label fw-bold">Status do Evento</label>
+      {{ form.status }}
+    </div>
+    <div class="mb-4">
+      <label class="form-label fw-bold">Observações</label>
+      {{ form.observacoes }}
+    </div>
+
+    <h5 class="fw-bold mb-3 text-secondary border-bottom pb-2 mt-4">Alocação de Equipamentos</h5>
+    <div class="mb-4">
+      <label class="form-label fw-bold d-block"><i class="bi bi-tent"></i> Selecionar Tendas</label>
+      {{ form.tendas }}
+      <small class="text-muted d-block mt-1">Segure Ctrl (ou Cmd) para selecionar múltiplas tendas.</small>
+    </div>
+    
+    <div class="mb-4">
+      <label class="form-label fw-bold d-block"><i class="bi bi-box"></i> Selecionar Conjuntos</label>
+      {{ form.conjuntos }}
+      <small class="text-muted d-block mt-1">Segure Ctrl (ou Cmd) para selecionar múltiplos conjuntos.</small>
+    </div>
+
+    <div class="d-grid mt-5">
+      <button type="submit" class="btn btn-warning btn-lg shadow fw-bold text-dark">SALVAR EVENTO</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const dInicioDia = document.getElementById("id_data_inicio_0");
+  const dInicioMes = document.getElementById("id_data_inicio_1");
+  const dInicioAno = document.getElementById("id_data_inicio_2");
+  
+  const dFimDia = document.getElementById("id_data_fim_0");
+  const dFimMes = document.getElementById("id_data_fim_1");
+  const dFimAno = document.getElementById("id_data_fim_2");
+  
+  const horaInicio = document.getElementById("id_hora_inicio");
+  const horaFim = document.getElementById("id_hora_fim");
+  
+  const tendasSelect = document.getElementById("id_tendas");
+  const conjuntosSelect = document.getElementById("id_conjuntos");
+  
+  const eventoId = "{{ evento.id|default:'' }}";
+  
+  console.log('DEBUG JS:', dInicioDia, dFimDia, tendasSelect);
+
+  function getSelectedValues(selectEl) {
+    if (!selectEl) return [];
+    return Array.from(selectEl.selectedOptions).map(opt => opt.value);
+  }
+
+  function setPlaceholder(selectEl, message) {
+    if (!selectEl) return;
+    selectEl.innerHTML = '';
+    const opt = document.createElement('option');
+    opt.text = message;
+    opt.disabled = true;
+    opt.selected = true;
+    selectEl.appendChild(opt);
+  }
+
+  function lockSelects() {
+    if (tendasSelect) {
+      tendasSelect.disabled = true;
+      setPlaceholder(tendasSelect, 'Preencha as datas de montagem e desmontagem primeiro');
+    }
+    if (conjuntosSelect) {
+      conjuntosSelect.disabled = true;
+      setPlaceholder(conjuntosSelect, 'Preencha as datas de montagem e desmontagem primeiro');
+    }
+  }
+
+  function populateSelect(selectEl, items, emptyMessage, selectedValues) {
+    if (!selectEl) return;
+    selectEl.innerHTML = '';
+    selectEl.disabled = false;
+    
+    if (items.length === 0) {
+      setPlaceholder(selectEl, emptyMessage);
+    } else {
+      items.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.id;
+        opt.text = item.nome;
+        if (selectedValues.includes(String(item.id))) {
+          opt.selected = true;
+        }
+        selectEl.appendChild(opt);
+      });
+    }
+    
+    // Dispara evento change caso exista lib de UI (Select2/Choices)
+    selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  function getIsoDate(diaEl, mesEl, anoEl) {
+    if (!diaEl || !mesEl || !anoEl) return null;
+    let d = diaEl.value.trim();
+    let m = mesEl.value.trim();
+    let y = anoEl.value.trim();
+    if (d.length > 0 && m.length > 0 && y.length === 4) {
+      if (d.length === 1) d = '0' + d;
+      if (m.length === 1) m = '0' + m;
+      return `${y}-${m}-${d}`;
+    }
+    return null;
+  }
+
+  function checkAvailability() {
+    const dtInicio = getIsoDate(dInicioDia, dInicioMes, dInicioAno);
+    const dtFim = getIsoDate(dFimDia, dFimMes, dFimAno);
+    
+    if (!dtInicio || !dtFim) {
+      lockSelects();
+      return;
+    }
+    
+    const hInicio = (horaInicio && horaInicio.value) ? horaInicio.value : '00:00';
+    const hFim = (horaFim && horaFim.value) ? horaFim.value : '23:59';
+    
+    const inicioIso = `${dtInicio}T${hInicio}`;
+    const fimIso = `${dtFim}T${hFim}`;
+    
+    console.log('Datas detectadas:', inicioIso, fimIso);
+    
+    const inicioObj = new Date(inicioIso);
+    const fimObj = new Date(fimIso);
+    const now = new Date();
+    
+    if (!eventoId && inicioObj < now) {
+      if (tendasSelect) {
+        tendasSelect.disabled = true;
+        setPlaceholder(tendasSelect, 'A data de montagem não pode ser no passado');
+      }
+      if (conjuntosSelect) {
+        conjuntosSelect.disabled = true;
+        setPlaceholder(conjuntosSelect, 'A data de montagem não pode ser no passado');
+      }
+      return;
+    }
+    
+    if (fimObj <= inicioObj) {
+      if (tendasSelect) {
+        tendasSelect.disabled = true;
+        setPlaceholder(tendasSelect, 'A desmontagem deve ser posterior à montagem');
+      }
+      if (conjuntosSelect) {
+        conjuntosSelect.disabled = true;
+        setPlaceholder(conjuntosSelect, 'A desmontagem deve ser posterior à montagem');
+      }
+      return;
+    }
+    
+    // Salvar seleções atuais para restaurar após popular
+    const tSelected = getSelectedValues(tendasSelect);
+    const cSelected = getSelectedValues(conjuntosSelect);
+    
+    // Feedback visual de busca
+    if (tendasSelect) setPlaceholder(tendasSelect, 'Buscando equipamentos disponíveis...');
+    if (conjuntosSelect) setPlaceholder(conjuntosSelect, 'Buscando equipamentos disponíveis...');
+    
+    let url = `{% url 'eventos:equipamentos_disponiveis' %}?inicio=${encodeURIComponent(inicioIso)}&fim=${encodeURIComponent(fimIso)}`;
+    if (eventoId) {
+      url += `&evento_id=${encodeURIComponent(eventoId)}`;
+    }
+    
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (data.sucesso) {
+          populateSelect(tendasSelect, data.tendas, 'Nenhum equipamento disponível para este período', tSelected);
+          populateSelect(conjuntosSelect, data.conjuntos, 'Nenhum equipamento disponível para este período', cSelected);
+        } else {
+          console.error("Erro retornado pela API:", data.erro);
+          if (tendasSelect) tendasSelect.disabled = false;
+          if (conjuntosSelect) conjuntosSelect.disabled = false;
+        }
+      })
+      .catch(err => {
+        console.error("Erro de rede ao buscar equipamentos:", err);
+        if (tendasSelect) tendasSelect.disabled = false;
+        if (conjuntosSelect) conjuntosSelect.disabled = false;
+      });
+  }
+
+  function addListeners(el) {
+    if (el) {
+      el.addEventListener("change", checkAvailability);
+      el.addEventListener("input", checkAvailability);
+    }
+  }
+
+  addListeners(dInicioDia);
+  addListeners(dInicioMes);
+  addListeners(dInicioAno);
+  addListeners(dFimDia);
+  addListeners(dFimMes);
+  addListeners(dFimAno);
+  addListeners(horaInicio);
+  addListeners(horaFim);
+  
+  // Estado inicial
+  checkAvailability();
+  
+  {% if is_reutilizar %}
+  if (dInicioDia) dInicioDia.focus();
+  {% endif %}
+});
+</script>
+{% endblock %}

@@ -1,0 +1,253 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Contrato - {{ contrato.evento.nome }}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+    
+    :root {
+      --cor-principal: #333;
+    }
+    
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      color: var(--cor-principal);
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+
+    .marca-dagua {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 480px;
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .marca-dagua img {
+      width: 100%;
+    }
+
+    .container {
+      position: relative;
+      overflow: hidden;
+      max-width: 800px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 40px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+    }
+
+    .header img {
+      max-width: 150px;
+    }
+
+    .header-text {
+      text-align: right;
+      font-size: 0.9em;
+    }
+
+    h1 {
+      font-size: 1.5em;
+      text-align: center;
+      text-transform: uppercase;
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      font-size: 1.1em;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+      margin-top: 25px;
+      margin-bottom: 15px;
+    }
+
+    .box {
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .box p {
+      margin: 5px 0;
+    }
+
+    .clausulas {
+      font-size: 0.9em;
+      text-align: justify;
+      white-space: pre-wrap;
+    }
+
+    .signatures {
+      margin-top: 60px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .signature-box {
+      width: 45%;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .signature-line {
+      border-bottom: 1px solid #000;
+      margin-bottom: 10px;
+    }
+    
+    .no-print {
+      display: none !important;
+    }
+    
+
+
+    @media print {
+      #barra-topo, .no-print, nav, header, button, a.btn, a {
+        display: none !important;
+        visibility: hidden !important;
+      }
+      @page {
+        margin: 1cm;
+        size: A4 portrait;
+      }
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .container {
+        box-shadow: none !important;
+        background: transparent !important;
+        margin: 0;
+        padding: 0;
+        max-width: 100%;
+        border: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="barra-topo" class="no-print" style="position: relative; width: 100%; background: #1a1a1a; padding: 14px 20px; display: flex !important; justify-content: center; align-items: center; box-sizing: border-box; z-index: 99999;">
+  <!-- Botão Voltar no Canto Superior Esquerdo -->
+  <a href="{% url 'eventos:contratos_lista' %}" style="position: absolute; left: 20px; background: #333; color: #fff; padding: 9px 18px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; border: 1px solid #555;">
+  ← Voltar para Contratos
+</a>
+
+  <!-- Botão Imprimir Centralizado -->
+  <button type="button" onclick="window.print()" style="background: #fbc02d; color: #000; font-weight: bold; border: none; padding: 10px 26px; border-radius: 6px; cursor: pointer; font-size: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+    Imprimir / Salvar PDF
+  </button>
+</div>
+
+  <div class="container">
+    <div class="marca-dagua">
+      <img src="{% static 'img/logo_contrato.png' %}" alt="Art.Tendas">
+    </div>
+    
+    <div class="content">
+      <div class="header">
+        <img src="{% static 'img/logo.png' %}" alt="Art.Tendas">
+        <div class="header-text">
+          <strong>ART TENDAS LOCAÇÕES</strong><br>
+          CNPJ: 26.471.123/0001-02<br>
+          Formosa - GO<br>
+          Contato: (61) 9-9809-7474
+        </div>
+      </div>
+
+      <h1>Contrato de Locação e Montagem</h1>
+
+      <h2>1. CONTRATANTE</h2>
+      <div class="box">
+        <p><strong>Nome / Razão Social:</strong> {{ contrato.contratante_nome }}</p>
+        <p><strong>CPF / CNPJ:</strong> {{ contrato.contratante_cpf_cnpj }}</p>
+        <p><strong>Telefone:</strong> {{ contrato.contratante_telefone }}</p>
+        <p><strong>Endereço:</strong> {{ contrato.contratante_endereco }}</p>
+      </div>
+
+      <h2>2. DADOS DO EVENTO E MONTAGEM</h2>
+      <div class="box">
+        <p><strong>Evento:</strong> {{ contrato.evento.nome }}</p>
+        <p><strong>Data/Hora de Montagem:</strong> {{ contrato.data_montagem|date:"d/m/Y H:i"|default:"A combinar" }}</p>
+        <p><strong>Data/Hora de Desmontagem:</strong> {{ contrato.data_desmontagem|date:"d/m/Y H:i"|default:"A combinar" }}</p>
+        <p><strong>Endereço de Montagem:</strong> {{ contrato.endereco_montagem }}</p>
+      </div>
+
+      <h2>3. ITENS LOCADOS</h2>
+      <div class="box">
+        <p style="white-space: pre-wrap;">{{ contrato.itens_locados }}</p>
+      </div>
+
+      <h2>4. VALORES E CONDIÇÕES DE PAGAMENTO</h2>
+      <div class="box">
+        <p><strong>Valor Total:</strong> R$ {{ contrato.valor_total|floatformat:2 }}</p>
+        {% if contrato.sinal %}
+          <p><strong>Sinal / Entrada Pago:</strong> R$ {{ contrato.sinal|floatformat:2 }}</p>
+          <p><strong>Saldo Restante a Pagar:</strong> R$ {{ contrato.saldo_restante|floatformat:2 }}</p>
+        {% endif %}
+        <p><strong>Forma de Pagamento:</strong> {{ contrato.forma_pagamento }}</p>
+      </div>
+
+      <h2>5. CLÁUSULAS CONTRATUAIS E OBSERVAÇÕES</h2>
+      <div class="clausulas">
+{{ contrato.clausulas }}
+      </div>
+
+      <div class="signatures">
+        <div class="signature-box">
+          <div class="signature-line"></div>
+          <strong>ART TENDAS LOCAÇÕES</strong><br>
+          Contratada
+        </div>
+        <div class="signature-box">
+          <div class="signature-line"></div>
+          <strong>{{ contrato.contratante_nome }}</strong><br>
+          Contratante
+        </div>
+        
+        <div class="signature-box" style="margin-top: 20px;">
+          <div class="signature-line"></div>
+          <strong>Testemunha 1</strong><br>
+          CPF:
+        </div>
+        <div class="signature-box" style="margin-top: 20px;">
+          <div class="signature-line"></div>
+          <strong>Testemunha 2</strong><br>
+          CPF:
+        </div>
+      </div>
+      
+      <p style="text-align: center; margin-top: 40px; font-size: 0.9em;">
+        Formosa - GO, {% now "d \d\e F \d\e Y" %}.
+      </p>
+
+    </div>
+  </div>
+
+</body>
+</html>

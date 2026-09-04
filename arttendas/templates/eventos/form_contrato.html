@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}Gerar Contrato{% endblock %}
+
+{% block content %}
+<div class="mb-4 mt-3">
+  <h2><i class="bi bi-file-earmark-text"></i> Gerar Contrato</h2>
+  <p class="text-muted">Evento: {{ evento.nome }}</p>
+</div>
+
+<form id="contratoForm" action="{% url 'eventos:salvar_contrato' evento.id %}" method="POST" class="card p-4 shadow-sm">
+  {% csrf_token %}
+  
+  <h5 class="fw-bold mb-3 border-bottom pb-2">1. Dados do Contratante</h5>
+  <div class="row g-3 mb-4">
+    <div class="col-md-6">
+      <label class="form-label">Nome Completo / Razão Social</label>
+      <input type="text" name="contratante_nome" class="form-control" value="{{ contrato.contratante_nome|default:evento.cliente }}" required>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">CPF / CNPJ</label>
+      <input type="text" name="contratante_cpf_cnpj" class="form-control" value="{{ contrato.contratante_cpf_cnpj }}" required>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Telefone</label>
+      <input type="text" name="contratante_telefone" class="form-control" value="{{ contrato.contratante_telefone|default:evento.telefone }}" required>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Endereço (Residencial/Fiscal)</label>
+      <input type="text" name="contratante_endereco" class="form-control" value="{{ contrato.contratante_endereco }}" required>
+    </div>
+  </div>
+
+  <h5 class="fw-bold mb-3 border-bottom pb-2">2. Dados da Locação e Montagem</h5>
+  <div class="row g-3 mb-4">
+    <div class="col-md-6">
+      <label class="form-label">Data/Hora de Montagem</label>
+      <input type="datetime-local" name="data_montagem" class="form-control" value="{{ contrato.data_montagem|date:'Y-m-d\TH:i'|default:data_montagem_padrao }}" required>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Data/Hora de Desmontagem</label>
+      <input type="datetime-local" name="data_desmontagem" class="form-control" value="{{ contrato.data_desmontagem|date:'Y-m-d\TH:i'|default:data_desmontagem_padrao }}" required>
+    </div>
+    <div class="col-12">
+      <label class="form-label">Endereço Exato da Montagem</label>
+      <input type="text" name="endereco_montagem" class="form-control" value="{{ contrato.endereco_montagem|default:endereco_montagem }}" required>
+    </div>
+    <div class="col-12">
+      <label class="form-label">Itens Locados (Tendas, Palcos, Pisos)</label>
+      <textarea name="itens_locados" class="form-control" rows="4" required>{{ contrato.itens_locados|default:itens_locados }}</textarea>
+    </div>
+  </div>
+
+  <h5 class="fw-bold mb-3 border-bottom pb-2">3. Valores e Pagamento</h5>
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <label class="form-label">Valor Total (R$)</label>
+      <input type="number" step="0.01" name="valor_total" class="form-control" value="{{ contrato.valor_total|default:'' }}" required>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Sinal / Entrada (R$)</label>
+      <input type="number" step="0.01" name="sinal" class="form-control" value="{{ contrato.sinal|default:'' }}">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Forma de Pagamento</label>
+      <input type="text" name="forma_pagamento" class="form-control" value="{{ contrato.forma_pagamento }}" placeholder="Ex: Pix, Espécie, Boleto" required>
+    </div>
+  </div>
+
+  <h5 class="fw-bold mb-3 border-bottom pb-2">4. Cláusulas e Observações</h5>
+  <div class="mb-4">
+    <textarea name="clausulas" class="form-control" rows="8" required>{{ contrato.clausulas|default:clausulas_padrao }}</textarea>
+    <small class="text-muted">Revise livremente as cláusulas para este contrato específico antes de emitir.</small>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-warning fw-bold px-5">Gerar Contrato</button>
+    <a href="{% url 'eventos:contratos_lista' %}" class="btn btn-outline-secondary">Cancelar / Voltar</a>
+  </div>
+</form>
+
+<!-- Modal de Confirmação -->
+<div class="modal fade" id="modalConfirmacao" tabindex="-1" aria-labelledby="modalConfirmacaoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title fw-bold" id="modalConfirmacaoLabel">Revisão do Contrato</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Tem certeza de que todas as informações, datas, valores e cláusulas estão corretas?</p>
+        <p class="text-danger fw-bold mb-0">Após a emissão, o contrato não poderá ser alterado.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Voltar e Revisar</button>
+        <button type="button" class="btn btn-success fw-bold" id="btnConfirmarEmissao">Confirmar e Emitir Contrato</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const form = document.getElementById("contratoForm");
+    const modal = new bootstrap.Modal(document.getElementById("modalConfirmacao"));
+    const btnConfirmar = document.getElementById("btnConfirmarEmissao");
+
+    form.addEventListener("submit", function(event) {
+      event.preventDefault(); // Intercepta o envio
+      if (form.checkValidity()) {
+        modal.show(); // Mostra o modal se o formulário for válido
+      } else {
+        form.reportValidity(); // Mostra erros de validação padrão do HTML5
+      }
+    });
+
+    btnConfirmar.addEventListener("click", function() {
+      // Quando confirmado, submete o formulário pulando o event listener
+      form.submit();
+    });
+  });
+</script>
+{% endblock %}

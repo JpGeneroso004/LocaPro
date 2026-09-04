@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Eventos{% endblock %}
+{% block nav_eventos %}active{% endblock %}
+{% block mob_eventos %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="fw-bold mb-0">Eventos</h3>
+  <a href="{% url 'eventos:novo' %}" class="btn btn-warning fw-bold d-none d-md-inline-block">+ Novo</a>
+</div>
+
+<form method="get" class="mb-4">
+  <div class="input-group shadow-sm">
+    <input type="text" name="q" class="form-control form-control-lg border-0" placeholder="Buscar por cliente, endereço..." value="{{ q }}">
+    <button class="btn btn-warning border-0 px-4" type="submit"><i class="bi bi-search"></i></button>
+  </div>
+</form>
+
+{% if eventos %}
+  <div class="row g-3">
+    {% for evento in eventos %}
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card p-3 shadow-sm h-100">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h5 class="fw-bold text-truncate mb-0" style="max-width: 75%;">{{ evento.nome }}</h5>
+            {% if evento.status == 'agendado' %}
+              <span class="badge bg-primary rounded-pill">Agendado</span>
+            {% elif evento.status == 'em_andamento' %}
+              <span class="badge bg-warning text-dark rounded-pill">Andamento</span>
+            {% elif evento.status == 'concluido' %}
+              <span class="badge bg-success rounded-pill">Concluído</span>
+            {% else %}
+              <span class="badge bg-secondary rounded-pill">Cancelado</span>
+            {% endif %}
+          </div>
+          <p class="small text-muted mb-1"><i class="bi bi-person"></i> {{ evento.cliente }}</p>
+          <p class="small text-muted mb-2"><i class="bi bi-calendar"></i> {{ evento.data_inicio|date:"d/m/y" }} a {{ evento.data_fim|date:"d/m/y" }}</p>
+          <div class="mt-auto pt-2 border-top d-flex gap-2">
+            <a href="{% url 'eventos:novo' %}?reutilizar={{ evento.pk }}" class="btn btn-outline-warning btn-sm rounded-pill px-3 fw-bold w-50" title="Criar novo evento com este cliente/local">
+              <i class="bi bi-arrow-repeat"></i> Reutilizar
+            </a>
+            <a href="{% url 'eventos:detalhe' evento.pk %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold w-50">Ver Evento</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="text-center p-5 text-muted">
+    <i class="bi bi-search fs-1 mb-3"></i>
+    <p>Nenhum evento encontrado.</p>
+  </div>
+{% endif %}
+
+<a href="{% url 'eventos:novo' %}" class="fab">
+  <i class="bi bi-plus"></i>
+</a>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+  <a href="javascript:history.back()" class="btn btn-outline-secondary border-0 rounded-circle me-3"><i class="bi bi-arrow-left"></i></a>
+  <h3 class="fw-bold mb-0">{{ titulo }}</h3>
+</div>
+
+<div class="card shadow-sm border-0 p-4 mb-5">
+  <form method="post">
+    {% csrf_token %}
+    
+    {% if form.errors %}
+      <div class="alert alert-danger mb-4">
+        <strong>Verifique os erros abaixo:</strong>
+        {{ form.errors }}
+      </div>
+    {% endif %}
+
+    <div class="mb-3">
+      <label class="form-label fw-bold">Tamanho</label>
+      {{ form.tamanho }}
+    </div>
+    
+    <div class="mb-3">
+      <label class="form-label fw-bold">Tipo</label>
+      {{ form.tipo }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold">Status</label>
+      {{ form.status }}
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label fw-bold">Observações</label>
+      {{ form.observacoes }}
+    </div>
+
+    <div class="d-grid mt-4 gap-2">
+      <button type="submit" class="btn btn-warning btn-lg shadow fw-bold">SALVAR TENDA</button>
+      {% if tenda %}
+      <button type="button" class="btn btn-outline-danger fw-bold" data-bs-toggle="modal" data-bs-target="#deleteModal">
+        <i class="bi bi-trash"></i> EXCLUIR TENDA
+      </button>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+{% if tenda %}
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-danger text-white border-0">
+        <h5 class="modal-title fw-bold">Confirmar Exclusão</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <i class="bi bi-exclamation-circle text-danger display-1 mb-3 d-block"></i>
+        <p class="fs-5">Tem certeza que deseja excluir a tenda <strong>{{ tenda.codigo }}</strong>?</p>
+        <p class="text-muted small">Esta ação não pode ser desfeita.</p>
+      </div>
+      <div class="modal-footer border-0 d-flex">
+        <button type="button" class="btn btn-outline-secondary w-100 mb-2" data-bs-dismiss="modal">Cancelar</button>
+        <form method="post" action="{% url 'inventario:excluir_tenda' tenda.pk %}" class="w-100 m-0">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger w-100 fw-bold">Sim, Excluir</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

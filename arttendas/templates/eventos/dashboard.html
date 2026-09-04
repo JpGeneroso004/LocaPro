@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Início{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block mob_dashboard %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="fw-bold mb-0">Dashboard</h3>
+    <span class="text-muted small">Resumo da operação</span>
+  </div>
+</div>
+
+<div class="row g-2 mb-4">
+  <div class="col-12 col-md-4">
+    <div class="card h-100 bg-body border border-primary border-2 text-center p-3 shadow-sm">
+      <h2 class="fw-bold text-primary mb-0">{{ ativos }}</h2>
+      <small class="text-muted fw-bold">Eventos Ativos</small>
+    </div>
+  </div>
+  <div class="col-6 col-md-4">
+    <div class="card h-100 bg-warning text-dark text-center p-3 shadow-sm border-0">
+      <h2 class="fw-bold mb-0">{{ tendas_em_uso }} / {{ total_tendas }}</h2>
+      <small class="fw-bold">Tendas em Uso</small>
+    </div>
+  </div>
+  <div class="col-6 col-md-4">
+    <div class="card h-100 bg-body-secondary text-dark text-center p-3 shadow-sm border-0">
+      <h2 class="fw-bold mb-0">{{ placas_em_uso }} / {{ total_placas }}</h2>
+      <small class="fw-bold">Placas em Uso</small>
+    </div>
+  </div>
+</div>
+
+<h5 class="fw-bold mb-3 mt-2 text-secondary">Eventos da Semana</h5>
+{% if proximos %}
+  <div class="row g-3 mb-4">
+    {% for evento in proximos %}
+      <div class="col-12 col-md-6">
+        <div class="card p-3 border-start border-5 border-warning shadow-sm">
+          <div class="d-flex justify-content-between">
+            <h5 class="fw-bold mb-1 text-truncate" style="max-width: 70%;">{{ evento.nome }}</h5>
+            <span class="badge bg-warning text-dark rounded-pill align-self-start">{{ evento.data_inicio|date:"d/m" }}</span>
+          </div>
+          <p class="text-muted small mb-1"><i class="bi bi-person-fill"></i> {{ evento.cliente }}</p>
+          <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill"></i> {{ evento.cidade }}</p>
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-secondary fw-bold">🏕️ {{ evento.total_tendas }} | 📦 {{ evento.total_placas }}</small>
+            <a href="{% url 'eventos:detalhe' evento.pk %}" class="btn btn-sm btn-dark px-3 fw-bold rounded-pill">Ver</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card p-4 text-center text-muted mb-4 border-0 bg-body-tertiary shadow-sm">
+    <i class="bi bi-calendar-check fs-1 mb-2"></i>
+    <p class="mb-0">Sem eventos agendados próximos.</p>
+  </div>
+{% endif %}
+
+<h5 class="fw-bold mb-3 text-secondary">Mapa de Montagem</h5>
+<div class="card overflow-hidden shadow-sm border-0 mb-4">
+  <div id="map" style="height: 250px; width: 100%; z-index: 1;"></div>
+</div>
+
+<a href="{% url 'eventos:novo' %}" class="fab">
+  <i class="bi bi-plus"></i>
+</a>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const mapEl = document.getElementById('map');
+  if (!mapEl) return;
+  const eventosData = {{ eventos_mapa_json|safe|default:"[]" }};
+  const map = L.map('map').setView([-15.5362, -47.3344], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  if (eventosData && eventosData.length > 0) {
+    const bounds = [];
+    eventosData.forEach(ev => {
+      const marker = L.marker([ev.lat, ev.lng]).addTo(map);
+      marker.bindPopup(`<b>${ev.nome}</b><br>${ev.cliente}<br><a href="${ev.url}">Detalhes</a>`);
+      bounds.push([ev.lat, ev.lng]);
+    });
+    map.fitBounds(bounds, {padding: [20, 20]});
+  }
+});
+</script>
+{% endblock %}

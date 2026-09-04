@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Contratos{% endblock %}
+{% block nav_contratos %}active{% endblock %}
+{% block mob_contratos %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+  <h2><i class="bi bi-file-earmark-text"></i> Contratos de Locação</h2>
+  <button class="btn btn-dark fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#novoContratoModal">
+    + Novo Contrato
+  </button>
+</div>
+
+<!-- Modal para Selecionar Evento -->
+<div class="modal fade" id="novoContratoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Gerar Contrato para Qual Evento?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small">Apenas eventos que ainda não possuem contrato e não foram cancelados aparecerão aqui.</p>
+        <div class="list-group">
+          {% for ev in eventos_sem_contrato %}
+            <a href="{% url 'eventos:gerar_contrato' ev.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ ev.nome }}</strong><br>
+                <small class="text-muted">{{ ev.data_inicio|date:"d/m/Y" }} - {{ ev.cliente }}</small>
+              </div>
+              <i class="bi bi-chevron-right text-muted"></i>
+            </a>
+          {% empty %}
+            <div class="text-center py-3 text-muted">Todos os eventos ativos já possuem contrato ou não há eventos disponíveis.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card p-0 overflow-hidden shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Evento</th>
+          <th>Contratante</th>
+          <th>Data do Evento</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in contratos %}
+        <tr>
+          <td class="fw-bold">{{ c.evento.nome }}</td>
+          <td>{{ c.contratante_nome }}</td>
+          <td>{{ c.evento.data_inicio|date:"d/m/Y" }}</td>
+          <td>
+            <a href="{% url 'eventos:imprimir_contrato' c.id %}" class="btn btn-sm btn-dark" title="Imprimir">
+              <i class="bi bi-printer"></i>
+            </a>
+
+            <form action="{% url 'eventos:deletar_contrato' c.id %}" method="POST" class="d-inline">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Excluir este contrato?')">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center py-4 text-muted">Nenhum contrato gerado. Acesse um evento para gerar.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block nav_inventario %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <a href="{% url 'inventario:inventario' %}" class="breadcrumb">← Inventário</a>
+    <h1 class="page-title">{{ titulo }}</h1>
+  </div>
+</div>
+
+<div class="form-container form-container--sm">
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-section">
+      <div class="form-grid">
+        {% for field in form %}
+        <div class="form-group {% if field.name == 'observacoes' %}form-group--full{% endif %}">
+          <label>{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="form-actions">
+      <a href="{% url 'inventario:inventario' %}" class="btn btn-outline">Cancelar</a>
+      <button type="submit" class="btn btn-primary">💾 Salvar</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

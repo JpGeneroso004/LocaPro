@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}Detalhe: {{ evento.nome }}{% endblock %}
+{% block nav_eventos %}active{% endblock %}
+{% block mob_eventos %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <a href="{% url 'eventos:lista' %}" class="btn btn-outline-secondary btn-sm rounded-pill"><i class="bi bi-arrow-left"></i> Voltar</a>
+  <div class="dropdown">
+    <button class="btn btn-outline-secondary border-0 rounded-circle" type="button" data-bs-toggle="dropdown">
+      <i class="bi bi-three-dots-vertical"></i>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+      <li><a class="dropdown-item fw-bold" href="{% url 'eventos:editar' evento.pk %}"><i class="bi bi-pencil me-2"></i> Editar</a></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><a class="dropdown-item text-danger fw-bold" href="{% url 'eventos:excluir' evento.pk %}"><i class="bi bi-trash me-2"></i> Excluir</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card shadow-sm p-4 mb-4 border-top border-warning border-5">
+  <h2 class="fw-bold mb-1">{{ evento.nome }}</h2>
+  <div class="mb-3">
+    {% if evento.status == 'agendado' %}
+      <span class="badge bg-primary px-3 py-2 rounded-pill">Agendado</span>
+    {% elif evento.status == 'em_andamento' %}
+      <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Em Andamento</span>
+    {% elif evento.status == 'concluido' %}
+      <span class="badge bg-success px-3 py-2 rounded-pill">Concluído</span>
+    {% else %}
+      <span class="badge bg-secondary px-3 py-2 rounded-pill">Cancelado</span>
+    {% endif %}
+  </div>
+  
+  <ul class="list-group list-group-flush mb-0">
+    <li class="list-group-item bg-transparent px-0 py-3">
+      <small class="text-muted d-block text-uppercase fw-bold">Cliente / Responsável</small>
+      <span class="fs-5">{{ evento.cliente }}</span>
+      {% if evento.telefone %}
+        <br><a href="tel:{{ evento.telefone }}" class="btn btn-sm btn-outline-success mt-2 rounded-pill"><i class="bi bi-whatsapp"></i> {{ evento.telefone }}</a>
+      {% endif %}
+    </li>
+    <li class="list-group-item bg-transparent px-0 py-3">
+      <small class="text-muted d-block text-uppercase fw-bold">Datas</small>
+      <span class="fs-5">{{ evento.data_inicio|date:"d/m/Y" }} até {{ evento.data_fim|date:"d/m/Y" }}</span>
+    </li>
+    <li class="list-group-item bg-transparent px-0 py-3">
+      <span class="fw-bold mb-1 d-block"><i class="bi bi-geo-alt-fill text-danger"></i> Localização</span>
+      <span>{{ evento.rua }}, {{ evento.numero }}{% if evento.complemento %} - {{ evento.complemento }}{% endif %}</span><br>
+      <span class="text-muted">{{ evento.setor }} - {{ evento.cidade }}</span>
+    </li>
+    {% if evento.observacoes %}
+    <li class="list-group-item bg-transparent px-0 py-3">
+      <small class="text-muted d-block text-uppercase fw-bold">Observações</small>
+      <p class="mb-0">{{ evento.observacoes }}</p>
+    </li>
+    {% endif %}
+  </ul>
+</div>
+
+<div class="row g-4 mb-5">
+  <div class="col-12 col-md-6">
+    <div class="card shadow-sm h-100 p-3">
+      <h5 class="fw-bold mb-3"><i class="bi bi-tent"></i> Tendas Alocadas</h5>
+      {% if evento.tendas.all %}
+        <ul class="list-group list-group-flush">
+          {% for t in evento.tendas.all %}
+            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+              <span>{{ t.codigo }} - {{ t.get_tamanho_display }}</span>
+              <span class="badge bg-body-secondary text-body border">{{ t.get_tipo_display }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted small">Nenhuma tenda alocada.</p>
+      {% endif %}
+    </div>
+  </div>
+  
+  <div class="col-12 col-md-6">
+    <div class="card shadow-sm h-100 p-3">
+      <h5 class="fw-bold mb-3"><i class="bi bi-box"></i> Palco / Piso</h5>
+      {% if evento.conjuntos.all %}
+        <ul class="list-group list-group-flush">
+          {% for c in evento.conjuntos.all %}
+            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+              <span>{{ c.nome }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted small">Nenhum conjunto alocado.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="d-flex flex-column flex-md-row gap-2 mt-2 mb-5">
+  <a href="{% url 'eventos:gerar_contrato' evento.pk %}" class="btn btn-dark btn-lg fw-bold flex-grow-1 shadow-sm">
+    <i class="bi bi-file-earmark-text"></i> {% if evento.contrato %}Ver Contrato{% else %}Gerar Contrato{% endif %}
+  </a>
+  <a href="{% url 'eventos:novo' %}?reutilizar={{ evento.pk }}" class="btn btn-warning btn-lg fw-bold flex-grow-1 shadow-sm">
+    <i class="bi bi-arrow-repeat"></i> Reutilizar Cliente/Local
+  </a>
+  <a href="{% url 'eventos:excluir' evento.pk %}" class="btn btn-outline-danger btn-lg fw-bold shadow-sm">
+    <i class="bi bi-trash"></i> Excluir Evento
+  </a>
+</div>
+{% endblock %}

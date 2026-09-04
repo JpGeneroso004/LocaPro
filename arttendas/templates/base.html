@@ -1,0 +1,303 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>{% block title %}Art.Tendas{% endblock %} | Sistema de Gestão</title>
+  <script>
+    const theme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-bs-theme', theme);
+  </script>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;900&family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    :root, [data-bs-theme="light"] {
+      --bs-font-sans-serif: 'Inter', 'Barlow', sans-serif;
+      --brand-font: 'Barlow Condensed', sans-serif;
+      --bs-primary: #FFD600;
+      --bs-warning: #FFD600;
+      --bs-body-bg: #f8f9fa;
+    }
+    [data-bs-theme="dark"] {
+      --bs-body-bg: #0A0A0A;
+      --bs-body-color: #bbb;
+      --bs-secondary-bg: #141414;
+      --bs-tertiary-bg: #1E1E1E;
+      --bs-border-color: #2A2A2A;
+      --bs-primary: #FFD600;
+      --bs-warning: #FFD600;
+      --bs-dark: #1E1E1E;
+    }
+
+    body {
+      background-color: var(--bs-body-bg);
+      padding-bottom: 70px;
+      font-family: var(--bs-font-sans-serif);
+      color: var(--bs-body-color);
+    }
+    
+    h1, h2, h3, h4, h5, h6, .navbar-brand {
+      font-family: var(--brand-font) !important;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .navbar-top {
+      background-color: var(--bs-warning);
+      box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    }
+    .navbar-brand {
+      font-weight: 900;
+      color: #000 !important;
+    }
+    
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: var(--bs-body-bg);
+      box-shadow: 0 -2px 10px rgba(0,0,0,.1);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      z-index: 1000;
+    }
+    [data-bs-theme="light"] .bottom-nav {
+      background-color: #fff;
+    }
+    [data-bs-theme="dark"] .bottom-nav {
+      border-top: 1px solid #333;
+    }
+    .bottom-nav-item {
+      text-align: center;
+      color: #6c757d;
+      text-decoration: none;
+      font-size: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .bottom-nav-item i {
+      font-size: 1.5rem;
+      margin-bottom: 2px;
+    }
+    .bottom-nav-item.active {
+      color: var(--bs-warning);
+      font-weight: 600;
+    }
+    
+    .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,.05);
+      margin-bottom: 1rem;
+    }
+    [data-bs-theme="dark"] .card {
+      background: #141414 !important;
+      border: 1px solid #2A2A2A !important;
+      box-shadow: none;
+    }
+    [data-bs-theme="dark"] .form-control, [data-bs-theme="dark"] .form-select {
+      background-color: #1E1E1E;
+      border-color: #2A2A2A;
+      color: #fff;
+    }
+    [data-bs-theme="dark"] .form-control:focus, [data-bs-theme="dark"] .form-select:focus {
+      border-color: #FFD600;
+      box-shadow: 0 0 0 3px rgba(255,214,0,0.1);
+    }
+    [data-bs-theme="dark"] .table {
+      --bs-table-bg: #141414;
+      --bs-table-border-color: #2A2A2A;
+      --bs-table-striped-bg: #1E1E1E;
+      --bs-table-hover-bg: #1E1E1E;
+      color: #bbb;
+    }
+    .table th {
+      font-family: 'Barlow', sans-serif;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+    }
+    [data-bs-theme="dark"] .table th {
+      color: #888;
+      background: #1E1E1E;
+    }
+    .btn {
+      border-radius: 8px;
+    }
+    .btn-warning {
+      background-color: #FFD600 !important;
+      border-color: #FFD600 !important;
+      color: #0A0A0A !important;
+    }
+    .btn-warning:hover {
+      background-color: #FFEA70 !important;
+      border-color: #FFEA70 !important;
+    }
+    .theme-toggle-icon {
+      color: #000;
+    }
+    .btn-lg {
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    
+    .fab {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background-color: var(--bs-warning);
+      color: #000;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 28px;
+      box-shadow: 0 4px 10px rgba(0,0,0,.3);
+      text-decoration: none;
+      z-index: 1000;
+    }
+    
+    @media (min-width: 768px) {
+      .bottom-nav, .fab {
+        display: none;
+      }
+      body {
+        padding-bottom: 0;
+      }
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<nav class="navbar navbar-expand-md navbar-top d-none d-md-flex mb-4">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'eventos:dashboard' %}">
+      <img src="{% static 'img/logo.png' %}" alt="Art.Tendas" height="40">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link fw-bold {% block nav_dashboard %}{% endblock %}" href="{% url 'eventos:dashboard' %}">Início</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-bold {% block nav_eventos %}{% endblock %}" href="{% url 'eventos:lista' %}">Eventos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-bold {% block nav_inventario %}{% endblock %}" href="{% url 'inventario:inventario' %}">Inventário</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-bold {% block nav_contratos %}{% endblock %}" href="{% url 'eventos:contratos_lista' %}">Contratos</a>
+        </li>
+      </ul>
+      <a href="{% url 'eventos:novo' %}" class="btn btn-dark fw-bold me-3">+ Novo Evento</a>
+      <button class="btn btn-link theme-toggle-icon text-decoration-none theme-toggle p-0 fs-5" title="Alternar tema">
+        <i class="bi bi-moon-stars-fill"></i>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="d-md-none navbar-top p-3 sticky-top mb-3 shadow-sm d-flex justify-content-between align-items-center">
+  <div style="width: 32px;"></div> <!-- Spacer -->
+  <a href="{% url 'eventos:dashboard' %}" class="text-decoration-none">
+    <h4 class="m-0 fw-bold"><img src="{% static 'img/logo.png' %}" alt="Art.Tendas" height="36"></h4>
+  </a>
+  <button class="btn btn-link theme-toggle-icon text-decoration-none theme-toggle p-0 fs-4" title="Alternar tema">
+    <i class="bi bi-moon-stars-fill"></i>
+  </button>
+</div>
+
+<div class="container pb-5">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</div>
+
+<nav class="bottom-nav d-md-none">
+  <a href="{% url 'eventos:dashboard' %}" class="bottom-nav-item {% block mob_dashboard %}{% endblock %}">
+    <i class="bi bi-house-door-fill"></i>
+    Início
+  </a>
+  <a href="{% url 'eventos:lista' %}" class="bottom-nav-item {% block mob_eventos %}{% endblock %}">
+    <i class="bi bi-calendar-event-fill"></i>
+    Eventos
+  </a>
+  <a href="{% url 'inventario:inventario' %}" class="bottom-nav-item {% block mob_inventario %}{% endblock %}">
+    <i class="bi bi-box-seam-fill"></i>
+    Estoque
+  </a>
+  <a href="{% url 'eventos:contratos_lista' %}" class="bottom-nav-item {% block mob_contratos %}{% endblock %}">
+    <i class="bi bi-file-earmark-text-fill"></i>
+    Contratos
+  </a>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const themeToggles = document.querySelectorAll('.theme-toggle');
+    const updateIcon = (theme) => {
+      themeToggles.forEach(btn => {
+        if (theme === 'dark') {
+          btn.innerHTML = '<i class="bi bi-sun-fill"></i>';
+        } else {
+          btn.innerHTML = '<i class="bi bi-moon-stars-fill"></i>';
+        }
+      });
+    };
+
+    updateIcon(document.documentElement.getAttribute('data-bs-theme'));
+
+    themeToggles.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-bs-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateIcon(newTheme);
+      });
+    });
+
+    // Auto-fechamento de alertas e toasts após 6 segundos
+    const alerts = document.querySelectorAll('.alert, .toast');
+    alerts.forEach(alertEl => {
+      setTimeout(() => {
+        try {
+          // Usa API nativa do Bootstrap se disponível (fecha com fade)
+          const bsAlert = bootstrap.Alert.getOrCreateInstance(alertEl);
+          bsAlert.close();
+        } catch (e) {
+          // Fallback para CSS fade-out e remoção
+          alertEl.style.transition = 'opacity 0.5s';
+          alertEl.style.opacity = '0';
+          setTimeout(() => alertEl.remove(), 500);
+        }
+      }, 6000);
+    });
+  });
+</script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>
