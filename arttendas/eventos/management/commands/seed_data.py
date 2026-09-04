@@ -26,7 +26,7 @@ class Command(BaseCommand):
         ]
         for codigo, tamanho, tipo in tendas_data:
             Tenda.objects.get_or_create(codigo=codigo, defaults={
-                'tamanho': tamanho, 'tipo': tipo, 'status': 'disponivel'
+                'tamanho': tamanho, 'tipo': tipo, 'status': 'ativo'
             })
         self.stdout.write(f'  ✅ {len(tendas_data)} tendas')
 
@@ -35,7 +35,7 @@ class Command(BaseCommand):
         for qtd in range(1, 31):
             _, novo = ConjuntoPalco.objects.get_or_create(
                 quantidade_placas=qtd,
-                defaults={'nome': f'Conjunto {qtd}', 'status': 'disponivel'}
+                defaults={'nome': f'Conjunto {qtd}', 'status': 'ativo'}
             )
             if novo:
                 criados += 1
@@ -49,7 +49,7 @@ class Command(BaseCommand):
                 'nome': 'Festa Junina Municipal',
                 'cliente': 'Prefeitura de Formosa',
                 'telefone': '(61) 3631-0000',
-                'local': 'Praça do Coreto, Centro',
+                'rua': 'Praça do Coreto', 'numero': 'S/N', 'setor': 'Centro',
                 'cidade': 'Formosa',
                 'latitude': -15.5362, 'longitude': -47.3344,
                 'data_inicio': hoje - timedelta(days=2),
@@ -63,7 +63,7 @@ class Command(BaseCommand):
                 'nome': 'Casamento Silva & Santos',
                 'cliente': 'Família Silva',
                 'telefone': '(61) 99876-5432',
-                'local': 'Sítio Recanto das Flores',
+                'rua': 'Sítio Recanto das Flores', 'numero': 'S/N', 'setor': 'Zona Rural',
                 'cidade': 'Formosa',
                 'latitude': -15.5100, 'longitude': -47.3800,
                 'data_inicio': hoje + timedelta(days=5),
@@ -77,7 +77,7 @@ class Command(BaseCommand):
                 'nome': 'Expo Agropecuária',
                 'cliente': 'Sindicato Rural de Formosa',
                 'telefone': '(61) 3631-1234',
-                'local': 'Parque de Exposições, BR-020',
+                'rua': 'Parque de Exposições', 'numero': 'BR-020', 'setor': 'Norte',
                 'cidade': 'Formosa',
                 'latitude': -15.5600, 'longitude': -47.3200,
                 'data_inicio': hoje + timedelta(days=15),
@@ -91,7 +91,7 @@ class Command(BaseCommand):
                 'nome': 'Show Gospel Renovar',
                 'cliente': 'Igreja Renovar',
                 'telefone': '(61) 98765-4321',
-                'local': 'Avenida Brasil, 1200',
+                'rua': 'Avenida Brasil', 'numero': '1200', 'setor': 'Centro',
                 'cidade': 'Formosa',
                 'latitude': -15.5280, 'longitude': -47.3390,
                 'data_inicio': hoje - timedelta(days=30),
@@ -114,9 +114,6 @@ class Command(BaseCommand):
                 for qtd in conjuntos_placas:
                     try: ev.conjuntos.add(ConjuntoPalco.objects.get(quantidade_placas=qtd))
                     except ConjuntoPalco.DoesNotExist: pass
-                if ev.status in ['agendado', 'em_andamento']:
-                    ev.tendas.all().update(status='em_uso')
-                    ev.conjuntos.all().update(status='em_uso')
 
         self.stdout.write('  ✅ 4 eventos de demonstração')
         self.stdout.write(self.style.SUCCESS('\n🎉 Tudo pronto!\n'))

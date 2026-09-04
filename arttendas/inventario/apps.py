@@ -28,7 +28,7 @@ class InventarioConfig(AppConfig):
             ]
             for codigo, tamanho, tipo in tendas:
                 Tenda.objects.get_or_create(codigo=codigo, defaults={
-                    'tamanho': tamanho, 'tipo': tipo, 'status': 'disponivel'
+                    'tamanho': tamanho, 'tipo': tipo, 'status': 'ativo'
                 })
 
             from inventario.models import ConjuntoPalco
@@ -36,7 +36,7 @@ class InventarioConfig(AppConfig):
                 for qtd in range(1, 31):
                     ConjuntoPalco.objects.get_or_create(
                         quantidade_placas=qtd,
-                        defaults={'nome': f'Conjunto {qtd}', 'status': 'disponivel'}
+                        defaults={'nome': f'Conjunto {qtd}', 'status': 'ativo'}
                     )
         except Exception:
             pass
