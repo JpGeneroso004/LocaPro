@@ -1,12 +1,20 @@
+import environ
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'arttendas-local-app-key-nao-usar-em-producao'
+env = environ.Env(
+    DEBUG=(bool, False),
+    ALLOWED_HOSTS=(list, ['127.0.0.1', 'localhost'])
+)
 
-DEBUG = False  # CORRIGIDO: False evita vazar info de erro para o usuário
+environ.Env.read_env(BASE_DIR / '.env')
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+SECRET_KEY = env('SECRET_KEY', default='arttendas-local-app-key-nao-usar-em-producao')
+
+DEBUG = env('DEBUG')
+
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -53,14 +61,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        'OPTIONS': {
-            # CORRIGIDO: evita banco corrompido se fechar o app abruptamente
-            'timeout': 20,
-        }
-    }
+    'default': env.db('DATABASE_URL', default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
 }
 
 AUTH_PASSWORD_VALIDATORS = []
