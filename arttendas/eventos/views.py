@@ -449,6 +449,12 @@ def salvar_contrato(request, evento_id):
             contrato, created = Contrato.objects.get_or_create(evento=evento)
             if created or not contrato.organizacao:
                 contrato.organizacao = evento.organizacao
+            
+            # Gera token único para link de assinatura
+            if not contrato.token_assinatura:
+                import uuid
+                contrato.token_assinatura = str(uuid.uuid4())
+                
             contrato.contratante_nome = request.POST.get('contratante_nome', '')
             contrato.contratante_cpf_cnpj = request.POST.get('contratante_cpf_cnpj', '')
             contrato.contratante_telefone = request.POST.get('contratante_telefone', '')

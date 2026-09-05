@@ -107,6 +107,17 @@ class Contrato(models.Model):
     itens_locados = models.TextField('Itens Locados')
     clausulas = models.TextField('Cláusulas')
 
+    # Assinatura Eletrônica (SaaS)
+    status_assinatura = models.CharField(
+        'Status da Assinatura', 
+        max_length=20, 
+        choices=[('pendente', 'Pendente'), ('assinado', 'Assinado'), ('recusado', 'Recusado')],
+        default='pendente'
+    )
+    data_assinatura = models.DateTimeField('Data da Assinatura', null=True, blank=True)
+    ip_assinatura = models.GenericIPAddressField('IP da Assinatura', null=True, blank=True)
+    token_assinatura = models.CharField('Token Seguro de Assinatura', max_length=100, unique=True, null=True, blank=True)
+
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
     organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='contratos')
