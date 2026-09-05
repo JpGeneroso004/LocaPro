@@ -101,6 +101,34 @@ def configuracoes_empresa(request):
     }
     return render(request, 'empresas/configuracoes.html', context)
 
+@login_required
+def excluir_locadora(request):
+    org = request.user.organizacao
+    if request.user.cargo != 'dono':
+        messages.error(request, 'Apenas o proprietário pode excluir a locadora.')
+        return redirect('empresas:configuracoes')
+        
+    if request.method == 'POST':
+        nome_confirmacao = request.POST.get('nome_confirmacao')
+        if nome_confirmacao != org.nome:
+            messages.error(request, 'O nome digitado não confere. Exclusão cancelada.')
+            return redirect('empresas:configuracoes')
+            
+        # Hard delete (CASCATA) de toda a locadora (eventos, clientes, contratos, estoque, etc)
+        org.delete()
+        
+        # Desloga o usuário atual já que a conta dele deixou de existir no contexto da locadora
+        # (Opcionalmente poderíamos deletar o usuário também, ou apenas remover a organização dele)
+        # Vamos deletar todos os usuários atrelados a essa locadora para privacidade total.
+        Usuario.objects.filter(organizacao=org).delete()
+        
+        from django.contrib.auth import logout
+        logout(request)
+        messages.success(request, 'Sua locadora e todos os dados foram excluídos definitivamente.')
+        return redirect('empresas:cadastro')
+        
+    return redirect('empresas:configuracoes')
+
 from django.db.models import Count
 from django.core.exceptions import PermissionDenied
 

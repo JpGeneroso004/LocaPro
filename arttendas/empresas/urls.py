@@ -5,6 +5,7 @@ app_name = 'empresas'
 urlpatterns = [
     path('cadastro/', views.cadastro_locadora, name='cadastro'),
     path('configuracoes/', views.configuracoes_empresa, name='configuracoes'),
+    path('configuracoes/excluir/', views.excluir_locadora, name='excluir_locadora'),
     path('equipe/', views.lista_equipe, name='equipe'),
     path('equipe/novo/', views.novo_membro, name='novo_membro'),
     path('equipe/editar/<int:pk>/', views.editar_membro, name='editar_membro'),

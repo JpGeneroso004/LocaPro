@@ -112,6 +112,43 @@
                 </div>
             </div>
         </div>
+        
+        {% if request.user.cargo == 'dono' %}
+        <div class="card shadow-sm border-danger mt-4">
+            <div class="card-body text-center">
+                <h5 class="text-danger fw-bold"><i class="bi bi-exclamation-octagon-fill"></i> Zona de Perigo</h5>
+                <p class="small text-muted mb-3">Isso apagará permanentemente todos os clientes, eventos e itens do seu estoque. Esta ação não pode ser desfeita.</p>
+                <button class="btn btn-outline-danger w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#deleteTenantModal">
+                    Excluir Locadora
+                </button>
+            </div>
+        </div>
+        
+        <!-- Modal Confirmar Exclusão -->
+        <div class="modal fade" id="deleteTenantModal" tabindex="-1">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-danger">
+              <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold">Confirmar Exclusão Definitiva</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+              </div>
+              <form method="post" action="{% url 'empresas:excluir_locadora' %}">
+                  {% csrf_token %}
+                  <div class="modal-body">
+                    <p>Tem certeza absoluta? Todos os seus dados serão <strong>apagados imediatamente</strong> da plataforma.</p>
+                    <p class="small text-muted">Para confirmar, digite o nome exato da sua locadora: <strong>{{ form.instance.nome }}</strong></p>
+                    <input type="text" name="nome_confirmacao" class="form-control" required placeholder="Digite {{ form.instance.nome }}">
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger fw-bold">Sim, Excluir Tudo</button>
+                  </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
     </div>
 </div>
 
