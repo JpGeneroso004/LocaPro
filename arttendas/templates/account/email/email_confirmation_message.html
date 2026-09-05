@@ -1,0 +1,15 @@
+{% extends "account/email/email_base.html" %}
+
+{% block content %}
+<h2>Bem-vindo(a) ao LocaPro! ⛺</h2>
+<p>Olá,</p>
+<p>Estamos muito felizes em ter você a bordo. O LocaPro foi desenhado para revolucionar a logística da sua empresa de locação.</p>
+<p>Para concluir seu cadastro e validar sua conta, precisamos apenas que confirme seu endereço de e-mail clicando no botão abaixo:</p>
+
+<div style="text-align: center;">
+    <a href="{{ activate_url }}" class="button">Confirmar Meu E-mail</a>
+</div>
+
+<p>Se tiver qualquer dúvida durante a configuração da sua locadora, nossa equipe de suporte está à disposição.</p>
+<p>Vamos juntos!<br>Equipe LocaPro</p>
+{% endblock %}
