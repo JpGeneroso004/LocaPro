@@ -47,3 +47,8 @@ Daqui pra frente, podemos desenvolver features novas, como Automação por Whats
 - **Mass Assignment no Form:** Usuários do Plano Starter conseguiam forçar a habilitação do Programa de Fidelidade (Feature Premium) inspecionando e modificando os requests HTML. Adicionado bloqueio em OrganizacaoForm.clean.
 - **Injeção de Valores Negativos:** Imposta trava absoluta em limpar_moeda() (max(0.0, val)) para prevenir que clientes maliciosos causassem saldo credor ou quebras no DRE (Faturamento) ao injetar valores negativos nos Contratos.
 - **Destravamento do Gateway:** O fluxo de upgrade de plano do SaaS travava se a empresa já tivesse uma intenção de assinatura iniciada; a lógica foi refatorada para permitir o descarte e criação de novas assinaturas de upgrade.
+
+### Deploy e Observabilidade (Setup SaaS)
+- **Sentry:** Taxa de rastreamento ajustada e captura de PII desativada (LGPD).
+- **Logs Centralizados:** Suporte nativo ao Logtail/Better Stack adicionado via variável LOGTAIL_SOURCE_TOKEN.
+- **Uptime Monitor:** Rota /api/health/ criada para monitorar se o PostgreSQL está vivo.

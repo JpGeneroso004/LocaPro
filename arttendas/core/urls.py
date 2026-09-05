@@ -11,8 +11,19 @@ def custom_logout(request):
     logout(request)
     return redirect('/accounts/login/')
 
+from django.http import JsonResponse
+from django.db import connection
+
+def healthcheck(request):
+    try:
+        connection.cursor()
+        return JsonResponse({'status': 'ok', 'db': 'connected'}, status=200)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'details': str(e)}, status=500)
+
 urlpatterns = [
     path('', landing_page, name='home'),
+    path('api/health/', healthcheck, name='healthcheck'),
     path('admin/', admin.site.urls),
     path('eventos/', include('eventos.urls', namespace='eventos')),
     path('inventario/', include('inventario.urls', namespace='inventario')),

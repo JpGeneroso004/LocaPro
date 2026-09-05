@@ -193,19 +193,29 @@ CACHES = {
 }
 
 # Logging mínimo para capturar erros sem travar o sistema
+LOGTAIL_SOURCE_TOKEN = env('LOGTAIL_SOURCE_TOKEN', default=None)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
-        'file': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        },
+        'logtail': {
+            'level': 'INFO',
+            'class': 'logtail.LogtailHandler',
+            'source_token': LOGTAIL_SOURCE_TOKEN,
+        } if LOGTAIL_SOURCE_TOKEN else {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
             'filename': BASE_DIR / 'erros.log',
         },
     },
     'root': {
-        'handlers': ['file'],
-        'level': 'ERROR',
+        'handlers': ['console', 'logtail'] if LOGTAIL_SOURCE_TOKEN else ['console', 'file'],
+        'level': 'INFO',
     },
 }
 
@@ -232,6 +242,6 @@ if SENTRY_DSN:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration()],
-        traces_sample_rate=1.0,
-        send_default_pii=True
+        traces_sample_rate=0.2, # Rastreia performance de 20% das requisições (economia no Free Tier)
+        send_default_pii=False  # Protege dados pessoais (LGPD)
     )
