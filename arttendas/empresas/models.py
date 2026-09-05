@@ -7,7 +7,7 @@ class Organizacao(models.Model):
     telefone = models.CharField('Telefone Principal', max_length=20, blank=True)
     logo = models.ImageField('Logo da Empresa', upload_to='logos/', null=True, blank=True)
     cor_primaria = models.CharField('Cor Principal', max_length=7, default='#004581', help_text='Cor tema da locadora')
-    clausulas_padrao = models.TextField('Cláusulas Padrão do Contrato', blank=True, 
+    clausulas_padrao = models.TextField('Cláusulas Padrão do Contrato', blank=True, default='1. RESPONSABILIDADE DO LOCAL: O Contratante é responsável por autorizações...\n2. FORÇA MAIOR: A Contratada isenta-se...')
     # Campos de SaaS (Assinatura)
     STATUS_ASSINATURA = [
         ('trial', 'Em Teste (Trial)'),
@@ -42,8 +42,6 @@ class Organizacao(models.Model):
     pontos_por_real = models.PositiveIntegerField('Quantos pontos o cliente ganha a cada R$ 1 pago?', default=1)
     taxa_resgate = models.PositiveIntegerField('Quantos pontos equivalem a R$ 1 de desconto?', default=100)
     
-    clausulas_padrao = models.TextField('Cláusulas Padrão do Contrato', blank=True, 
-        default="1. RESPONSABILIDADE DO LOCAL: O Contratante é responsável por autorizações...\n2. FORÇA MAIOR: A Contratada isenta-se...")
     
     # Indique e Ganhe (B2B Referral)
     codigo_indicacao = models.CharField('Código de Indicação', max_length=20, blank=True, unique=True, null=True)
