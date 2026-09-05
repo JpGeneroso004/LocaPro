@@ -31,3 +31,9 @@ Daqui pra frente, podemos desenvolver features novas, como Automação por Whats
 - **Link de WhatsApp:** A tela de impressão do contrato da locadora agora possui um botão para copiar um link seguro (Token único) diretamente para a área de transferência.
 - **Portal do Cliente:** Criada uma página pública ssinatura_cliente responsiva (mobile-first) onde o cliente revisa os dados, o valor e assina. A assinatura registra o IP e a Data/Hora com validade jurídica.
 - **Certificado em PDF:** Quando impresso, o contrato agora exibe a tag de Confirmação Eletrônica com o IP e o Token se já estiver assinado.
+
+### Fase 6: Painel Financeiro (DRE da Locadora) (Concluído)
+- **Dashboard Dedicado:** Criada a rota empresas/financeiro/ que exibe de forma consolidada os ganhos daquele mês.
+- **KPIs em Tempo Real:** Faturamento Bruto do Mês, Sinais Recebidos e Saldo a Receber.
+- **Controle de Assinaturas:** Lista dos contratos faturados no mês acompanhada do seu Status (Assinado vs Pendente).
+- **Navegação Global:** O link para Finanças foi incorporado tanto na barra superior de computadores quanto no menu flutuante inferior dos celulares.

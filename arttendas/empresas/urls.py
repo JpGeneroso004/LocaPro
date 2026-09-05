@@ -10,6 +10,7 @@ urlpatterns = [
     path('equipe/novo/', views.novo_membro, name='novo_membro'),
     path('equipe/editar/<int:pk>/', views.editar_membro, name='editar_membro'),
     path('equipe/remover/<int:pk>/', views.remover_membro, name='remover_membro'),
+    path('financeiro/', views.dashboard_financeiro, name='financeiro'),
     path('assinatura/', views.assinatura, name='assinatura'),
     path('assinatura/processar/', views.processar_assinatura, name='processar_assinatura'),
     path('webhook/asaas/', views.webhook_asaas, name='webhook_asaas'),

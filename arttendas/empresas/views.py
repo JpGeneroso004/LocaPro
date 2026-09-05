@@ -379,3 +379,40 @@ def webhook_asaas(request):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
     return JsonResponse({"error": "Method not allowed"}, status=405)
+
+
+@login_required
+def dashboard_financeiro(request):
+    from django.db.models import Sum, Count
+    from eventos.models import Contrato, Evento
+    from django.utils import timezone
+    import datetime
+
+    hoje = timezone.localdate()
+    mes_atual = hoje.month
+    ano_atual = hoje.year
+
+    contratos_mes = Contrato.objects.filter(
+        evento__data_inicio__month=mes_atual,
+        evento__data_inicio__year=ano_atual,
+        evento__status__in=['agendado', 'em_andamento', 'concluido']
+    )
+
+    faturamento_bruto = sum(c.valor_final for c in contratos_mes if c.valor_final)
+    sinais_recebidos = sum(c.sinal for c in contratos_mes if c.sinal)
+    saldo_a_receber = faturamento_bruto - sinais_recebidos
+
+    contratos_assinados_qtd = contratos_mes.filter(status_assinatura='assinado').count()
+    contratos_pendentes_qtd = contratos_mes.filter(status_assinatura='pendente').count()
+
+    context = {
+        'faturamento_bruto': faturamento_bruto,
+        'sinais_recebidos': sinais_recebidos,
+        'saldo_a_receber': saldo_a_receber,
+        'contratos_assinados_qtd': contratos_assinados_qtd,
+        'contratos_pendentes_qtd': contratos_pendentes_qtd,
+        'mes_atual': hoje.strftime('%B').capitalize(),
+        'ano_atual': ano_atual,
+        'contratos': contratos_mes.order_by('-evento__data_inicio')
+    }
+    return render(request, 'empresas/financeiro.html', context)

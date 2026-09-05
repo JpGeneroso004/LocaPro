@@ -258,6 +258,9 @@
         <li class="nav-item">
           <a class="nav-link fw-bold {% block nav_contratos %}{% endblock %}" href="{% url 'eventos:contratos_lista' %}">Contratos</a>
         </li>
+        <li class="nav-item me-2">
+          <a class="nav-link fw-bold {% block nav_financeiro %}{% endblock %}" href="{% url 'empresas:financeiro' %}">Financeiro</a>
+        </li>
         <li class="nav-item">
           <a class="nav-link fw-bold {% block nav_ia %}{% endblock %}" href="{% url 'assistente_ia:painel' %}">
             <i class="bi bi-robot text-warning"></i> IA do Zap
@@ -343,6 +346,10 @@
   <a href="{% url 'inventario:inventario' %}" class="bottom-nav-item {% block mob_inventario %}{% endblock %}">
     <i class="bi bi-box-seam-fill"></i>
     Estoque
+  </a>
+  <a href="{% url 'empresas:financeiro' %}" class="bottom-nav-item {% block mob_financeiro %}{% endblock %}">
+    <i class="bi bi-wallet2"></i>
+    Finanças
   </a>
   <a href="{% url 'assistente_ia:painel' %}" class="bottom-nav-item {% block mob_ia %}{% endblock %}">
     <i class="bi bi-robot"></i>
