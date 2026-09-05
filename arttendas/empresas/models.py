@@ -82,7 +82,22 @@ class TenantManager(models.Manager):
         qs = super().get_queryset()
         from .middleware import get_current_user
         user = get_current_user()
-        if user and user.is_authenticated and getattr(user, 'organizacao_id', None):
+        
+        # 1. Se não houver requisição (ex: terminal manage.py), retorna tudo.
+        if user is None:
+            return qs
+            
+        # 2. Se for uma requisição de um usuário não autenticado, não deve ver nada.
+        if not user.is_authenticated:
+            return qs.none()
+            
+        # 3. Se for Superuser, deixamos ver tudo (útil para o painel de admin).
+        if user.is_superuser:
+            return qs
+            
+        # 4. Se for usuário normal autenticado, filtra estritamente pela sua organização.
+        if getattr(user, 'organizacao_id', None):
             return qs.filter(organizacao=user.organizacao)
-        # Se for um comando de management (sem request), ou superuser sem tenant, retorna tudo.
-        return qs
+            
+        # 5. Segurança Final: Usuário logado mas sem organização (ex: logou pelo Google mas não criou locadora). NÃO DEVE VER NADA.
+        return qs.none()

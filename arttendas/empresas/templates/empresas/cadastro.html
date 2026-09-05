@@ -79,6 +79,7 @@
             <label for="empresa">Nome da Locadora</label>
           </div>
         
+          {% if not is_google_user %}
           <div class="form-floating mb-3">
             <input type="text" name="nome" class="form-control" id="nome" value="{{ nome|default_if_none:'' }}" required placeholder="João">
             <label for="nome">Seu Nome Completo</label>
@@ -96,12 +97,21 @@
               <i class="bi bi-eye-slash-fill" id="eyeIcon"></i>
             </button>
           </div>
+          {% else %}
+          <div class="alert alert-info border-0 shadow-sm rounded-3">
+            <i class="bi bi-google"></i> Você está usando sua conta Google. Quase lá! Só precisamos do nome da sua Locadora.
+          </div>
+          {% endif %}
 
-          <button type="submit" class="btn btn-brand w-100 fw-bold fs-5 py-3 shadow-sm rounded-3">Criar Minha Conta</button>
+          <button type="submit" class="btn btn-brand w-100 fw-bold fs-5 py-3 shadow-sm rounded-3">
+              {% if is_google_user %}Finalizar Cadastro{% else %}Criar Minha Conta{% endif %}
+          </button>
           
+          {% if not is_google_user %}
           <div class="text-center mt-4">
             <p class="text-muted fw-medium">Já tem uma conta? <a href="/accounts/login/" class="text-decoration-none" style="color: #004581; font-weight: bold;">Faça Login</a></p>
           </div>
+          {% endif %}
       </form>
     </div>
   </div>

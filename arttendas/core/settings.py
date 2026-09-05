@@ -179,3 +179,4 @@ AUTH_USER_MODEL = 'empresas.Usuario'
 # Integração Gateway de Pagamento (Asaas)
 ASAAS_API_KEY = env('ASAAS_API_KEY', default='')
 ASAAS_URL = env('ASAAS_URL', default='https://sandbox.asaas.com/api/v3')
+ASAAS_WEBHOOK_TOKEN = env('ASAAS_WEBHOOK_TOKEN', default='')

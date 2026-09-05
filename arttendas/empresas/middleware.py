@@ -21,10 +21,18 @@ class TenantMiddleware(MiddlewareMixin):
 class LoginRequiredMiddleware(MiddlewareMixin):
     def process_request(self, request):
         path = request.path_info
+        
+        # 1. Redireciona usuários não autenticados para o login
         if not request.user.is_authenticated:
-            allowed = ['/admin', getattr(settings, 'LOGIN_URL', '/accounts/login/'), '/empresas/cadastro', '/accounts/', '/static/', '/media/']
+            allowed = ['/admin', getattr(settings, 'LOGIN_URL', '/accounts/login/'), '/empresas/cadastro', '/empresas/webhook/asaas/', '/accounts/', '/static/', '/media/']
             if not any(path.startswith(p) for p in allowed):
                 return redirect(f"/accounts/login/?next={path}")
+                
+        # 2. Usuário autenticado, mas SEM organização (ex: Logou pelo Google pela primeira vez)
+        elif not getattr(request.user, 'organizacao_id', None) and not request.user.is_superuser:
+            allowed_for_no_tenant = ['/empresas/cadastro', '/accounts/logout', '/static/', '/media/']
+            if not any(path.startswith(p) for p in allowed_for_no_tenant):
+                return redirect('empresas:cadastro')
 
 class BloqueioInadimplenteMiddleware(MiddlewareMixin):
     def process_request(self, request):

@@ -5,26 +5,35 @@ from .models import Organizacao, Usuario
 from django.db import transaction
 
 def cadastro_locadora(request):
-    if request.user.is_authenticated:
+    # Se já está logado E já tem empresa, não precisa cadastrar
+    if request.user.is_authenticated and getattr(request.user, 'organizacao_id', None):
         return redirect('eventos:dashboard')
-
+        
     if request.method == 'POST':
         empresa_nome = request.POST.get('empresa_nome')
         nome = request.POST.get('nome')
         email = request.POST.get('email')
         senha = request.POST.get('senha')
-
-        if not (empresa_nome and nome and email and senha):
-            messages.error(request, 'Preencha todos os campos.')
-            return render(request, 'empresas/cadastro.html', {'empresa_nome': empresa_nome, 'nome': nome, 'email': email})
-            
-        if len(senha) < 6:
-            messages.error(request, 'A senha deve ter pelo menos 6 caracteres.')
-            return render(request, 'empresas/cadastro.html', {'empresa_nome': empresa_nome, 'nome': nome, 'email': email})
-            
-        if Usuario.objects.filter(username=email).exists():
-            messages.error(request, 'Este e-mail já está em uso.')
-            return render(request, 'empresas/cadastro.html', {'empresa_nome': empresa_nome, 'nome': nome, 'email': email})
+        
+        # Se for usuário do Google, ele não precisa enviar email e senha (mas o form pode mandar vazio)
+        is_google_user = request.user.is_authenticated
+        
+        if not is_google_user:
+            if not (empresa_nome and nome and email and senha):
+                messages.error(request, 'Preencha todos os campos.')
+                return render(request, 'empresas/cadastro.html', {'empresa_nome': empresa_nome, 'nome': nome, 'email': email})
+                
+            if len(senha) < 6:
+                messages.error(request, 'A senha deve ter pelo menos 6 caracteres.')
+                return render(request, 'empresas/cadastro.html', {'empresa_nome': empresa_nome, 'nome': nome, 'email': email})
+                
+            if Usuario.objects.filter(username=email).exists():
+                messages.error(request, 'Este e-mail já está em uso.')
+                return render(request, 'empresas/cadastro.html', {'empresa_nome': empresa_nome, 'nome': nome, 'email': email})
+        else:
+            if not empresa_nome:
+                messages.error(request, 'O Nome da Locadora é obrigatório.')
+                return render(request, 'empresas/cadastro.html', {'empresa_nome': empresa_nome})
 
         ref_id = request.GET.get('ref')
         indicado_por = None
@@ -34,20 +43,35 @@ def cadastro_locadora(request):
         try:
             with transaction.atomic():
                 org = Organizacao.objects.create(nome=empresa_nome, indicado_por=indicado_por)
-                user = Usuario.objects.create_user(
-                    username=email,
-                    email=email,
-                    password=senha,
-                    first_name=nome,
-                    organizacao=org
-                )
-            login(request, user)
-            messages.success(request, f'Bem-vindo(a) ao LocaPro, {nome}! Sua conta da empresa {empresa_nome} foi criada.')
+                
+                if is_google_user:
+                    # Associa a locadora ao usuário do Google que já está logado
+                    request.user.organizacao = org
+                    request.user.cargo = 'dono'
+                    request.user.save()
+                    from django.contrib.auth import login
+                    login(request, request.user, backend='django.contrib.auth.backends.ModelBackend') # Keep them logged in
+                else:
+                    # Cria novo usuário tradicional
+                    user = Usuario.objects.create_user(
+                        username=email,
+                        email=email,
+                        password=senha,
+                        first_name=nome,
+                        organizacao=org,
+                        cargo='dono'
+                    )
+                    from django.contrib.auth import authenticate, login
+                    user_auth = authenticate(request, username=email, password=senha)
+                    if user_auth:
+                        login(request, user_auth)
+                        
+            messages.success(request, 'Conta criada com sucesso! Bem-vindo(a).')
             return redirect('eventos:dashboard')
         except Exception as e:
             messages.error(request, f'Erro ao criar conta: {str(e)}')
-
-    return render(request, 'empresas/cadastro.html')
+            
+    return render(request, 'empresas/cadastro.html', {'is_google_user': request.user.is_authenticated})
 
 from django.contrib.auth.decorators import login_required
 from .forms import OrganizacaoForm
@@ -228,6 +252,13 @@ def webhook_asaas(request):
     Deve ser configurado no painel do Asaas apontando para: https://seudominio.com/empresas/webhook/asaas/
     """
     if request.method == 'POST':
+        # Validação de Segurança (Token do Webhook)
+        webhook_token = getattr(settings, 'ASAAS_WEBHOOK_TOKEN', None)
+        if webhook_token:
+            token_recebido = request.headers.get('asaas-access-token')
+            if token_recebido != webhook_token:
+                return JsonResponse({"error": "Token inválido"}, status=403)
+                
         try:
             data = json.loads(request.body)
             event = data.get('event')
