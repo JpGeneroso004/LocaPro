@@ -498,7 +498,8 @@ def salvar_contrato(request, evento_id):
             return redirect('eventos:imprimir_contrato', contrato_id=contrato.id)
             
         except Exception as e:
-            traceback.print_exc()
+            import logging
+            logging.getLogger(__name__).error(traceback.format_exc())
             messages.error(request, f'Erro inesperado ao salvar contrato: {str(e)}')
             return redirect('eventos:detalhe', pk=evento.pk)
 
@@ -567,7 +568,8 @@ def obter_equipamentos_disponiveis(request):
                 return JsonResponse({'sucesso': False, 'erro': 'Intervalo de datas inválido'}, status=400)
         except Exception as e:
             import traceback
-            traceback.print_exc()
+            import logging
+            logging.getLogger(__name__).error(traceback.format_exc())
             return JsonResponse({'sucesso': False, 'erro': str(e)}, status=400)
             
         from django.utils import timezone

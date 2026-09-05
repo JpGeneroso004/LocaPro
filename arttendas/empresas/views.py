@@ -397,7 +397,7 @@ def dashboard_financeiro(request):
     mes_atual = hoje.month
     ano_atual = hoje.year
 
-    contratos_mes = Contrato.objects.filter(
+    contratos_mes = Contrato.objects.select_related('evento').filter(
         evento__data_inicio__month=mes_atual,
         evento__data_inicio__year=ano_atual,
         evento__status__in=['agendado', 'em_andamento', 'concluido']
