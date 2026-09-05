@@ -22,10 +22,32 @@ def webhook_whatsapp(request, org_id):
         # Aqui a IA irá processar a mensagem recebida e enviar de volta
         try:
             payload = json.loads(request.body)
-            # Logica de parsing do payload do WhatsApp seria aqui...
+            # Logica estrutural de parsing (Meta API)
             
-            # Exemplo de salvamento de memória:
-            # MensagemWhatsApp.objects.create(organizacao_id=org_id, telefone_cliente=telefone, mensagem=texto, is_bot=False)
+            # Navega no payload da Meta Cloud API para extrair número e texto
+            # Formato oficial: payload['entry'][0]['changes'][0]['value']['messages'][0]
+            entry = payload.get('entry', [{}])[0]
+            changes = entry.get('changes', [{}])[0]
+            value = changes.get('value', {})
+            messages = value.get('messages', [])
+            
+            if not messages:
+                # Pode ser apenas um status update (entregue/lido)
+                return JsonResponse({"status": "ignorado"})
+                
+            msg = messages[0]
+            telefone_cliente = msg.get('from')
+            texto_recebido = msg.get('text', {}).get('body')
+            
+            if telefone_cliente and texto_recebido:
+                # Dispara a inteligência artificial
+                org = ConfiguracaoIA.objects.get(organizacao_id=org_id).organizacao
+                from .bot import gerar_resposta_ia
+                
+                # O ideal num servidor em produção seria jogar isso no Celery (delay),
+                # mas vamos invocar de forma síncrona/thread para manter arquitetura inicial simples
+                import threading
+                threading.Thread(target=gerar_resposta_ia, args=(org, telefone_cliente, texto_recebido)).start()
             
             return JsonResponse({"status": "recebido"})
         except Exception as e:

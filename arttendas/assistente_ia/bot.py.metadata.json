@@ -1,0 +1,4 @@
+{
+  "summary":  "Módulo Core da Inteligência Artificial do Assistente. Ele lê o banco de dados (estoque e preços da locadora), constrói o prompt injetando a personalidade definida pela empresa, e utiliza a SDK oficial do Gemini (Google) para gerar uma resposta humana focada em conversão.",
+  "updatedAt":  "2026-09-05T22:38:58.967703Z"
+}

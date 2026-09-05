@@ -52,3 +52,7 @@ Daqui pra frente, podemos desenvolver features novas, como Automação por Whats
 - **Sentry:** Taxa de rastreamento ajustada e captura de PII desativada (LGPD).
 - **Logs Centralizados:** Suporte nativo ao Logtail/Better Stack adicionado via variável LOGTAIL_SOURCE_TOKEN.
 - **Uptime Monitor:** Rota /api/health/ criada para monitorar se o PostgreSQL está vivo.
+
+### Módulo de IA (Assistente de WhatsApp)
+- **Integração Gemini SDK:** Implementado script ot.py que puxa o estoque real da locadora e usa LLM para responder clientes.
+- **Webhook Assíncrono:** Django configurado para escutar a API da Meta, extrair o texto via payload do WhatsApp Cloud API, e disparar o Bot em uma nova Thread.
