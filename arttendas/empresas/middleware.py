@@ -42,6 +42,7 @@ class BloqueioInadimplenteMiddleware(MiddlewareMixin):
             # Rotas permitidas mesmo se bloqueado
             allowed = [
                 '/empresas/assinatura/', 
+                '/empresas/configuracoes/excluir/',
                 '/admin/logout/', 
                 '/accounts/logout/'
             ]

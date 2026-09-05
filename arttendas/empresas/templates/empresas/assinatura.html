@@ -328,6 +328,15 @@ input:checked ~ .toggle-labels .label-anual { color: #fff; }
         </div>
     </div>
     
+    <!-- Botão de Voltar ou Cancelar Assinatura (LGPD) -->
+    <div class="mt-5 mb-5 text-center">
+        <a href="{% url 'eventos:dashboard' %}" class="btn btn-outline-secondary px-4"><i class="bi bi-arrow-left"></i> Voltar ao Painel</a>
+        <br>
+        <a href="{% url 'empresas:configuracoes' %}#danger-zone" class="text-danger small mt-4 d-inline-block text-decoration-none">
+            <i class="bi bi-trash"></i> Encerrar conta e apagar todos os meus dados (LGPD)
+        </a>
+    </div>
+
 </div>
 
 <script>

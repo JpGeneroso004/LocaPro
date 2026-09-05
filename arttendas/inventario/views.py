@@ -144,9 +144,14 @@ def editar_tenda(request, pk):
 def excluir_tenda(request, pk):
     tenda = get_object_or_404(Tenda, pk=pk)
     if request.method == 'POST':
-        cod = tenda.codigo
-        tenda.delete()
-        messages.success(request, f'Tenda {cod} removida com sucesso!')
+        # BLINDAGEM: Impedir deleção se a tenda estiver atrelada a eventos ativos/futuros
+        em_uso = tenda.eventos.filter(status__in=['agendado', 'em_andamento']).exists()
+        if em_uso:
+            messages.error(request, f'Erro: A Tenda {tenda.codigo} não pode ser excluída pois está reservada ou em uso em um evento ativo.')
+        else:
+            cod = tenda.codigo
+            tenda.delete()
+            messages.success(request, f'Tenda {cod} removida com sucesso!')
     return redirect('inventario:inventario')
 
 
@@ -184,7 +189,11 @@ def editar_conjunto(request, pk):
 def excluir_conjunto(request, pk):
     conjunto = get_object_or_404(ConjuntoPalco, pk=pk)
     if request.method == 'POST':
-        nome = conjunto.nome
-        conjunto.delete()
-        messages.success(request, f'Conjunto "{nome}" removido com sucesso!')
+        em_uso = conjunto.eventos.filter(status__in=['agendado', 'em_andamento']).exists()
+        if em_uso:
+            messages.error(request, f'Erro: O Conjunto "{conjunto.nome}" não pode ser excluído pois está reservado ou em uso em um evento ativo.')
+        else:
+            nome = conjunto.nome
+            conjunto.delete()
+            messages.success(request, f'Conjunto "{nome}" removido com sucesso!')
     return redirect('inventario:inventario')
