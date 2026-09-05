@@ -32,3 +32,30 @@ def webhook_whatsapp(request, org_id):
             return JsonResponse({"erro": str(e)}, status=400)
     
     return JsonResponse({"erro": "Método não permitido"}, status=405)
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def painel_ia(request):
+    if request.user.cargo != "dono":
+        return redirect("eventos:dashboard")
+    
+    config, _ = ConfiguracaoIA.objects.get_or_create(
+        organizacao=request.user.organizacao,
+        defaults={
+            "bot_ativo": False,
+            "numero_whatsapp": "",
+        }
+    )
+    
+    if request.method == "POST":
+        config.bot_ativo = request.POST.get("bot_ativo") == "on"
+        config.numero_whatsapp = request.POST.get("numero_whatsapp")
+        config.nome_assistente = request.POST.get("nome_assistente")
+        config.prompt_personalidade = request.POST.get("prompt_personalidade")
+        config.save()
+        return redirect("assistente_ia:painel")
+        
+    return render(request, "assistente_ia/painel.html", {"config": config})
+

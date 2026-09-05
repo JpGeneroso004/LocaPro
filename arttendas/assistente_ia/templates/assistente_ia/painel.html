@@ -1,0 +1,77 @@
+﻿{% extends "base.html" %}
+{% block title %}Assistente IA{% endblock %}
+{% block nav_ia %}active{% endblock %}
+{% block mob_ia %}active{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row align-items-center mb-4">
+        <div class="col">
+            <h2 class="fw-bold"><i class="bi bi-robot text-primary"></i> Assistente de Inteligência Artificial</h2>
+            <p class="text-muted">Configure o cérebro do seu vendedor autônomo no WhatsApp.</p>
+        </div>
+        <div class="col-auto">
+            {% if config.bot_ativo %}
+                <span class="badge bg-success p-2 fs-6"><i class="bi bi-circle-fill text-white opacity-75"></i> ROBÔ ATIVO</span>
+            {% else %}
+                <span class="badge bg-secondary p-2 fs-6"><i class="bi bi-pause-circle"></i> ROBÔ PAUSADO</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <h5 class="fw-bold border-bottom pb-2 mb-3">Conexão WhatsApp</h5>
+                        
+                        <div class="form-check form-switch fs-5 mb-4">
+                            <input class="form-check-input" type="checkbox" role="switch" id="botAtivo" name="bot_ativo" {% if config.bot_ativo %}checked{% endif %}>
+                            <label class="form-check-label fw-bold" for="botAtivo">Habilitar Robô no WhatsApp</label>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Número Conectado (Ex: 5561998542025)</label>
+                                <input type="text" name="numero_whatsapp" class="form-control" value="{{ config.numero_whatsapp }}" placeholder="5511999999999">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nome do Robô</label>
+                                <input type="text" name="nome_assistente" class="form-control" value="{{ config.nome_assistente }}" placeholder="Ex: João da LocaPro">
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold border-bottom pb-2 mb-3 mt-5">O Cérebro (Comportamento e Regras)</h5>
+                        <p class="small text-muted">Escreva aqui como o robô deve se comportar, negociar e responder aos seus clientes. Ele seguirá isso à risca.</p>
+                        
+                        <div class="mb-4">
+                            <textarea name="prompt_personalidade" class="form-control font-monospace bg-light" rows="10">{{ config.prompt_personalidade }}</textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold">Salvar Configurações da Inteligência</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 bg-primary bg-gradient text-white mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-lightning-charge-fill text-warning"></i> Como o robô opera?</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-warning"></i> <strong>Lê a Agenda:</strong> Ele verifica sozinho se a tenda está livre na data.</li>
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-warning"></i> <strong>Gera Contratos:</strong> Ele cria o evento no sistema e manda o PDF pro cliente.</li>
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-warning"></i> <strong>Recebe PIX:</strong> Ele envia a chave PIX e confirma o recebimento.</li>
+                    </ul>
+                    <hr class="opacity-25">
+                    <p class="small mb-0">Status da API Neural: <span class="badge bg-success">Aguardando Conexão</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
