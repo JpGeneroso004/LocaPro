@@ -1,0 +1,18 @@
+﻿{
+  "name": "LocaPro SaaS",
+  "short_name": "LocaPro",
+  "description": "Sistema de Gestão para Locadoras",
+  "start_url": "/eventos/",
+  "display": "standalone",
+  "background_color": "#004581",
+  "theme_color": "#004581",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2721/2721121.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

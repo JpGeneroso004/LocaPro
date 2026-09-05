@@ -5,6 +5,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>{% block title %}LocaPro{% endblock %} | SaaS de Locação</title>
+  
+  <!-- Configurações de PWA (Instalar como App) -->
+  <link rel="manifest" href="{% static 'manifest.json' %}">
+  <meta name="theme-color" content="{{ user.organizacao.cor_primaria|default:'#004581' }}">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2721/2721121.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <script>
     const theme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-bs-theme', theme);
@@ -385,5 +393,15 @@
   });
 </script>
 {% block extra_scripts %}{% endblock %}
+  <!-- Registro do Service Worker (PWA) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('{% static "sw.js" %}', { scope: '/' })
+          .then(registration => console.log('PWA ServiceWorker registrado com sucesso'))
+          .catch(err => console.log('Falha ao registrar PWA ServiceWorker', err));
+      });
+    }
+  </script>
 </body>
 </html>

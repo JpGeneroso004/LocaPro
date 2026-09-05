@@ -45,6 +45,9 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_SESSION_REMEMBER = True # Fixação de Conta Automática (Manter Logado)
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30 # 30 dias de sessão persistente
+
 SOCIALACCOUNT_ADAPTER = 'empresas.adapters.MySocialAccountAdapter'
 LOGIN_REDIRECT_URL = '/eventos/'
 
