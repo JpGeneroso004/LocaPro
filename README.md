@@ -1,80 +1,81 @@
-# 🚀 LocaPro — SaaS de Gestão para Locadoras de Estruturas
+# ⛺ LocaPro — SaaS de Gestão para Locadoras de Estruturas
 
-LocaPro (antigo Art.Tendas) é uma plataforma SaaS (Software as a Service) moderna, focada em resolver os maiores desafios logísticos e de gestão financeira de empresas de locação de tendas, palcos, pisos e infraestrutura para eventos.
-
----
-
-## 🎯 O que o LocaPro resolve?
-Gestão de locação é complexa: choques de datas, controle de inventário distribuído e contratos mal redigidos geram prejuízos constantes. O LocaPro atua como o sistema nervoso central da sua locadora, permitindo:
-
-- **Controle de Estoque Inteligente:** Saiba exatamente quantas tendas e placas estão disponíveis, em uso ou em manutenção em qualquer data.
-- **Gestão de Eventos em Mapa:** Visualize logisticamente onde estão suas montagens via integração com OpenStreetMap.
-- **Contratos Automatizados:** Gere contratos em PDF instantaneamente com regras de negócio blindadas.
-- **Faturamento e Cobrança Integrados:** Integração direta com gateway de pagamento para emissão de cobranças e assinaturas.
-- **Programa de Fidelidade (LocaPoints):** Gamificação B2B onde clientes ganham pontos por aluguéis e trocam por descontos (aumentando a retenção).
+O **LocaPro** (anteriormente Art.Tendas) é uma plataforma SaaS (Software as a Service) de nível empresarial, projetada arquitetonicamente para resolver os maiores gargalos logísticos, contratuais e financeiros de empresas de locação de tendas, palcos e estruturas para eventos.
 
 ---
 
-## 🏢 Arquitetura Multi-Tenant
-O LocaPro foi projetado para rodar na Nuvem e atender centenas de locadoras simultaneamente com **isolamento de dados rigoroso** (Tenant Isolation).
-- Cada locadora (Organização) possui seu próprio ambiente seguro.
-- Funcionários só visualizam clientes, eventos e estoques pertencentes à sua empresa.
-- Sistema de faturamento por assinatura automatizado (integração Asaas).
+## 🚀 Principais Features e Diferenciais do Produto
+
+O sistema vai muito além de um simples CRUD. Ele atua como o sistema nervoso central da locadora:
+
+*   **🛡️ Arquitetura Multi-Tenant Rigorosa:** Um único servidor suporta múltiplas empresas. Os dados são totalmente isolados via `TenantManager` customizado, garantindo que nenhum vazamento de informações (IDOR) ocorra entre locadoras.
+*   **🧠 Motor Inteligente de Estoque (com Cache):** O algoritmo varre o banco de dados e calcula sobreposições de datas (incluindo *buffers* logísticos de 24h). Integrado com `django.core.cache` (Memcached local) para checagens de disponibilidade ultrarrápidas (aliviando queries complexas no banco).
+*   **✍️ Contratos com Assinatura Eletrônica:** Geração em tempo real do layout do contrato. Conta com uma rota pública *mobile-first* (`/assinatura/`) que permite envio pelo WhatsApp, capturando aceite jurídico (IP + Data) e exibindo QR Code PIX instantâneo.
+*   **📊 DRE Financeiro Integrado:** Dashboard em tempo real mostrando Faturamento Bruto Anual (YTD), adiantamentos (Sinal recebido), balanço a receber e inadimplências. Totalmente protegido contra problemas de N+1 queries (`select_related`).
+*   **📍 Logística Espacial (Geocoding):** Conversão assíncrona (`threading`) de endereços de eventos em coordenadas geográficas via OpenStreetMap, gerando mapas interativos para a equipe de montagem via Leaflet.js.
+*   **💸 Assinaturas e Webhooks de Cobrança:** Integração completa com o gateway de pagamentos ASAAS. Criação automatizada de `Customers`, `Subscriptions` e `Webhooks` seguros (validação via Token) que bloqueiam automaticamente o acesso de locadoras inadimplentes usando Middlewares.
+*   **🏆 Programa de Fidelidade (B2B):** Sistema de acúmulo e resgate de pontos (LocaPoints) permitindo *cashback* e retenção de longo prazo.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
-- **Backend:** Python + Django 4
-- **Banco de Dados:** PostgreSQL (via Tenant Isolation)
-- **Frontend:** HTML5, CSS3, JavaScript (Leaflet.js para Mapas)
-- **Integrações:** Asaas (Gateway de Pagamentos API v3), OpenStreetMap (Geocoding)
-- **Cloud/Infra (Recomendado):** AWS S3 (armazenamento estático), Redis (Cache), Celery (Tarefas Assíncronas)
+## 🛠️ Stack Tecnológico e Observabilidade
+
+O projeto atingiu maturidade de produção e conta com as melhores práticas para Cloud:
+
+*   **Backend:** Python 3.10+ e Django 4.2+
+*   **Banco de Dados:** PostgreSQL
+*   **Serviços de Produção:** Gunicorn (App Server), WhiteNoise (Assets Estáticos rápidos)
+*   **Frontend:** Bootstrap 5, Leaflet.js
+*   **Observabilidade 24/7:**
+    *   **Sentry SDK:** Captura de exceções e erros 500 silenciosos, otimizado para não ferir a LGPD (`send_default_pii=False`).
+    *   **Logtail (Better Stack):** Injeção em nuvem dos arquivos de `logging` padronizados, sem necessidade de acessar o terminal.
+    *   **Healthchecks:** Rota `/api/health/` para rastreamento de tempo de atividade (Uptime Kuma).
 
 ---
 
-## 🚀 Como Rodar o Ambiente de Desenvolvimento
-
-### Pré-requisitos
-- Python 3.10+
-- PostgreSQL (opcional para testes simples, mas obrigatório em produção)
-
-### Instalação
+## 💻 Como Rodar (Ambiente de Desenvolvimento)
 
 ```bash
-# Entrar na pasta do projeto django
+# 1. Entre na pasta do projeto
 cd arttendas
 
-# Criar e ativar ambiente virtual
+# 2. Crie e ative o ambiente virtual
 python -m venv venv
-source venv/bin/activate          # Linux/Mac
-# ou: venv\Scripts\activate       # Windows
+source venv/bin/activate          # No Linux/Mac
+# venv\Scripts\activate           # No Windows
 
-# Instalar dependências
+# 3. Instale as dependências
 pip install -r requirements.txt
 
-# Configurar Variáveis de Ambiente
-# Crie um arquivo .env na pasta raiz (baseado no .env.example) com as credenciais do Asaas, DB, etc.
+# 4. Configure as Variáveis de Ambiente (.env na raiz)
+# Exemplo de chaves necessárias:
+# SECRET_KEY=sua-chave-aqui
+# DEBUG=True
+# DATABASE_URL=postgres://user:pass@localhost:5432/locapro (Opcional no local)
+# ASAAS_API_KEY=sua-chave-api-asaas
+# ASAAS_WEBHOOK_TOKEN=seu-token-asaas
+# SENTRY_DSN=sua-url-sentry
+# LOGTAIL_SOURCE_TOKEN=seu-token-logtail
 
-# Executar Migrations
+# 5. Aplique o Banco de Dados (SQLite ou Postgres)
 python manage.py makemigrations
 python manage.py migrate
 
-# Iniciar servidor
+# 6. Inicie o Servidor
 python manage.py runserver
 ```
 
-Acesse: **http://127.0.0.1:8000** e cadastre sua primeira locadora!
+Acesse **http://127.0.0.1:8000** no seu navegador.
 
 ---
 
-## 📈 Roadmap de Engenharia (SaaS)
-- [x] Isolamento Crítico de Sessões (Middlewares Multi-tenant Seguros)
-- [x] Constraints Dinâmicas de Banco de Dados (Prevenção contra Dados Órfãos)
-- [x] Integração de Assinaturas Asaas (Webhooks Seguros)
-- [ ] Configuração S3 via `django-storages` para Mídias Cloud-Ready
-- [ ] Otimização de Geocoding (Mover API do OSM para Workers Celery)
-- [ ] Dashboard Avançado de BI para Administradores do SaaS
+## ☁️ Deploy (Produção)
+
+O repositório já está configurado para provedores de **PaaS** (Platform as a Service) modernos, como **Railway.app**, **Render** ou **Heroku**.
+
+1. Conecte sua conta GitHub à plataforma desejada.
+2. O arquivo `Procfile` nativo (na pasta `arttendas`) fará a inicialização via `Gunicorn`.
+3. Certifique-se de preencher a variável `DATABASE_URL` no painel do servidor, além das demais variáveis de integração. O `WhiteNoise` assumirá a entrega dos arquivos CSS/JS.
 
 ---
-
-*Desenvolvido para revolucionar a gestão de locadoras de eventos no Brasil.*
+*Engenharia rigorosa. Desenhado para ser o padrão nacional na gestão de infraestruturas.*
