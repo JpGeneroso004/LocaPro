@@ -24,7 +24,7 @@
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">CNPJ</label>
+                                <label class="form-label fw-bold">CNPJ / ID Fiscal</label>
                                 {{ form.cnpj }}
                             </div>
                             <div class="col-md-6 mb-3">
@@ -33,6 +33,30 @@
                             </div>
                         </div>
 
+                        <!-- LOCALIZAÇÃO GLOBAL -->
+                        <h5 class="fw-bold text-primary mt-4 mb-3 border-bottom pb-2">Localização Global (Internacional)</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">País</label>
+                                {{ form.pais }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Moeda Operacional</label>
+                                {{ form.moeda }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Cidade Sede</label>
+                                {{ form.cidade }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Estado / Província</label>
+                                {{ form.estado }}
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold text-primary mt-4 mb-3 border-bottom pb-2">Identidade Visual</h5>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Logo da Empresa</label>

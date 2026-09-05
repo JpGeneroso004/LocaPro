@@ -250,10 +250,10 @@
           CPF:
         </div>
       </div>
-      
-      <p style="text-align: center; margin-top: 40px; font-size: 0.9em;">
-        Formosa - GO, {% now "d \d\e F \d\e Y" %}.
-      </p>
+            <!-- Data e Assinaturas -->
+        <div class="mt-5 text-end">
+            {{ request.user.organizacao.cidade|default:"[Sua Cidade]" }} - {{ request.user.organizacao.estado|default:"[Seu Estado]" }}, {% now "d \d\e F \d\e Y" %}.
+        </div>
 
     </div>
   </div>

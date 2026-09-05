@@ -37,7 +37,7 @@ class Evento(models.Model):
     numero     = models.CharField('Número', max_length=20, default='')
     setor      = models.CharField('Setor/Bairro', max_length=100, default='')
     complemento= models.CharField('Complemento', max_length=150, blank=True)
-    cidade     = models.CharField('Cidade', max_length=100, default='Formosa')
+    cidade     = models.CharField('Cidade', max_length=100, blank=True)
     latitude   = models.DecimalField('Latitude',  max_digits=10, decimal_places=7, null=True, blank=True)
     longitude  = models.DecimalField('Longitude', max_digits=10, decimal_places=7, null=True, blank=True)
     data_inicio = models.DateField('Data de Início')
