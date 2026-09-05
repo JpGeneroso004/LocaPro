@@ -49,8 +49,8 @@ def inventario(request):
             else:
                 chapeu_disponiveis += 1
 
-    # Conjuntos de palco/piso
-    conjuntos = list(ConjuntoPalco.objects.all())
+    # Conjuntos de palco/piso ativos
+    conjuntos = list(ConjuntoPalco.objects.exclude(status='baixado').order_by('quantidade_placas'))
     total_placas = sum(c.quantidade_placas for c in conjuntos)
     placas_em_uso = 0
     placas_manutencao = 0
@@ -58,6 +58,10 @@ def inventario(request):
     conjuntos_em_uso = 0
     conjuntos_manutencao = 0
     conjuntos_disponiveis = 0
+    
+    # Itens arquivados/baixados para auditoria
+    tendas_baixadas = list(Tenda.objects.filter(status='baixado').order_by('-id'))
+    conjuntos_baixados = list(ConjuntoPalco.objects.filter(status='baixado').order_by('-id'))
 
     for c in conjuntos:
         if c.status == 'manutencao':
@@ -106,6 +110,8 @@ def inventario(request):
         'conjuntos_disponiveis': conjuntos_disponiveis,
         'conjuntos_em_uso': conjuntos_em_uso,
         'conjuntos_manutencao': conjuntos_manutencao,
+        'tendas_baixadas': tendas_baixadas,
+        'conjuntos_baixados': conjuntos_baixados,
     }
     return render(request, 'inventario/inventario.html', context)
 

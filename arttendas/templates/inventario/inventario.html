@@ -24,6 +24,9 @@
   <li class="nav-item" role="presentation">
     <button class="nav-link rounded-pill fw-bold" data-bs-toggle="pill" data-bs-target="#palcos" type="button">Palcos/Pisos</button>
   </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link rounded-pill fw-bold text-secondary" data-bs-toggle="pill" data-bs-target="#baixados" type="button"><i class="bi bi-archive"></i> Arquivo</button>
+  </li>
 </ul>
 
 <div class="tab-content" id="pills-tabContent">
@@ -94,6 +97,41 @@
           <i class="bi bi-grid-3x3 fs-1 mb-2"></i>
           <p>Nenhum conjunto cadastrado.</p>
         </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- BAIXADOS / ARQUIVO TAB -->
+  <div class="tab-pane fade" id="baixados" role="tabpanel">
+    
+    <h5 class="fw-bold text-muted mb-3"><i class="bi bi-tent"></i> Tendas Baixadas / Vendidas</h5>
+    <div class="row g-3 mb-5">
+      {% for tenda in tendas_baixadas %}
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card p-3 shadow-sm h-100 border-start border-4 border-secondary bg-body-tertiary opacity-75">
+            <h5 class="fw-bold text-decoration-line-through mb-2 text-muted">{{ tenda.codigo }}</h5>
+            <p class="mb-1 small text-muted"><i class="bi bi-arrows-fullscreen"></i> {{ tenda.get_tamanho_display }}</p>
+            <p class="mb-2 small text-muted"><i class="bi bi-tags"></i> {{ tenda.get_tipo_display }}</p>
+            <span class="badge bg-secondary w-100 py-2 mt-auto"><i class="bi bi-archive-fill"></i> Arquivada</span>
+          </div>
+        </div>
+      {% empty %}
+        <div class="col-12 text-muted small"><p>Nenhuma tenda no histórico.</p></div>
+      {% endfor %}
+    </div>
+
+    <h5 class="fw-bold text-muted mb-3"><i class="bi bi-grid-3x3"></i> Palcos/Pisos Baixados</h5>
+    <div class="row g-3">
+      {% for c in conjuntos_baixados %}
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card p-3 shadow-sm h-100 border-start border-4 border-secondary bg-body-tertiary opacity-75">
+            <h5 class="fw-bold text-decoration-line-through mb-2 text-muted">{{ c.nome }}</h5>
+            <h3 class="fw-bold text-center my-3 text-muted opacity-50">{{ c.quantidade_placas }} <span class="fs-6 fw-normal">placas</span></h3>
+            <span class="badge bg-secondary w-100 py-2 mt-auto"><i class="bi bi-archive-fill"></i> Arquivado</span>
+          </div>
+        </div>
+      {% empty %}
+        <div class="col-12 text-muted small"><p>Nenhum conjunto no histórico.</p></div>
       {% endfor %}
     </div>
   </div>

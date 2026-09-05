@@ -59,8 +59,8 @@ def dashboard(request):
     tendas_manutencao = Tenda.objects.filter(status='manutencao').count()
     tendas_disponiveis = total_tendas - tendas_em_uso - tendas_manutencao
 
-    # Considerar conjuntos globais da locadora
-    todos_conjuntos = ConjuntoPalco.objects.all()
+    # Considerar conjuntos globais da locadora (exceto baixados)
+    todos_conjuntos = ConjuntoPalco.objects.exclude(status='baixado')
     total_placas = sum(c.quantidade_placas for c in todos_conjuntos)
     
     # Placas em uso HOJE
