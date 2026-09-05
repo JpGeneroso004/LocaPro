@@ -4,9 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>{% block title %}LocaPro{% endblock %} | SaaS de Locação</title>
+  <title>{% block title %}LocaPro{% endblock %} | LocaPro SaaS</title>
   
   <!-- Configurações de PWA (Instalar como App) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>⛺</text></svg>">
   <link rel="manifest" href="{% static 'manifest.json' %}">
   <meta name="theme-color" content="{{ user.organizacao.cor_primaria|default:'#004581' }}">
   <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2721/2721121.png">
