@@ -12,6 +12,7 @@
   </div>
 </div>
 
+{% if user.cargo == 'dono' or user.cargo == 'gerente' %}
 <div class="row g-2 mb-3">
   <div class="col-6">
     <div class="card h-100 bg-success text-white p-3 shadow-sm border-0">
@@ -26,9 +27,11 @@
     </div>
   </div>
 </div>
+{% endif %}
 
 <!-- NOVAS MÉTRICAS DE BI (Business Intelligence) -->
 <div class="row g-2 mb-4">
+  {% if user.cargo == 'dono' or user.cargo == 'gerente' %}
   <div class="col-md-6">
     <div class="card h-100 bg-primary bg-gradient text-white p-3 shadow-sm border-0 position-relative overflow-hidden">
       <i class="bi bi-graph-up-arrow position-absolute" style="font-size: 4rem; opacity: 0.2; right: -10px; bottom: -10px;"></i>
@@ -37,6 +40,7 @@
       <small class="mt-2 text-white"><i class="bi bi-calendar-check"></i> Receita total gerada no ano atual.</small>
     </div>
   </div>
+  {% endif %}
   <div class="col-md-6">
     <div class="card h-100 bg-light p-3 shadow-sm border-0 border-start border-4 border-warning">
       <small class="fw-bold text-muted text-uppercase">Material Mais Lucrativo</small>

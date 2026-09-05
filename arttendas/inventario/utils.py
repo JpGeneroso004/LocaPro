@@ -23,6 +23,8 @@ def verificar_disponibilidade_item(item, data_montagem_nova, data_desmontagem_no
     
     if item.status == 'manutencao':
         return False, f"O item {nome_item} está em manutenção."
+    if item.status == 'baixado':
+        return False, f"O item {nome_item} foi descartado/vendido e não pode ser agendado."
 
     filtros = Q(status__in=['agendado', 'em_andamento'])
     if isinstance(item, Tenda):

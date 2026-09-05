@@ -41,6 +41,7 @@ class Tenda(models.Model):
     STATUS = [
         ('ativo', 'Ativo'),
         ('manutencao', 'Em Manutenção'),
+        ('baixado', 'Descartado/Vendido'),
     ]
 
     codigo    = models.CharField('Código', max_length=20)
@@ -86,6 +87,7 @@ class ConjuntoPalco(models.Model):
     STATUS = [
         ('ativo', 'Ativo'),
         ('manutencao', 'Em Manutenção'),
+        ('baixado', 'Descartado/Vendido'),
     ]
 
     nome             = models.CharField('Nome do Conjunto', max_length=100)

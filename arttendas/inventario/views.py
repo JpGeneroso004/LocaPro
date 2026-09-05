@@ -18,7 +18,7 @@ def inventario(request):
     tendas_ids_em_uso = set(tid for tid in eventos_hoje.values_list('tendas__id', flat=True) if tid)
     conjuntos_ids_em_uso = set(cid for cid in eventos_hoje.values_list('conjuntos__id', flat=True) if cid)
 
-    tendas = list(Tenda.objects.all().order_by('tamanho', 'tipo', 'codigo'))
+    tendas = list(Tenda.objects.exclude(status='baixado').order_by('tamanho', 'tipo', 'codigo'))
     
     total_tendas = len(tendas)
     tendas_em_uso = 0
@@ -149,9 +149,15 @@ def excluir_tenda(request, pk):
         if em_uso:
             messages.error(request, f'Erro: A Tenda {tenda.codigo} não pode ser excluída pois está reservada ou em uso em um evento ativo.')
         else:
-            cod = tenda.codigo
-            tenda.delete()
-            messages.success(request, f'Tenda {cod} removida com sucesso!')
+            # Soft Delete if it has historical events
+            if tenda.eventos.exists():
+                tenda.status = "baixado"
+                tenda.save()
+                messages.warning(request, f'A Tenda {tenda.codigo} possui histórico de eventos passados e foi movida para Descartada/Vendida (para auditoria) ao invés de apagada.')
+            else:
+                cod = tenda.codigo
+                tenda.delete()
+                messages.success(request, f'Tenda {cod} removida permanentemente com sucesso!')
     return redirect('inventario:inventario')
 
 
@@ -193,7 +199,12 @@ def excluir_conjunto(request, pk):
         if em_uso:
             messages.error(request, f'Erro: O Conjunto "{conjunto.nome}" não pode ser excluído pois está reservado ou em uso em um evento ativo.')
         else:
-            nome = conjunto.nome
-            conjunto.delete()
-            messages.success(request, f'Conjunto "{nome}" removido com sucesso!')
+            if conjunto.eventos.exists():
+                conjunto.status = "baixado"
+                conjunto.save()
+                messages.warning(request, f'O Conjunto "{conjunto.nome}" possui histórico de eventos passados e foi movido para Descartado/Vendido (para auditoria).')
+            else:
+                nome = conjunto.nome
+                conjunto.delete()
+                messages.success(request, f'Conjunto "{nome}" removido permanentemente com sucesso!')
     return redirect('inventario:inventario')
