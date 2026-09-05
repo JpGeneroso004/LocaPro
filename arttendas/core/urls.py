@@ -5,13 +5,14 @@ from django.conf.urls.static import static
 from django.shortcuts import redirect
 
 from django.contrib.auth import logout
+from core.views import landing_page
 
 def custom_logout(request):
     logout(request)
     return redirect('/accounts/login/')
 
 urlpatterns = [
-    path('', lambda request: redirect('eventos:dashboard'), name='home'),
+    path('', landing_page, name='home'),
     path('admin/', admin.site.urls),
     path('eventos/', include('eventos.urls', namespace='eventos')),
     path('inventario/', include('inventario.urls', namespace='inventario')),

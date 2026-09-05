@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocaPro | O Software Definitivo para Locadoras de Estruturas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; }
+        .hero { background: linear-gradient(135deg, #002240 0%, #004581 100%); color: white; padding: 100px 0 80px; }
+        .hero h1 { font-weight: 900; font-size: 3.5rem; letter-spacing: -1px; }
+        .hero p { font-size: 1.25rem; opacity: 0.9; }
+        .btn-cta { background-color: #FFD600; color: #000; font-weight: bold; border: none; padding: 15px 30px; font-size: 1.1rem; border-radius: 50px; transition: transform 0.2s; }
+        .btn-cta:hover { transform: scale(1.05); background-color: #FFC107; color: #000; }
+        .feature-card { border: none; border-radius: 15px; transition: transform 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .feature-card:hover { transform: translateY(-10px); }
+        .feature-icon { font-size: 2.5rem; color: #004581; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-transparent position-absolute w-100">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-3" href="#"><i class="bi bi-box-seam"></i> LocaPro</a>
+            <div class="d-flex">
+                <a href="/accounts/login/" class="btn btn-outline-light rounded-pill px-4 me-2 fw-bold">Entrar</a>
+                <a href="/empresas/cadastro/" class="btn btn-cta px-4 py-2">Começar Grátis</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero text-center">
+        <div class="container">
+            <h1 class="mb-4">Escale sua Locadora de Tendas sem perder o controle.</h1>
+            <p class="mb-5 mx-auto" style="max-width: 700px;">
+                Chega de planilhas confusas e pranchetas perdidas. Gestão de estoque, contratos com QR Code PIX, 
+                agendas inteligentes e Inteligência Artificial integrados em uma única plataforma.
+            </p>
+            <a href="/empresas/cadastro/" class="btn btn-cta shadow-lg"><i class="bi bi-rocket-takeoff-fill"></i> Iniciar Teste de 7 Dias Grátis</a>
+            <div class="mt-4 opacity-75 small">Nenhum cartão de crédito necessário. Configuração em 2 minutos.</div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5">
+        <div class="container py-5">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">A Suíte Executiva da sua Locadora</h2>
+                <p class="text-muted">Desenhado para empresas que faturam alto e não podem errar.</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 p-4 text-center">
+                        <i class="bi bi-calendar2-week feature-icon"></i>
+                        <h4 class="fw-bold">Agenda Visual Anti-Conflito</h4>
+                        <p class="text-muted">Nunca mais alugue a mesma tenda para dois eventos no mesmo dia. O sistema bloqueia materiais em uso automaticamente.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 p-4 text-center">
+                        <i class="bi bi-file-earmark-pdf feature-icon"></i>
+                        <h4 class="fw-bold">Contratos em 1 Clique (com PIX)</h4>
+                        <p class="text-muted">Gere contratos jurídicos perfeitamente formatados em PDF com QR Code PIX embutido para pagamento imediato.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 p-4 text-center">
+                        <i class="bi bi-graph-up-arrow feature-icon"></i>
+                        <h4 class="fw-bold">Business Intelligence</h4>
+                        <p class="text-muted">Acompanhe seu faturamento YTD, materiais mais rentáveis e tenha previsibilidade de caixa na tela inicial.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white-50 text-center py-4">
+        <div class="container">
+            <p class="mb-0">&copy; 2026 LocaPro SaaS. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+</body>
+</html>
