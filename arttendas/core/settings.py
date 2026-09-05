@@ -81,6 +81,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'empresas.middleware.GlobalExceptionHandlerMiddleware',
     'empresas.middleware.TenantMiddleware',
     'empresas.middleware.LoginRequiredMiddleware',
     'empresas.middleware.BloqueioInadimplenteMiddleware',
@@ -172,8 +173,15 @@ if env.bool('USE_S3', default=False):
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORRIGIDO: sessão dura 30 dias, não expira ao fechar o app
-SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
-SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_AGE = 2592000
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Segurança de Sessão/CSRF (Blindagem Agente 1)
+# Se estiver em produção (HTTPS), ativamos o Secure
+if env.bool('SECURE_COOKIES', default=False) or not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
 
 # CORRIGIDO: desativa cache de template para não servir páginas velhas
 # (relevante quando DEBUG=False)

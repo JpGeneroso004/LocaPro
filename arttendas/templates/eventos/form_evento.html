@@ -253,9 +253,15 @@ document.addEventListener("DOMContentLoaded", function() {
     const tSelected = getSelectedValues(tendasSelect);
     const cSelected = getSelectedValues(conjuntosSelect);
     
-    // Feedback visual de busca
-    if (tendasSelect) setPlaceholder(tendasSelect, 'Buscando equipamentos disponíveis...');
-    if (conjuntosSelect) setPlaceholder(conjuntosSelect, 'Buscando equipamentos disponíveis...');
+    // Feedback visual de busca (Spinner/Pulse)
+    if (tendasSelect) {
+      tendasSelect.classList.add('placeholder-glow', 'opacity-50');
+      setPlaceholder(tendasSelect, '⏳ Buscando equipamentos disponíveis...');
+    }
+    if (conjuntosSelect) {
+      conjuntosSelect.classList.add('placeholder-glow', 'opacity-50');
+      setPlaceholder(conjuntosSelect, '⏳ Buscando equipamentos disponíveis...');
+    }
     
     let url = `{% url 'eventos:equipamentos_disponiveis' %}?inicio=${encodeURIComponent(inicioIso)}&fim=${encodeURIComponent(fimIso)}`;
     if (eventoId) {
@@ -265,6 +271,9 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch(url)
       .then(res => res.json())
       .then(data => {
+        if (tendasSelect) tendasSelect.classList.remove('placeholder-glow', 'opacity-50');
+        if (conjuntosSelect) conjuntosSelect.classList.remove('placeholder-glow', 'opacity-50');
+        
         if (data.sucesso) {
           populateSelect(tendasSelect, data.tendas, 'Nenhum equipamento disponível para este período', tSelected);
           populateSelect(conjuntosSelect, data.conjuntos, 'Nenhum equipamento disponível para este período', cSelected);
@@ -276,8 +285,8 @@ document.addEventListener("DOMContentLoaded", function() {
       })
       .catch(err => {
         console.error("Erro de rede ao buscar equipamentos:", err);
-        if (tendasSelect) tendasSelect.disabled = false;
-        if (conjuntosSelect) conjuntosSelect.disabled = false;
+        if (tendasSelect) { tendasSelect.disabled = false; tendasSelect.classList.remove('placeholder-glow', 'opacity-50'); }
+        if (conjuntosSelect) { conjuntosSelect.disabled = false; conjuntosSelect.classList.remove('placeholder-glow', 'opacity-50'); }
       });
   }
 

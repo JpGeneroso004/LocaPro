@@ -50,7 +50,7 @@ def cadastro_locadora(request):
                     nome=empresa_nome, 
                     indicado_por=indicado_por,
                     status_assinatura='trial',
-                    vencimento_trial=date.today() + datetime.timedelta(days=7)
+                    vencimento_trial=timezone.localdate() + datetime.timedelta(days=7)
                 )
                 
                 if is_google_user:
@@ -353,12 +353,12 @@ def webhook_asaas(request):
                 # Fidelidade do SaaS: Ganha 1 mês pago no histórico
                 org.meses_pagos += 1
                 
-                from datetime import date
+                from django.utils import timezone
                 import datetime
                 if org.ciclo_pagamento == 'YEARLY':
-                    org.vencimento_assinatura = date.today() + datetime.timedelta(days=365)
+                    org.vencimento_assinatura = timezone.localdate() + datetime.timedelta(days=365)
                 else:
-                    org.vencimento_assinatura = date.today() + datetime.timedelta(days=30)
+                    org.vencimento_assinatura = timezone.localdate() + datetime.timedelta(days=30)
                 
                 # Regras de Benefícios de Longevidade (Prata, Ouro, Diamante)
                 if org.meses_pagos >= 24:

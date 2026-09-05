@@ -4,11 +4,11 @@ from .models import Tenda, ConjuntoPalco
 from .forms import TendaForm, ConjuntoPalcoForm
 
 
-from datetime import date
+from django.utils import timezone
 
 def inventario(request):
     from eventos.models import Evento
-    hoje = date.today()
+    hoje = timezone.localdate()
     eventos_hoje = Evento.objects.filter(
         status__in=['agendado', 'em_andamento'],
         data_inicio__lte=hoje,

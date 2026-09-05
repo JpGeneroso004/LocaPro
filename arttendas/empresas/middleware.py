@@ -1,8 +1,25 @@
 import threading
-from django.shortcuts import redirect
+import logging
+from django.shortcuts import redirect, render
+from django.http import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 from django.conf import settings
 from django.urls import resolve
+
+logger = logging.getLogger(__name__)
+
+class GlobalExceptionHandlerMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        return self.get_response(request)
+
+    def process_exception(self, request, exception):
+        logger.error(f"Erro Crítico Capturado: {exception}", exc_info=True)
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.path.startswith('/api/'):
+            return JsonResponse({'error': 'Erro interno do servidor. Nossa equipe já foi notificada.'}, status=500)
+        return render(request, '500.html', status=500)
 
 _thread_locals = threading.local()
 

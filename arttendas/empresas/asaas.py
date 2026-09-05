@@ -1,5 +1,7 @@
 import requests
+import datetime
 from django.conf import settings
+from django.utils import timezone
 
 def get_headers():
     return {
@@ -28,9 +30,7 @@ def criar_cliente(nome, email, cpf_cnpj=None):
 
 def criar_assinatura(customer_id, valor, ciclo="MONTHLY", descricao="Assinatura LocaPro SaaS"):
     url = f"{get_base_url()}/subscriptions"
-    from datetime import date
-    import datetime
-    vencimento = date.today() + datetime.timedelta(days=1)
+    vencimento = timezone.localdate() + datetime.timedelta(days=1)
     
     payload = {
         "customer": customer_id,

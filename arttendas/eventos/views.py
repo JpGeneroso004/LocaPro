@@ -10,30 +10,42 @@ from .models import Evento
 from .forms import EventoForm
 from inventario.models import Tenda, ConjuntoPalco
 
-def geocode_address(rua, numero, cidade):
+import threading
+
+def _geocode_and_save(evento_id):
+    from django.db import connection
     try:
-        # Tenta remover s/n para evitar que a API falhe na busca exata
-        num = str(numero).lower().replace('s/n', '').replace('sn', '').replace('sem numero', '').strip()
-        query = f"{rua} {num}, {cidade}" if num else f"{rua}, {cidade}"
+        evento = Evento.objects.get(id=evento_id)
+        num = str(evento.numero).lower().replace('s/n', '').replace('sn', '').replace('sem numero', '').strip()
+        query = f"{evento.rua} {num}, {evento.cidade}" if num else f"{evento.rua}, {evento.cidade}"
         
         url = "https://nominatim.openstreetmap.org/search?q=" + urllib.parse.quote(query) + "&format=json&limit=1"
         req = urllib.request.Request(url, headers={'User-Agent': 'LocaPro-SaaS/1.0 (contato@locapro.com)'})
-        with urllib.request.urlopen(req, timeout=1.5) as response:
+        with urllib.request.urlopen(req, timeout=3.0) as response:
             data = json.loads(response.read().decode())
             if data:
-                return data[0]['lat'], data[0]['lon']
-            else:
-                # Fallback só para a cidade
-                query_fallback = cidade
-                url_fb = "https://nominatim.openstreetmap.org/search?q=" + urllib.parse.quote(query_fallback) + "&format=json&limit=1"
-                req_fb = urllib.request.Request(url_fb, headers={'User-Agent': 'LocaPro-SaaS/1.0 (contato@locapro.com)'})
-                with urllib.request.urlopen(req_fb, timeout=1.5) as resp_fb:
-                    data_fb = json.loads(resp_fb.read().decode())
-                    if data_fb:
-                        return data_fb[0]['lat'], data_fb[0]['lon']
+                evento.latitude = data[0]['lat']
+                evento.longitude = data[0]['lon']
+                evento.save(update_fields=['latitude', 'longitude'])
+                return
+            
+        query_fallback = evento.cidade
+        url_fb = "https://nominatim.openstreetmap.org/search?q=" + urllib.parse.quote(query_fallback) + "&format=json&limit=1"
+        req_fb = urllib.request.Request(url_fb, headers={'User-Agent': 'LocaPro-SaaS/1.0 (contato@locapro.com)'})
+        with urllib.request.urlopen(req_fb, timeout=3.0) as resp_fb:
+            data_fb = json.loads(resp_fb.read().decode())
+            if data_fb:
+                evento.latitude = data_fb[0]['lat']
+                evento.longitude = data_fb[0]['lon']
+                evento.save(update_fields=['latitude', 'longitude'])
     except Exception:
         pass
-    return None, None
+    finally:
+        connection.close()
+
+def async_geocode_evento(evento_id):
+    t = threading.Thread(target=_geocode_and_save, args=(evento_id,))
+    t.start()
 
 def dashboard(request):
     hoje = timezone.localdate()
@@ -211,11 +223,12 @@ def novo_evento(request):
                 for c in conflitos:
                     messages.error(request, c)
             else:
-                lat, lng = geocode_address(evento.rua, evento.numero, evento.cidade)
-                evento.latitude = lat
-                evento.longitude = lng
                 evento.save()
                 form.save_m2m()
+            
+                # 6) Chama o geocoding em background para não travar a UI
+                async_geocode_evento(evento.id)
+
                 messages.success(request, f'Evento "{evento.nome}" criado com sucesso!')
                 return redirect('eventos:detalhe', pk=evento.pk)
     else:
@@ -259,12 +272,12 @@ def editar_evento(request, pk):
                 for c in conflitos:
                     messages.error(request, c)
             else:
-                if 'rua' in form.changed_data or 'numero' in form.changed_data or 'cidade' in form.changed_data:
-                    lat, lng = geocode_address(ev.rua, ev.numero, ev.cidade)
-                    ev.latitude = lat
-                    ev.longitude = lng
                 ev.save()
                 form.save_m2m()
+                
+                if 'rua' in form.changed_data or 'numero' in form.changed_data or 'cidade' in form.changed_data:
+                    async_geocode_evento(ev.id)
+                    
                 messages.success(request, 'Evento atualizado com sucesso!')
                 return redirect('eventos:detalhe', pk=ev.pk)
     else:
