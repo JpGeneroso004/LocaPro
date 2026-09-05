@@ -609,3 +609,30 @@ def obter_equipamentos_disponiveis(request):
         
     except Exception as e:
         return JsonResponse({'sucesso': False, 'erro': str(e)}, status=400)
+
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+def assinatura_cliente(request, token):
+    from .models import Contrato
+    from django.utils import timezone
+    # Nǜo exige login, pois  a pǭgina do cliente!
+    contrato = get_object_or_404(Contrato, token_assinatura=token)
+    
+    if request.method == 'POST':
+        if contrato.status_assinatura == 'pendente':
+            contrato.status_assinatura = 'assinado'
+            contrato.data_assinatura = timezone.now()
+            contrato.ip_assinatura = get_client_ip(request)
+            contrato.save()
+            messages.success(request, 'Contrato assinado com sucesso!')
+            # Disparar envio de cpia do PDF para o cliente aqui futuramente
+        return redirect('eventos:assinatura_cliente', token=token)
+        
+    return render(request, 'eventos/assinatura_cliente.html', {'contrato': contrato})

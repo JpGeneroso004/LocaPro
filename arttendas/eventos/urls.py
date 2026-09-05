@@ -16,9 +16,10 @@ urlpatterns = [
     # Contratos
     path('contratos/', views.contratos_lista, name='contratos_lista'),
     path('<int:evento_id>/gerar-contrato/', views.gerar_contrato, name='gerar_contrato'),
-    path('<int:evento_id>/salvar-contrato/', views.salvar_contrato, name='salvar_contrato'),
+    path('contrato/<int:evento_id>/salvar-contrato/', views.salvar_contrato, name='salvar_contrato'),
     path('contrato/<int:contrato_id>/imprimir/', views.imprimir_contrato, name='imprimir_contrato'),
     path('contrato/<int:contrato_id>/deletar/', views.deletar_contrato, name='deletar_contrato'),
+    path('contrato/assinatura/<str:token>/', views.assinatura_cliente, name='assinatura_cliente'),
     
     # API
     path('api/equipamentos-disponiveis/', views.obter_equipamentos_disponiveis, name='equipamentos_disponiveis'),
