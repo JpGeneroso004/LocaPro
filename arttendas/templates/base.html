@@ -179,13 +179,41 @@
   </style>
   {% if user.is_authenticated and user.organizacao and user.organizacao.cor_primaria %}
   <style>
-    :root, [data-bs-theme="light"], [data-bs-theme="dark"] {
-      --bs-warning: {{ user.organizacao.cor_primaria }};
+    /* Diurno (Claro) */
+    :root, [data-bs-theme="light"] {
       --bs-primary: {{ user.organizacao.cor_primaria }};
+      /* Usa a cor original ou escurece levemente para botões */
+      --bs-primary-rgb: {{ user.organizacao.cor_primaria }};
+      --bs-warning: {{ user.organizacao.cor_primaria }};
+      --brand-color: {{ user.organizacao.cor_primaria }};
     }
-    .btn-warning {
-      background-color: var(--bs-warning) !important;
-      border-color: var(--bs-warning) !important;
+    
+    /* Noturno (Escuro) - Adaptando a cor para brilhar no fundo escuro */
+    [data-bs-theme="dark"] {
+      /* Mistura a cor do usuário com 30% de branco para garantir leitura no fundo preto */
+      --bs-primary: color-mix(in srgb, {{ user.organizacao.cor_primaria }} 70%, white);
+      --bs-warning: color-mix(in srgb, {{ user.organizacao.cor_primaria }} 70%, white);
+      --brand-color: color-mix(in srgb, {{ user.organizacao.cor_primaria }} 70%, white);
+    }
+    
+    /* Força botões primários a usar a cor da marca com texto legível */
+    .btn-primary, .btn-warning {
+      background-color: var(--brand-color) !important;
+      border-color: var(--brand-color) !important;
+      color: #fff !important; /* Sempre texto branco em botões sólidos para não bugar contraste */
+    }
+    
+    .text-primary, .text-warning {
+      color: var(--brand-color) !important;
+    }
+    
+    .bg-primary, .bg-warning {
+      background-color: var(--brand-color) !important;
+      color: #fff !important;
+    }
+    
+    .border-primary, .border-warning {
+      border-color: var(--brand-color) !important;
     }
   </style>
   {% endif %}
