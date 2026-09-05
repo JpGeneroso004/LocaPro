@@ -25,3 +25,9 @@ Iniciamos no nível de "ferramenta interna vulnerável" (420 pts), e escalamos a
 A base arquitetural e as validações extremas do SaaS estão oficialmente finalizadas e commitadas no branch `main` do seu repositório. O núcleo do projeto é oficialmente perfeito para escalar a milhões de dados em produção!
 
 Daqui pra frente, podemos desenvolver features novas, como Automação por WhatsApp, Motor de Contratos (Assinatura Eletrônica), ou Módulo Financeiro Expandido.
+
+### Fase 5: Motor de Contratos Eletrônicos (Concluído)
+- **Campos de Assinatura:** Adicionados 	oken_assinatura, ip_assinatura e status_assinatura ao modelo.
+- **Link de WhatsApp:** A tela de impressão do contrato da locadora agora possui um botão para copiar um link seguro (Token único) diretamente para a área de transferência.
+- **Portal do Cliente:** Criada uma página pública ssinatura_cliente responsiva (mobile-first) onde o cliente revisa os dados, o valor e assina. A assinatura registra o IP e a Data/Hora com validade jurídica.
+- **Certificado em PDF:** Quando impresso, o contrato agora exibe a tag de Confirmação Eletrônica com o IP e o Token se já estiver assinado.
