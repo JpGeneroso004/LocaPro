@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% load static %}
 {% block title %}Planos e Assinatura{% endblock %}
 
@@ -96,10 +96,16 @@ input:checked ~ .toggle-labels .label-anual { color: #fff; }
     {% if user.organizacao.status_assinatura == "ativa" %}
     <div class="alert alert-success border-0 shadow-sm d-flex align-items-center mb-5 p-4 rounded-4">
         <i class="bi bi-check-circle-fill fs-1 me-4"></i>
-        <div>
+        <div class="flex-grow-1">
             <h4 class="alert-heading fw-bold mb-1">Sua assinatura está Ativa!</h4>
             <p class="mb-0">Você está no plano <strong>{{ user.organizacao.get_plano_display }}</strong>. Aproveite todos os recursos do LocaPro sem interrupções.</p>
         </div>
+        {% if user.organizacao.vencimento_assinatura %}
+        <div class="text-end border-start border-success ps-4 ms-3 d-none d-md-block">
+            <p class="text-success mb-1 small fw-bold text-uppercase">Válido até</p>
+            <h4 class="fw-bold mb-0">{{ user.organizacao.vencimento_assinatura|date:"d/m/Y" }}</h4>
+        </div>
+        {% endif %}
     </div>
     {% elif user.organizacao.status_assinatura == "inadimplente" %}
     <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center mb-5 p-4 rounded-4">
@@ -281,6 +287,39 @@ input:checked ~ .toggle-labels .label-anual { color: #fff; }
             </div>
         </div>
     </div>
+    
+    <!-- MÓDULOS ADICIONAIS (UPSELL / EXTRA MRR) -->
+    <div class="mt-5 mb-5">
+        <h3 class="fw-bold mb-4 text-primary"><i class="bi bi-puzzle-fill text-warning"></i> Expanda seu Sistema (Add-ons)</h3>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Cobrança Pix & Boleto Automática</h5>
+                            <span class="badge bg-success fs-6">+ R$ 49<small>/mês</small></span>
+                        </div>
+                        <p class="text-muted small">Cansado de cobrar caloteiros no WhatsApp? Gere boletos e Pix registrados para seus clientes diretamente do contrato. O sistema cobra automaticamente por você.</p>
+                        <button class="btn btn-outline-success w-100 fw-bold" onclick="alert('Funcionalidade em desenvolvimento intenso! Entre na lista de espera para ter acesso antecipado.')">Entrar na Lista de Espera</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Site / Catálogo Online Próprio</h5>
+                            <span class="badge bg-primary fs-6">+ R$ 99<small>/mês</small></span>
+                        </div>
+                        <p class="text-muted small">Tenha um site profissional com o seu estoque. Seus clientes podem entrar no site, escolher as tendas, ver disponibilidade e pedir orçamento na hora.</p>
+                        <button class="btn btn-outline-primary w-100 fw-bold" onclick="alert('Funcionalidade em desenvolvimento intenso! Entre na lista de espera para ter acesso antecipado.')">Entrar na Lista de Espera</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 </div>
 
 <script>

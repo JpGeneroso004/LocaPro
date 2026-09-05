@@ -24,8 +24,10 @@ class Organizacao(models.Model):
 
     # Plano e Assinatura
     plano = models.CharField('Plano Escolhido', max_length=20, choices=PLANOS, default='starter')
+    ciclo_pagamento = models.CharField('Ciclo', max_length=10, default='MONTHLY')
     status_assinatura = models.CharField('Status da Assinatura', max_length=15, choices=STATUS_ASSINATURA, default='trial')
     vencimento_trial = models.DateField('Vencimento do Trial', null=True, blank=True)
+    vencimento_assinatura = models.DateField('Próximo Vencimento', null=True, blank=True)
     
     # Integração Asaas
     asaas_customer_id = models.CharField('Asaas Customer ID', max_length=100, blank=True)

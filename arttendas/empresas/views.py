@@ -263,6 +263,7 @@ def processar_assinatura(request):
             
     # 2. Definir Preço Base e Ciclo
     ciclo = request.POST.get('ciclo', 'MONTHLY') # 'MONTHLY' ou 'YEARLY'
+    org.ciclo_pagamento = ciclo
     
     tabela_precos = {
         'starter': 97.00,
@@ -333,6 +334,13 @@ def webhook_asaas(request):
                 org.status_assinatura = 'ativa'
                 # Fidelidade do SaaS: Ganha 1 mês pago no histórico
                 org.meses_pagos += 1
+                
+                from datetime import date
+                import datetime
+                if org.ciclo_pagamento == 'YEARLY':
+                    org.vencimento_assinatura = date.today() + datetime.timedelta(days=365)
+                else:
+                    org.vencimento_assinatura = date.today() + datetime.timedelta(days=30)
                 
                 # Regras de Benefícios de Longevidade (Prata, Ouro, Diamante)
                 if org.meses_pagos >= 24:
