@@ -21,3 +21,13 @@ class OrganizacaoForm(forms.ModelForm):
             'pontos_por_real': forms.NumberInput(attrs={'class': 'form-control'}),
             'taxa_resgate': forms.NumberInput(attrs={'class': 'form-control'}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        fidelidade_ativa = cleaned_data.get('fidelidade_ativa')
+        
+        # Bloqueia recurso premium para plano starter
+        if fidelidade_ativa and self.instance.plano == 'starter':
+            self.add_error('fidelidade_ativa', 'O Programa de Fidelidade é um recurso exclusivo dos planos Pro e Premium. Faça upgrade para habilitar.')
+            
+        return cleaned_data

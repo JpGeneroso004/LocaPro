@@ -45,7 +45,7 @@ class LoginRequiredMiddleware(MiddlewareMixin):
         
         # 1. Redireciona usuários não autenticados para o login
         if not request.user.is_authenticated:
-            allowed = ['/admin', getattr(settings, 'LOGIN_URL', '/accounts/login/'), '/empresas/cadastro', '/empresas/webhook/asaas/', '/accounts/', '/static/', '/media/']
+            allowed = ['/admin', getattr(settings, 'LOGIN_URL', '/accounts/login/'), '/empresas/cadastro', '/empresas/webhook/asaas/', '/accounts/', '/static/', '/media/', '/eventos/contrato/assinatura/']
             if not any(path.startswith(p) for p in allowed):
                 return redirect(f"/accounts/login/?next={path}")
                 

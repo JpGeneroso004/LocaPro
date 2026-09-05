@@ -429,16 +429,18 @@ def gerar_contrato(request, evento_id):
     }
     return render(request, 'eventos/form_contrato.html', context)
 
+
 def limpar_moeda(val):
     if not val:
         return 0.0
     if isinstance(val, (int, float)):
-        return float(val)
+        return max(0.0, float(val))
     val_limpo = str(val).replace('R$', '').replace('.', '').replace(',', '.').strip()
     try:
-        return float(val_limpo)
+        return max(0.0, float(val_limpo))
     except ValueError:
         return 0.0
+
 
 def salvar_contrato(request, evento_id):
     import traceback

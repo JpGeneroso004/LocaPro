@@ -259,12 +259,18 @@ def processar_assinatura(request):
         
     if request.method == 'POST':
         novo_plano = request.POST.get('plano')
+        ciclo = request.POST.get('ciclo', 'MONTHLY') # 'MONTHLY' ou 'YEARLY'
+        
+        # Se ele quer mudar de plano ou ciclo, mas já tem uma intenção pendente, limpamos a intenção antiga.
+        if org.asaas_subscription_id and (novo_plano != org.plano or ciclo != org.ciclo_pagamento):
+            org.asaas_subscription_id = '' # Reseta para criar uma nova no Asaas
+            
         if novo_plano in ['starter', 'pro', 'premium']:
             org.plano = novo_plano
             org.save()
             
     if org.asaas_subscription_id:
-        messages.info(request, 'Você já possui uma assinatura em processamento.')
+        messages.info(request, 'Você já possui uma assinatura em processamento. Verifique seu e-mail para encontrar a fatura.')
         return redirect('empresas:assinatura')
         
     from .asaas import criar_cliente, criar_assinatura
@@ -280,7 +286,6 @@ def processar_assinatura(request):
             return redirect('empresas:assinatura')
             
     # 2. Definir Preço Base e Ciclo
-    ciclo = request.POST.get('ciclo', 'MONTHLY') # 'MONTHLY' ou 'YEARLY'
     org.ciclo_pagamento = ciclo
     
     tabela_precos = {

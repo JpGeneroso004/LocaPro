@@ -41,3 +41,9 @@ Daqui pra frente, podemos desenvolver features novas, como Automação por Whats
 ### Extras: Implementações do Diagnóstico Avançado
 - **Cache de Motor de Inventário:** Implementado django.core.cache nas verificações de disponibilidade (aliviando a carga do banco) com invalidação limpa no Evento.save().
 - **Devoluções Antecipadas (Edge Case):** Novo campo data_devolucao_real no Evento. Quando o contrato é concluído antes do previsto, os equipamentos são liberados antecipadamente da janela de bloqueio.
+
+### Extras: Pentest e Segurança Avançada
+- **Bypass de Middleware Corrigido:** O link público de assinatura pelo WhatsApp estava sendo engolido pela tela de login, quebrando o fluxo do Cliente Final. Adicionada regra de exceção no Middleware.
+- **Mass Assignment no Form:** Usuários do Plano Starter conseguiam forçar a habilitação do Programa de Fidelidade (Feature Premium) inspecionando e modificando os requests HTML. Adicionado bloqueio em OrganizacaoForm.clean.
+- **Injeção de Valores Negativos:** Imposta trava absoluta em limpar_moeda() (max(0.0, val)) para prevenir que clientes maliciosos causassem saldo credor ou quebras no DRE (Faturamento) ao injetar valores negativos nos Contratos.
+- **Destravamento do Gateway:** O fluxo de upgrade de plano do SaaS travava se a empresa já tivesse uma intenção de assinatura iniciada; a lógica foi refatorada para permitir o descarte e criação de novas assinaturas de upgrade.
