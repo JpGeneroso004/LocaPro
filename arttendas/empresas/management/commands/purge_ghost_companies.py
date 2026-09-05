@@ -1,4 +1,4 @@
-﻿from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
@@ -25,7 +25,10 @@ class Command(BaseCommand):
             
             # Se ninguém logou e a conta foi criada há mais de 6 meses
             if not ultimo_login:
-                # Opcional: usar date_joined
+                continue
+                
+            # IMPORTANTE: Nunca deletar empresas que estão com a assinatura financeira ATIVA, mesmo que não acessem!
+            if locadora.status_assinatura == 'ativa':
                 continue
                 
             dias_inativos = (hoje - ultimo_login).days

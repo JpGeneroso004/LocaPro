@@ -8,24 +8,40 @@ class Organizacao(models.Model):
     logo = models.ImageField('Logo da Empresa', upload_to='logos/', null=True, blank=True)
     cor_primaria = models.CharField('Cor Principal', max_length=7, default='#004581', help_text='Cor tema da locadora')
     clausulas_padrao = models.TextField('Cláusulas Padrão do Contrato', blank=True, 
-        default="1. RESPONSABILIDADE DO LOCAL: O Contratante é responsável por autorizações...\n2. FORÇA MAIOR: A Contratada isenta-se...")
-    
     # Campos de SaaS (Assinatura)
     STATUS_ASSINATURA = [
         ('trial', 'Em Teste (Trial)'),
         ('ativa', 'Ativa'),
-        ('inadimplente', 'Inadimplente (Bloqueada)'),
+        ('inadimplente', 'Inadimplente'),
         ('cancelada', 'Cancelada'),
     ]
+    
+    PLANOS = [
+        ('starter', 'Starter (Essencial)'),
+        ('pro', 'Pro (Avançado)'),
+        ('premium', 'Premium (Escala)'),
+    ]
+
+    # Plano e Assinatura
+    plano = models.CharField('Plano Escolhido', max_length=20, choices=PLANOS, default='starter')
     status_assinatura = models.CharField('Status da Assinatura', max_length=15, choices=STATUS_ASSINATURA, default='trial')
     vencimento_trial = models.DateField('Vencimento do Trial', null=True, blank=True)
+    
+    # Integração Asaas
     asaas_customer_id = models.CharField('Asaas Customer ID', max_length=100, blank=True)
     asaas_subscription_id = models.CharField('Asaas Subscription ID', max_length=100, blank=True)
+    
+    # Gamificação / Fidelidade do SaaS (Níveis de Parceiro)
+    meses_pagos = models.PositiveIntegerField('Meses de Assinatura Pagos', default=0)
+    beneficio_ativo = models.CharField('Benefício de Longevidade', max_length=100, blank=True, help_text='Ex: Embaixador Prata (-5%)')
     
     # Configurações do LocaPoints (Fidelidade)
     fidelidade_ativa = models.BooleanField('Ativar LocaPoints', default=True)
     pontos_por_real = models.PositiveIntegerField('Quantos pontos o cliente ganha a cada R$ 1 pago?', default=1)
     taxa_resgate = models.PositiveIntegerField('Quantos pontos equivalem a R$ 1 de desconto?', default=100)
+    
+    clausulas_padrao = models.TextField('Cláusulas Padrão do Contrato', blank=True, 
+        default="1. RESPONSABILIDADE DO LOCAL: O Contratante é responsável por autorizações...\n2. FORÇA MAIOR: A Contratada isenta-se...")
     
     # Indique e Ganhe (B2B Referral)
     codigo_indicacao = models.CharField('Código de Indicação', max_length=20, blank=True, unique=True, null=True)

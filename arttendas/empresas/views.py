@@ -239,8 +239,14 @@ import json
 @login_required
 def processar_assinatura(request):
     org = request.user.organizacao
+    if request.method == 'POST':
+        novo_plano = request.POST.get('plano')
+        if novo_plano in ['starter', 'pro', 'premium']:
+            org.plano = novo_plano
+            org.save()
+            
     if org.asaas_subscription_id:
-        messages.info(request, "Você já possui uma assinatura ativa ou em processamento.")
+        messages.info(request, 'Você já possui uma assinatura em processamento.')
         return redirect('empresas:assinatura')
         
     from .asaas import criar_cliente, criar_assinatura
@@ -303,11 +309,22 @@ def webhook_asaas(request):
                 return JsonResponse({"status": "not_found"}, status=404)
                 
             # Pagamento confirmado (PIX, Cartão ou Boleto pago)
-            if event in ['PAYMENT_RECEIVED', 'PAYMENT_CONFIRMED']:
+            if event == 'PAYMENT_RECEIVED':
                 org.status_assinatura = 'ativa'
-                org.save()
+                # Fidelidade do SaaS: Ganha 1 mês pago no histórico
+                org.meses_pagos += 1
                 
-            # Pagamento atrasado ou recusado
+                # Regras de Benefícios de Longevidade (Prata, Ouro, Diamante)
+                if org.meses_pagos >= 24:
+                    org.beneficio_ativo = 'Embaixador Diamante'
+                elif org.meses_pagos >= 12:
+                    org.beneficio_ativo = 'Embaixador Ouro'
+                    if org.plano == 'starter':
+                        org.plano = 'pro' # Upgrade gratuito!
+                elif org.meses_pagos >= 6:
+                    org.beneficio_ativo = 'Embaixador Prata'
+                    
+                org.save()
             elif event in ['PAYMENT_OVERDUE', 'PAYMENT_REFUNDED', 'PAYMENT_CHARGEBACK_REQUESTED']:
                 org.status_assinatura = 'inadimplente'
                 org.save()

@@ -1,49 +1,165 @@
-{% extends 'base.html' %}
-{% block title %}Minha Assinatura{% endblock %}
+﻿{% extends "base.html" %}
+{% load static %}
+{% block title %}Planos e Assinatura{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-8 col-lg-6 mt-4">
-    <div class="card shadow border-0">
-      <div class="card-body p-5">
-        <div class="text-center mb-4">
-          <i class="bi bi-credit-card-2-front-fill text-warning" style="font-size: 3rem;"></i>
-          <h2 class="fw-bold mt-2">Plano e Pagamento</h2>
-        </div>
-
-        {% if org.status_assinatura == 'trial' %}
-          <div class="alert alert-info border-0 shadow-sm rounded-3">
-            <h5 class="fw-bold"><i class="bi bi-clock-history"></i> Período de Teste</h5>
-            <p class="mb-0">Você está utilizando a plataforma gratuitamente. Seu teste expira em <strong>{{ dias_trial }} dias</strong>.</p>
-          </div>
-        {% elif org.status_assinatura == 'inadimplente' or org.status_assinatura == 'cancelada' %}
-          <div class="alert alert-danger border-0 shadow-sm rounded-3">
-            <h5 class="fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> Assinatura Bloqueada</h5>
-            <p class="mb-0">Sua assinatura está expirada. Renove para liberar o acesso ao sistema.</p>
-          </div>
-        {% else %}
-          <div class="alert alert-success border-0 shadow-sm rounded-3">
-            <h5 class="fw-bold"><i class="bi bi-check-circle-fill"></i> Assinatura Ativa</h5>
-            <p class="mb-0">Obrigado por usar o LocaPro! Sua locadora está operando normalmente.</p>
-          </div>
-        {% endif %}
-
-        <div class="bg-light p-4 rounded-3 text-center mt-4">
-          <p class="text-muted mb-2">Para assinar o sistema ou pagar faturas pendentes:</p>
-          {% if not org.asaas_subscription_id %}
-          <a href="{% url 'empresas:processar_assinatura' %}" class="btn btn-dark btn-lg fw-bold w-100 shadow">
-            Assinar LocaPro - R$ 97,00/mês
-          </a>
-          <p class="small text-muted mt-2">Você será notificado por e-mail com a fatura (Pix/Cartão/Boleto).</p>
-          {% else %}
-          <div class="alert alert-warning mt-3">
-             <i class="bi bi-clock"></i> Fatura gerada! Verifique seu e-mail para realizar o pagamento via Asaas.
-          </div>
-          {% endif %}
-        </div>
-
-      </div>
+<div class="container mt-4 mb-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-primary"><i class="bi bi-rocket-takeoff-fill text-warning"></i> Planos LocaPro</h2>
+        <p class="text-muted fs-5">Escale sua locadora de tendas e eventos com a melhor tecnologia do mercado.</p>
     </div>
-  </div>
+
+    {% if user.organizacao.status_assinatura == "ativa" %}
+    <div class="alert alert-success border-0 shadow-sm d-flex align-items-center mb-5 p-4 rounded-4">
+        <i class="bi bi-check-circle-fill fs-1 me-4"></i>
+        <div>
+            <h4 class="alert-heading fw-bold mb-1">Sua assinatura está Ativa!</h4>
+            <p class="mb-0">Você está no plano <strong>{{ user.organizacao.get_plano_display }}</strong>. Aproveite todos os recursos do LocaPro sem interrupções.</p>
+        </div>
+    </div>
+    {% elif user.organizacao.status_assinatura == "inadimplente" %}
+    <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center mb-5 p-4 rounded-4">
+        <i class="bi bi-exclamation-triangle-fill fs-1 me-4"></i>
+        <div>
+            <h4 class="alert-heading fw-bold mb-1">Pagamento Pendente</h4>
+            <p class="mb-0">Identificamos uma fatura em aberto. Regularize seu plano para não perder o acesso ao sistema e os benefícios de longo prazo.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row row-cols-1 row-cols-md-3 mb-5 text-center g-4">
+        <!-- PLANO ESSENCIAL -->
+        <div class="col">
+            <div class="card shadow-sm border-0 h-100 {% if user.organizacao.plano == "starter" %}border-warning border-3 shadow-lg{% endif %}">
+                <div class="card-header py-4 bg-light border-bottom-0">
+                    <h4 class="my-0 fw-bold text-dark">LocaPro Essencial</h4>
+                    <p class="text-muted small mt-2">Para locadoras em crescimento</p>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h1 class="card-title pricing-card-title fw-bold">R$ 97<small class="text-muted fw-light">/mês</small></h1>
+                    <ul class="list-unstyled mt-4 mb-4 text-start flex-grow-1">
+                        <li class="mb-2"><i class="bi bi-check2 text-success fw-bold"></i> Até 50 Eventos por mês</li>
+                        <li class="mb-2"><i class="bi bi-check2 text-success fw-bold"></i> Controle de Estoque Básico</li>
+                        <li class="mb-2"><i class="bi bi-check2 text-success fw-bold"></i> Contratos em PDF</li>
+                        <li class="mb-2 text-muted"><i class="bi bi-x"></i> Sem LocaPoints (Fidelidade)</li>
+                        <li class="mb-2 text-muted"><i class="bi bi-x"></i> Máximo de 3 usuários</li>
+                    </ul>
+                    <form action="{% url 'empresas:processar_assinatura' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="plano" value="starter">
+                        <button type="submit" class="btn btn-lg w-100 {% if user.organizacao.plano == "starter" %}btn-warning fw-bold text-dark{% else %}btn-outline-primary{% endif %}">
+                            {% if user.organizacao.plano == "starter" and user.organizacao.status_assinatura == "ativa" %}Plano Atual{% else %}Assinar Essencial{% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PLANO MASTER -->
+        <div class="col">
+            <div class="card shadow border-primary border-2 h-100 position-relative {% if user.organizacao.plano == "pro" %}bg-primary-subtle border-3 shadow-lg{% endif %}">
+                <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-warning text-dark fs-6 shadow">MAIS ESCOLHIDO</span>
+                <div class="card-header py-4 bg-primary text-white border-bottom-0">
+                    <h4 class="my-0 fw-bold">LocaPro Master</h4>
+                    <p class="text-white-50 small mt-2">O padrão ouro das locadoras</p>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h1 class="card-title pricing-card-title fw-bold">R$ 197<small class="text-muted fw-light">/mês</small></h1>
+                    <ul class="list-unstyled mt-4 mb-4 text-start flex-grow-1">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-primary"></i> <strong>Eventos Ilimitados</strong></li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-primary"></i> <strong>Usuários Ilimitados</strong></li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-primary"></i> Sistema LocaPoints (Fidelidade)</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-primary"></i> Assinatura Digital de Contratos</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-primary"></i> Relatórios Financeiros</li>
+                    </ul>
+                    <form action="{% url 'empresas:processar_assinatura' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="plano" value="pro">
+                        <button type="submit" class="btn btn-lg w-100 {% if user.organizacao.plano == "pro" %}btn-primary fw-bold text-white{% else %}btn-primary text-white{% endif %}">
+                            {% if user.organizacao.plano == "pro" and user.organizacao.status_assinatura == "ativa" %}Plano Atual{% else %}Assinar Master{% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- PLANO INFINITY -->
+        <div class="col">
+            <div class="card shadow-sm border-0 h-100 bg-dark text-white {% if user.organizacao.plano == "premium" %}border-warning border-3 shadow-lg{% endif %}">
+                <div class="card-header py-4 bg-transparent border-bottom-0">
+                    <h4 class="my-0 fw-bold text-warning">LocaPro Infinity</h4>
+                    <p class="text-secondary small mt-2">Para franquias e grandes operações</p>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h1 class="card-title pricing-card-title fw-bold">R$ 397<small class="text-secondary fw-light">/mês</small></h1>
+                    <ul class="list-unstyled mt-4 mb-4 text-start flex-grow-1">
+                        <li class="mb-2"><i class="bi bi-star-fill text-warning"></i> Tudo do plano Master</li>
+                        <li class="mb-2"><i class="bi bi-star-fill text-warning"></i> Multi-Filiais (Estoques isolados)</li>
+                        <li class="mb-2"><i class="bi bi-star-fill text-warning"></i> White-label (Remover marca LocaPro)</li>
+                        <li class="mb-2"><i class="bi bi-star-fill text-warning"></i> API Aberta para integrações</li>
+                        <li class="mb-2"><i class="bi bi-star-fill text-warning"></i> Suporte VIP WhatsApp 24/7</li>
+                    </ul>
+                    <button type="button" class="btn btn-lg btn-outline-warning w-100" onclick="alert('Entre em contato com nosso time de vendas para ativar o plano Infinity.')">Falar com Vendas</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROGRAMA DE LONGEVIDADE (B2B SAAS) -->
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden mb-5">
+        <div class="row g-0">
+            <div class="col-md-4 bg-primary text-white p-5 d-flex flex-column justify-content-center text-center">
+                <i class="bi bi-gem display-1 text-warning mb-3"></i>
+                <h3 class="fw-bold">Clube de Sócios LocaPro</h3>
+                <p>Quanto mais tempo você usar o sistema, mais a sua locadora ganha. Seu sucesso é nosso sucesso.</p>
+                <div class="bg-dark p-3 rounded mt-3">
+                    <h5 class="text-warning mb-0">{{ user.organizacao.meses_pagos }}</h5>
+                    <small>Meses de Parceria Ativa</small>
+                </div>
+            </div>
+            <div class="col-md-8 p-5 bg-white">
+                <h4 class="fw-bold mb-4 border-bottom pb-2">Suas Conquistas</h4>
+                
+                <div class="d-flex align-items-center mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-circle {% if user.organizacao.meses_pagos >= 6 %}bg-secondary text-white shadow-lg{% else %}bg-light text-muted{% endif %} d-flex justify-content-center align-items-center" style="width: 60px; height: 60px;">
+                            <i class="bi bi-shield-check fs-2"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-4">
+                        <h5 class="mb-1 fw-bold {% if user.organizacao.meses_pagos >= 6 %}text-dark{% else %}text-muted{% endif %}">Embaixador Prata (6 Meses)</h5>
+                        <p class="mb-0 text-muted small">Selo especial "Locadora Ouro Verificada" adicionado automaticamente aos seus contratos PDF (Gera extrema autoridade no mercado).</p>
+                    </div>
+                    {% if user.organizacao.meses_pagos >= 6 %}<i class="bi bi-check-lg text-success fs-2 ms-3"></i>{% endif %}
+                </div>
+
+                <div class="d-flex align-items-center mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-circle {% if user.organizacao.meses_pagos >= 12 %}bg-warning text-dark shadow-lg{% else %}bg-light text-muted{% endif %} d-flex justify-content-center align-items-center" style="width: 60px; height: 60px;">
+                            <i class="bi bi-trophy fs-2"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-4">
+                        <h5 class="mb-1 fw-bold {% if user.organizacao.meses_pagos >= 12 %}text-dark{% else %}text-muted{% endif %}">Embaixador Ouro (1 Ano)</h5>
+                        <p class="mb-0 text-muted small"><strong>Upgrade Automático!</strong> Se estiver no plano Essencial, você ganha o LocaPro Master permanentemente sem pagar 1 centavo a mais.</p>
+                    </div>
+                    {% if user.organizacao.meses_pagos >= 12 %}<i class="bi bi-check-lg text-success fs-2 ms-3"></i>{% endif %}
+                </div>
+
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-circle {% if user.organizacao.meses_pagos >= 24 %}bg-info text-dark shadow-lg{% else %}bg-light text-muted{% endif %} d-flex justify-content-center align-items-center" style="width: 60px; height: 60px;">
+                            <i class="bi bi-diamond fs-2"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-4">
+                        <h5 class="mb-1 fw-bold {% if user.organizacao.meses_pagos >= 24 %}text-dark{% else %}text-muted{% endif %}">Embaixador Diamante (2 Anos)</h5>
+                        <p class="mb-0 text-muted small">Suporte técnico VIP, prioridade no desenvolvimento de novas features e destaque no portal regional de locadoras LocaPro.</p>
+                    </div>
+                    {% if user.organizacao.meses_pagos >= 24 %}<i class="bi bi-check-lg text-success fs-2 ms-3"></i>{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
