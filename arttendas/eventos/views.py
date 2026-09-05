@@ -17,8 +17,8 @@ def geocode_address(rua, numero, cidade):
         query = f"{rua} {num}, {cidade}" if num else f"{rua}, {cidade}"
         
         url = "https://nominatim.openstreetmap.org/search?q=" + urllib.parse.quote(query) + "&format=json&limit=1"
-        req = urllib.request.Request(url, headers={'User-Agent': 'ArtTendas/1.0'})
-        with urllib.request.urlopen(req, timeout=3) as response:
+        req = urllib.request.Request(url, headers={'User-Agent': 'LocaPro-SaaS/1.0 (contato@locapro.com)'})
+        with urllib.request.urlopen(req, timeout=1.5) as response:
             data = json.loads(response.read().decode())
             if data:
                 return data[0]['lat'], data[0]['lon']
@@ -26,8 +26,8 @@ def geocode_address(rua, numero, cidade):
                 # Fallback só para a cidade
                 query_fallback = cidade
                 url_fb = "https://nominatim.openstreetmap.org/search?q=" + urllib.parse.quote(query_fallback) + "&format=json&limit=1"
-                req_fb = urllib.request.Request(url_fb, headers={'User-Agent': 'ArtTendas/1.0'})
-                with urllib.request.urlopen(req_fb, timeout=3) as resp_fb:
+                req_fb = urllib.request.Request(url_fb, headers={'User-Agent': 'LocaPro-SaaS/1.0 (contato@locapro.com)'})
+                with urllib.request.urlopen(req_fb, timeout=1.5) as resp_fb:
                     data_fb = json.loads(resp_fb.read().decode())
                     if data_fb:
                         return data_fb[0]['lat'], data_fb[0]['lon']
