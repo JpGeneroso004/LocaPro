@@ -90,18 +90,19 @@ def dashboard(request):
     faturamento_mes = sum(c.valor_final for c in contratos_mes)
     
     # Previsão baseada nos agendados/em andamento
-    eventos_futuros = eventos.filter(status__in=['agendado', 'em_andamento'])
-    previsao_faturamento = sum(e.contrato.valor_final for e in eventos_futuros if hasattr(e, 'contrato'))
+    eventos_futuros = eventos.filter(status__in=['agendado', 'em_andamento'], contrato__isnull=False)
+    previsao_faturamento = sum(e.contrato.valor_final for e in eventos_futuros)
 
     # --- BI FINANCEIRO E MÉTRICAS ---
     from django.db.models import Sum, Count
     
     # Faturamento do Mês Atual (Eventos concluídos ou agendados/em andamento neste mês)
-    eventos_mes = eventos.filter(data_inicio__month=hoje.month, data_inicio__year=hoje.year)
-    faturamento_mes = eventos_mes.exclude(status='cancelado').aggregate(total=Sum('valor_total'))['total'] or 0.00
+    eventos_mes = eventos.filter(data_inicio__month=hoje.month, data_inicio__year=hoje.year, contrato__isnull=False)
+    faturamento_mes = sum(e.contrato.valor_final for e in eventos_mes.exclude(status='cancelado'))
     
     # Receita Anual (Eventos deste ano)
-    faturamento_ano = eventos.filter(data_inicio__year=hoje.year).exclude(status='cancelado').aggregate(total=Sum('valor_total'))['total'] or 0.00
+    eventos_ano = eventos.filter(data_inicio__year=hoje.year, contrato__isnull=False).exclude(status='cancelado')
+    faturamento_ano = sum(e.contrato.valor_final for e in eventos_ano)
     
     # Tenda mais popular (Mais alugada)
     tenda_mais_alugada = Tenda.objects.filter(eventos__in=eventos.exclude(status='cancelado')).annotate(num_alugueis=Count('eventos')).order_by('-num_alugueis').first()
