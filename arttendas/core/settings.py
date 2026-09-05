@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'empresas',
     'eventos',
     'inventario',
+    'assistente_ia',
     'django.contrib.sites',
     'allauth',
     'allauth.account',
