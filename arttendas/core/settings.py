@@ -73,6 +73,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',  # Habilita tradução dinâmica
     'django.middleware.common.CommonMiddleware',
@@ -222,3 +223,15 @@ AUTH_USER_MODEL = 'empresas.Usuario'
 ASAAS_API_KEY = env('ASAAS_API_KEY', default='')
 ASAAS_URL = env('ASAAS_URL', default='https://sandbox.asaas.com/api/v3')
 ASAAS_WEBHOOK_TOKEN = env('ASAAS_WEBHOOK_TOKEN', default='')
+
+# Sentry (Observabilidade)
+SENTRY_DSN = env('SENTRY_DSN', default=None)
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=1.0,
+        send_default_pii=True
+    )

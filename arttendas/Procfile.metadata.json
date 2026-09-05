@@ -1,0 +1,4 @@
+{
+  "summary":  "Criado arquivo Procfile para automatizar o deploy da aplicação em serviços PaaS (como Render, Heroku ou Railway), inicializando o servidor via Gunicorn.",
+  "updatedAt":  "2026-09-05T21:42:19.634224500Z"
+}
