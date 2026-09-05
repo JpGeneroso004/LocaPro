@@ -261,11 +261,31 @@ def processar_assinatura(request):
             messages.error(request, "Erro ao conectar com o gateway de pagamento (Asaas). Verifique a API Key.")
             return redirect('empresas:assinatura')
             
-    # 2. Criar Assinatura (ex: R$ 97,00 por mês)
-    # Você pode parametrizar esse valor depois
-    VALOR_PLANO = 97.00 
+    # 2. Definir Preço Base e Ciclo
+    ciclo = request.POST.get('ciclo', 'MONTHLY') # 'MONTHLY' ou 'YEARLY'
     
-    assinatura_data = criar_assinatura(org.asaas_customer_id, VALOR_PLANO)
+    tabela_precos = {
+        'starter': 97.00,
+        'pro': 197.00,
+        'premium': 397.00
+    }
+    
+    valor_mensal = tabela_precos.get(org.plano, 97.00)
+    
+    # Aplica desconto de Early Adopter (Sócio Pioneiro) - 30% OFF para atrair clientes
+    DESCONTO_PIONEIRO = 0.30 
+    valor_mensal_com_desconto = valor_mensal * (1 - DESCONTO_PIONEIRO)
+    
+    if ciclo == 'YEARLY':
+        # Plano Anual = Paga 10 meses e leva 12 (Mais 2 meses grátis)
+        valor_final = valor_mensal_com_desconto * 10
+        descricao = f"Assinatura LocaPro {org.get_plano_display()} (Anual - Desconto Pioneiro)"
+    else:
+        valor_final = valor_mensal_com_desconto
+        descricao = f"Assinatura LocaPro {org.get_plano_display()} (Mensal - Desconto Pioneiro)"
+    
+    # 3. Criar Assinatura no Asaas
+    assinatura_data = criar_assinatura(org.asaas_customer_id, round(valor_final, 2), ciclo=ciclo, descricao=descricao)
     if assinatura_data and assinatura_data.get('id'):
         org.asaas_subscription_id = assinatura_data['id']
         org.save()

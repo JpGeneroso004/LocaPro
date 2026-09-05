@@ -2,11 +2,95 @@
 {% load static %}
 {% block title %}Planos e Assinatura{% endblock %}
 
+{% block extra_head %}
+<style>
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 200px;
+  height: 40px;
+  background-color: #f1f3f5;
+  border-radius: 20px;
+  margin: 0 auto;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider-bg {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 20px;
+  transition: .4s;
+}
+.slider-btn {
+  position: absolute;
+  height: 32px;
+  width: 96px;
+  left: 4px;
+  bottom: 4px;
+  background-color: #004581;
+  border-radius: 16px;
+  transition: .4s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+input:checked + .slider-bg .slider-btn {
+  transform: translateX(96px);
+  background-color: #198754;
+}
+.toggle-labels {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  font-weight: bold;
+  z-index: 10;
+}
+.toggle-labels span {
+  width: 50%;
+  text-align: center;
+  font-size: 0.9rem;
+  transition: color 0.3s;
+}
+.label-mensal { color: #fff; }
+.label-anual { color: #6c757d; }
+input:checked ~ .toggle-labels .label-mensal { color: #6c757d; }
+input:checked ~ .toggle-labels .label-anual { color: #fff; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4 mb-5">
     <div class="text-center mb-5">
         <h2 class="fw-bold text-primary"><i class="bi bi-rocket-takeoff-fill text-warning"></i> Planos LocaPro</h2>
         <p class="text-muted fs-5">Escale sua locadora de tendas e eventos com a melhor tecnologia do mercado.</p>
+        
+        <!-- SELO DE EARLY ADOPTER -->
+        <div class="d-inline-block bg-warning text-dark px-4 py-2 rounded-pill fw-bold shadow-sm mb-4 border border-dark">
+            <i class="bi bi-stars"></i> OFERTA PIONEIROS: 30% OFF GARANTIDO PARA SEMPRE
+        </div>
+        
+        <!-- TOGGLE MENSAL / ANUAL -->
+        <div class="mt-2 mb-2">
+            <label class="toggle-switch">
+              <input type="checkbox" id="cicloToggle" onchange="toggleCiclo()">
+              <div class="slider-bg">
+                  <div class="slider-btn"></div>
+              </div>
+              <div class="toggle-labels">
+                  <span class="label-mensal">Mensal</span>
+                  <span class="label-anual">Anual</span>
+              </div>
+            </label>
+            <div class="mt-2 text-success fw-bold" id="badgeAnualText" style="display: none; transition: opacity 0.3s;">
+                <i class="bi bi-arrow-up-right-circle-fill"></i> Pague 10, Leve 12 meses (+2 meses GRÁTIS!)
+            </div>
+        </div>
     </div>
 
     {% if user.organizacao.status_assinatura == "ativa" %}
@@ -36,7 +120,16 @@
                     <p class="text-muted small mt-2">Para locadoras em crescimento</p>
                 </div>
                 <div class="card-body d-flex flex-column">
-                    <h1 class="card-title pricing-card-title fw-bold">R$ 97<small class="text-muted fw-light">/mês</small></h1>
+                    <div class="price-mensal">
+                        <h4 class="text-muted text-decoration-line-through mb-0">De R$ 97</h4>
+                        <h1 class="card-title pricing-card-title fw-bold text-success">R$ 67<small class="text-muted fw-light">/mês</small></h1>
+                    </div>
+                    <div class="price-anual" style="display: none;">
+                        <h4 class="text-muted text-decoration-line-through mb-0">De R$ 1.164</h4>
+                        <h1 class="card-title pricing-card-title fw-bold text-success">R$ 679<small class="text-muted fw-light">/ano</small></h1>
+                        <span class="badge bg-success">Economia de R$ 485/ano</span>
+                    </div>
+                    
                     <ul class="list-unstyled mt-4 mb-4 text-start flex-grow-1">
                         <li class="mb-2"><i class="bi bi-check2 text-success fw-bold"></i> Até 50 Eventos por mês</li>
                         <li class="mb-2"><i class="bi bi-check2 text-success fw-bold"></i> Controle de Estoque Básico</li>
@@ -47,6 +140,7 @@
                     <form action="{% url 'empresas:processar_assinatura' %}" method="post">
                         {% csrf_token %}
                         <input type="hidden" name="plano" value="starter">
+                        <input type="hidden" name="ciclo" value="MONTHLY" class="input-ciclo">
                         <button type="submit" class="btn btn-lg w-100 {% if user.organizacao.plano == "starter" %}btn-warning fw-bold text-dark{% else %}btn-outline-primary{% endif %}">
                             {% if user.organizacao.plano == "starter" and user.organizacao.status_assinatura == "ativa" %}Plano Atual{% else %}Assinar Essencial{% endif %}
                         </button>
@@ -64,7 +158,16 @@
                     <p class="text-white-50 small mt-2">O padrão ouro das locadoras</p>
                 </div>
                 <div class="card-body d-flex flex-column">
-                    <h1 class="card-title pricing-card-title fw-bold">R$ 197<small class="text-muted fw-light">/mês</small></h1>
+                    <div class="price-mensal">
+                        <h4 class="text-muted text-decoration-line-through mb-0">De R$ 197</h4>
+                        <h1 class="card-title pricing-card-title fw-bold text-success">R$ 137<small class="text-muted fw-light">/mês</small></h1>
+                    </div>
+                    <div class="price-anual" style="display: none;">
+                        <h4 class="text-muted text-decoration-line-through mb-0">De R$ 2.364</h4>
+                        <h1 class="card-title pricing-card-title fw-bold text-success">R$ 1.379<small class="text-muted fw-light">/ano</small></h1>
+                        <span class="badge bg-success">Economia de R$ 985/ano</span>
+                    </div>
+                    
                     <ul class="list-unstyled mt-4 mb-4 text-start flex-grow-1">
                         <li class="mb-2"><i class="bi bi-check-circle-fill text-primary"></i> <strong>Eventos Ilimitados</strong></li>
                         <li class="mb-2"><i class="bi bi-check-circle-fill text-primary"></i> <strong>Usuários Ilimitados</strong></li>
@@ -75,6 +178,7 @@
                     <form action="{% url 'empresas:processar_assinatura' %}" method="post">
                         {% csrf_token %}
                         <input type="hidden" name="plano" value="pro">
+                        <input type="hidden" name="ciclo" value="MONTHLY" class="input-ciclo">
                         <button type="submit" class="btn btn-lg w-100 {% if user.organizacao.plano == "pro" %}btn-primary fw-bold text-white{% else %}btn-primary text-white{% endif %}">
                             {% if user.organizacao.plano == "pro" and user.organizacao.status_assinatura == "ativa" %}Plano Atual{% else %}Assinar Master{% endif %}
                         </button>
@@ -91,7 +195,16 @@
                     <p class="text-secondary small mt-2">Para franquias e grandes operações</p>
                 </div>
                 <div class="card-body d-flex flex-column">
-                    <h1 class="card-title pricing-card-title fw-bold">R$ 397<small class="text-secondary fw-light">/mês</small></h1>
+                    <div class="price-mensal">
+                        <h4 class="text-secondary text-decoration-line-through mb-0">De R$ 397</h4>
+                        <h1 class="card-title pricing-card-title fw-bold text-success">R$ 277<small class="text-secondary fw-light">/mês</small></h1>
+                    </div>
+                    <div class="price-anual" style="display: none;">
+                        <h4 class="text-secondary text-decoration-line-through mb-0">De R$ 4.764</h4>
+                        <h1 class="card-title pricing-card-title fw-bold text-success">R$ 2.779<small class="text-secondary fw-light">/ano</small></h1>
+                        <span class="badge bg-success">Economia de R$ 1.985/ano</span>
+                    </div>
+
                     <ul class="list-unstyled mt-4 mb-4 text-start flex-grow-1">
                         <li class="mb-2"><i class="bi bi-star-fill text-warning"></i> Tudo do plano Master</li>
                         <li class="mb-2"><i class="bi bi-star-fill text-warning"></i> Multi-Filiais (Estoques isolados)</li>
@@ -99,7 +212,14 @@
                         <li class="mb-2"><i class="bi bi-star-fill text-warning"></i> API Aberta para integrações</li>
                         <li class="mb-2"><i class="bi bi-star-fill text-warning"></i> Suporte VIP WhatsApp 24/7</li>
                     </ul>
-                    <button type="button" class="btn btn-lg btn-outline-warning w-100" onclick="alert('Entre em contato com nosso time de vendas para ativar o plano Infinity.')">Falar com Vendas</button>
+                    <form action="{% url 'empresas:processar_assinatura' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="plano" value="premium">
+                        <input type="hidden" name="ciclo" value="MONTHLY" class="input-ciclo">
+                        <button type="submit" class="btn btn-lg w-100 {% if user.organizacao.plano == "premium" %}btn-warning fw-bold text-dark{% else %}btn-outline-warning{% endif %}">
+                            {% if user.organizacao.plano == "premium" and user.organizacao.status_assinatura == "ativa" %}Plano Atual{% else %}Assinar Infinity{% endif %}
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -162,4 +282,30 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleCiclo() {
+    var isAnual = document.getElementById("cicloToggle").checked;
+    
+    // Atualiza os precos exibidos
+    var pricesMensais = document.querySelectorAll(".price-mensal");
+    var pricesAnuais = document.querySelectorAll(".price-anual");
+    
+    if (isAnual) {
+        pricesMensais.forEach(el => el.style.display = "none");
+        pricesAnuais.forEach(el => el.style.display = "block");
+        document.getElementById("badgeAnualText").style.display = "block";
+    } else {
+        pricesMensais.forEach(el => el.style.display = "block");
+        pricesAnuais.forEach(el => el.style.display = "none");
+        document.getElementById("badgeAnualText").style.display = "none";
+    }
+    
+    // Atualiza os inputs hidden dos formulários
+    var cicloInputs = document.querySelectorAll(".input-ciclo");
+    cicloInputs.forEach(input => {
+        input.value = isAnual ? "YEARLY" : "MONTHLY";
+    });
+}
+</script>
 {% endblock %}
