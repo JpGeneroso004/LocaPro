@@ -9,7 +9,7 @@ class Cliente(models.Model):
     telefone = models.CharField('Telefone', max_length=20, blank=True)
     cpf_cnpj = models.CharField('CPF/CNPJ', max_length=30, blank=True)
     locapoints = models.PositiveIntegerField('LocaPoints Acumulados', default=0)
-    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='clientes', null=True)
+    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='clientes')
     criado_em = models.DateTimeField(auto_now_add=True)
     
     objects = TenantManager()
@@ -51,7 +51,7 @@ class Evento(models.Model):
     conjuntos   = models.ManyToManyField(ConjuntoPalco, blank=True,
                                          verbose_name='Conjuntos de Palco/Piso', related_name='eventos')
     criado_em   = models.DateTimeField(auto_now_add=True)
-    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='eventos', null=True)
+    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='eventos')
 
     objects = TenantManager()
 
@@ -109,7 +109,7 @@ class Contrato(models.Model):
 
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
-    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='contratos', null=True)
+    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='contratos')
 
     objects = TenantManager()
 

@@ -1,6 +1,6 @@
 import threading
-from django.utils.deprecation import MiddlewareMixin
 from django.shortcuts import redirect
+from django.utils.deprecation import MiddlewareMixin
 from django.conf import settings
 from django.urls import resolve
 
@@ -9,14 +9,18 @@ _thread_locals = threading.local()
 def get_current_user():
     return getattr(_thread_locals, 'user', None)
 
-class TenantMiddleware(MiddlewareMixin):
-    def process_request(self, request):
-        _thread_locals.user = request.user
+class TenantMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
 
-    def process_response(self, request, response):
-        if hasattr(_thread_locals, 'user'):
-            del _thread_locals.user
-        return response
+    def __call__(self, request):
+        _thread_locals.user = getattr(request, 'user', None)
+        try:
+            response = self.get_response(request)
+            return response
+        finally:
+            if hasattr(_thread_locals, 'user'):
+                del _thread_locals.user
 
 class LoginRequiredMiddleware(MiddlewareMixin):
     def process_request(self, request):

@@ -59,13 +59,14 @@ def dashboard(request):
     tendas_manutencao = Tenda.objects.filter(status='manutencao').count()
     tendas_disponiveis = total_tendas - tendas_em_uso - tendas_manutencao
 
-    total_placas = 30
+    # Considerar conjuntos globais da locadora
+    todos_conjuntos = ConjuntoPalco.objects.all()
+    total_placas = sum(c.quantidade_placas for c in todos_conjuntos)
     
     # Placas em uso HOJE
     placas_em_uso = sum(e.total_placas() for e in eventos_ativos_hoje)
     
     # Considerar também conjuntos em manutenção
-    todos_conjuntos = ConjuntoPalco.objects.all()
     placas_manutencao = sum(c.quantidade_placas for c in todos_conjuntos if c.status == 'manutencao')
     
     placas_disponiveis = max(0, total_placas - placas_em_uso - placas_manutencao)
@@ -501,7 +502,9 @@ from django.http import JsonResponse
 from inventario.models import Tenda, ConjuntoPalco
 from inventario.utils import verificar_disponibilidade_item
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def obter_equipamentos_disponiveis(request):
     try:
         inicio_str = request.GET.get('inicio')

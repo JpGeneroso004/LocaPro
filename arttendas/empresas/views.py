@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib import messages
+from django.conf import settings
 from .models import Organizacao, Usuario
 from django.db import transaction
 
@@ -23,8 +24,8 @@ def cadastro_locadora(request):
                 messages.error(request, 'Preencha todos os campos.')
                 return render(request, 'empresas/cadastro.html', {'empresa_nome': empresa_nome, 'nome': nome, 'email': email})
                 
-            if len(senha) < 6:
-                messages.error(request, 'A senha deve ter pelo menos 6 caracteres.')
+            if len(senha) < 8:
+                messages.error(request, 'A senha deve ter pelo menos 8 caracteres.')
                 return render(request, 'empresas/cadastro.html', {'empresa_nome': empresa_nome, 'nome': nome, 'email': email})
                 
             if Usuario.objects.filter(username=email).exists():

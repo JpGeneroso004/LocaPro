@@ -49,7 +49,7 @@ class Tenda(models.Model):
     tipo      = models.CharField('Tipo', max_length=20, choices=TIPOS, default='piramidal')
     status    = models.CharField('Status', max_length=20, choices=STATUS, default='ativo')
     observacoes = models.TextField('Observações', blank=True)
-    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='tendas', null=True)
+    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='tendas')
 
     objects = models.Manager() # The default one is needed sometimes
     tenant_objects = models.Manager() # Wait, just override default manager
@@ -98,7 +98,7 @@ class ConjuntoPalco(models.Model):
     )
     status      = models.CharField('Status', max_length=20, choices=STATUS, default='ativo')
     observacoes = models.TextField('Observações', blank=True)
-    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='conjuntos', null=True)
+    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='conjuntos')
 
     objects = TenantManager()
 
