@@ -42,7 +42,15 @@ def cadastro_locadora(request):
 
         try:
             with transaction.atomic():
-                org = Organizacao.objects.create(nome=empresa_nome, indicado_por=indicado_por)
+                from datetime import date
+                import datetime
+                
+                org = Organizacao.objects.create(
+                    nome=empresa_nome, 
+                    indicado_por=indicado_por,
+                    status_assinatura='trial',
+                    vencimento_trial=date.today() + datetime.timedelta(days=7)
+                )
                 
                 if is_google_user:
                     # Associa a locadora ao usuário do Google que já está logado
@@ -66,8 +74,9 @@ def cadastro_locadora(request):
                     if user_auth:
                         login(request, user_auth)
                         
-            messages.success(request, 'Conta criada com sucesso! Bem-vindo(a).')
-            return redirect('eventos:dashboard')
+            # SaaS Onboarding Flow: Redirect immediately to Pricing Page
+            messages.success(request, 'Locadora criada! Você ganhou 7 dias de acesso total grátis.')
+            return redirect('empresas:assinatura')
         except Exception as e:
             messages.error(request, f'Erro ao criar conta: {str(e)}')
             
@@ -220,6 +229,10 @@ def assinatura(request):
     if not org:
         return redirect('empresas:cadastro')
         
+    if request.user.cargo != 'dono':
+        messages.error(request, 'Apenas o proprietário (dono) da locadora pode gerenciar a assinatura.')
+        return redirect('eventos:dashboard')
+        
     context = {
         'org': org,
         'dias_trial': 0
@@ -239,6 +252,10 @@ import json
 @login_required
 def processar_assinatura(request):
     org = request.user.organizacao
+    if request.user.cargo != 'dono':
+        messages.error(request, 'Acesso Negado.')
+        return redirect('eventos:dashboard')
+        
     if request.method == 'POST':
         novo_plano = request.POST.get('plano')
         if novo_plano in ['starter', 'pro', 'premium']:

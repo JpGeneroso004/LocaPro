@@ -91,6 +91,14 @@ input:checked ~ .toggle-labels .label-anual { color: #fff; }
                 <i class="bi bi-arrow-up-right-circle-fill"></i> Pague 10, Leve 12 meses (+2 meses GRÁTIS!)
             </div>
         </div>
+        
+        {% if user.organizacao.status_assinatura == 'trial' %}
+        <div class="mt-4">
+            <a href="{% url 'eventos:dashboard' %}" class="btn btn-outline-secondary fw-bold rounded-pill px-4">
+                Pular etapa e usar meus 7 dias grátis <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+        {% endif %}
     </div>
 
     {% if user.organizacao.status_assinatura == "ativa" %}

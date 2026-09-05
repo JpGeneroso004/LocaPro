@@ -249,23 +249,33 @@
         <li class="nav-item">
           <a class="nav-link fw-bold {% block nav_contratos %}{% endblock %}" href="{% url 'eventos:contratos_lista' %}">Contratos</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link fw-bold" href="{% url 'empresas:configuracoes' %}"><i class="bi bi-gear-fill"></i> Empresa</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link fw-bold text-warning" href="{% url 'empresas:assinatura' %}"><i class="bi bi-credit-card-2-front-fill"></i> Assinatura</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link fw-bold" href="{% url 'empresas:equipe' %}"><i class="bi bi-people-fill"></i> Equipe</a>
-        </li>
-        {% if user.is_superuser %}
-        <li class="nav-item">
-          <a class="nav-link fw-bold text-danger" href="{% url 'empresas:super_admin' %}"><i class="bi bi-shield-lock-fill"></i> Super-Admin</a>
-        </li>
-        {% endif %}
-        <li class="nav-item">
-          <a class="nav-link fw-bold text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Sair</a>
-        </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'configuracoes' %}active{% endif %}" href="{% url 'empresas:configuracoes' %}">
+              <i class="bi bi-building"></i> <span>Empresa</span>
+            </a>
+          </li>
+          
+          {% if user.cargo == 'dono' %}
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'assinatura' %}active text-warning fw-bold{% endif %}" href="{% url 'empresas:assinatura' %}">
+              <i class="bi bi-star-fill text-warning"></i> <span>Planos LocaPro</span>
+            </a>
+          </li>
+          {% endif %}
+          
+          <li class="nav-item">
+            <a class="nav-link fw-bold {% block nav_equipe %}{% endblock %}" href="{% url 'empresas:equipe' %}">Equipe</a>
+          </li>
+          
+          {% if user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link fw-bold text-danger" href="{% url 'admin:index' %}">Painel Admin</a>
+          </li>
+          {% endif %}
+          
+          <li class="nav-item">
+            <a class="nav-link fw-bold text-danger" href="{% url 'account_logout' %}"><i class="bi bi-box-arrow-right"></i> Sair</a>
+          </li>
       </ul>
       <a href="{% url 'eventos:novo' %}" class="btn btn-dark fw-bold me-3">+ Novo Evento</a>
       <button class="btn btn-link theme-toggle-icon text-decoration-none theme-toggle p-0 fs-5" title="Alternar tema">
