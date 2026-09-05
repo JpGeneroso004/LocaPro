@@ -16,15 +16,24 @@ def cadastro_locadora(request):
 
         if not (empresa_nome and nome and email and senha):
             messages.error(request, 'Preencha todos os campos.')
-            return render(request, 'empresas/cadastro.html')
+            return render(request, 'empresas/cadastro.html', {'empresa_nome': empresa_nome, 'nome': nome, 'email': email})
+            
+        if len(senha) < 6:
+            messages.error(request, 'A senha deve ter pelo menos 6 caracteres.')
+            return render(request, 'empresas/cadastro.html', {'empresa_nome': empresa_nome, 'nome': nome, 'email': email})
             
         if Usuario.objects.filter(username=email).exists():
             messages.error(request, 'Este e-mail já está em uso.')
-            return render(request, 'empresas/cadastro.html')
+            return render(request, 'empresas/cadastro.html', {'empresa_nome': empresa_nome, 'nome': nome, 'email': email})
+
+        ref_id = request.GET.get('ref')
+        indicado_por = None
+        if ref_id and ref_id.isdigit():
+            indicado_por = Organizacao.objects.filter(pk=ref_id).first()
 
         try:
             with transaction.atomic():
-                org = Organizacao.objects.create(nome=empresa_nome)
+                org = Organizacao.objects.create(nome=empresa_nome, indicado_por=indicado_por)
                 user = Usuario.objects.create_user(
                     username=email,
                     email=email,

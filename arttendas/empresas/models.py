@@ -27,6 +27,10 @@ class Organizacao(models.Model):
     pontos_por_real = models.PositiveIntegerField('Quantos pontos o cliente ganha a cada R$ 1 pago?', default=1)
     taxa_resgate = models.PositiveIntegerField('Quantos pontos equivalem a R$ 1 de desconto?', default=100)
     
+    # Indique e Ganhe (B2B Referral)
+    codigo_indicacao = models.CharField('Código de Indicação', max_length=20, blank=True, unique=True, null=True)
+    indicado_por = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='indicados')
+    
     criado_em = models.DateTimeField(auto_now_add=True)
     
     class Meta:
