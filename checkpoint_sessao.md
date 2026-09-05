@@ -37,3 +37,7 @@ Daqui pra frente, podemos desenvolver features novas, como Automação por Whats
 - **KPIs em Tempo Real:** Faturamento Bruto do Mês, Sinais Recebidos e Saldo a Receber.
 - **Controle de Assinaturas:** Lista dos contratos faturados no mês acompanhada do seu Status (Assinado vs Pendente).
 - **Navegação Global:** O link para Finanças foi incorporado tanto na barra superior de computadores quanto no menu flutuante inferior dos celulares.
+
+### Extras: Implementações do Diagnóstico Avançado
+- **Cache de Motor de Inventário:** Implementado django.core.cache nas verificações de disponibilidade (aliviando a carga do banco) com invalidação limpa no Evento.save().
+- **Devoluções Antecipadas (Edge Case):** Novo campo data_devolucao_real no Evento. Quando o contrato é concluído antes do previsto, os equipamentos são liberados antecipadamente da janela de bloqueio.

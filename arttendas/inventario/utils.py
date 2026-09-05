@@ -2,6 +2,8 @@ from datetime import datetime, time, timedelta
 from django.db.models import Q
 from django.utils import timezone
 from eventos.models import Evento
+from django.core.cache import cache
+import hashlib
 
 def _make_aware_safe(dt):
     if timezone.is_naive(dt):
@@ -19,12 +21,25 @@ def verificar_disponibilidade_item(item, data_montagem_nova, data_desmontagem_no
     data_montagem_nova = _make_aware_safe(data_montagem_nova)
     data_desmontagem_nova = _make_aware_safe(data_desmontagem_nova)
     
+    # Gera chave de cache baseada nos parâmetros (Performance - Etapa 3 do Plano)
+    item_type = 'T' if isinstance(item, Tenda) else 'C'
+    cache_key_raw = f'disp_{item_type}_{item.pk}_{data_montagem_nova}_{data_desmontagem_nova}_{evento_id_ignorado}'
+    cache_key = hashlib.md5(cache_key_raw.encode('utf-8')).hexdigest()
+    
+    cached_result = cache.get(cache_key)
+    if cached_result is not None:
+        return cached_result
+    
     nome_item = getattr(item, 'codigo', getattr(item, 'nome', str(item)))
     
     if item.status == 'manutencao':
-        return False, f"O item {nome_item} está em manutenção."
+        msg = f"O item {nome_item} está em manutenção."
+        cache.set(cache_key, (False, msg), 300)
+        return False, msg
     if item.status == 'baixado':
-        return False, f"O item {nome_item} foi descartado/vendido e não pode ser agendado."
+        msg = f"O item {nome_item} foi descartado/vendido e não pode ser agendado."
+        cache.set(cache_key, (False, msg), 300)
+        return False, msg
 
     filtros = Q(status__in=['agendado', 'em_andamento'])
     if isinstance(item, Tenda):
@@ -38,7 +53,12 @@ def verificar_disponibilidade_item(item, data_montagem_nova, data_desmontagem_no
         
     for ev in eventos_bd:
         ev_dt_inicio = _make_aware_safe(datetime.combine(ev.data_inicio, ev.hora_inicio if ev.hora_inicio else time.min))
-        ev_dt_fim = _make_aware_safe(datetime.combine(ev.data_fim, ev.hora_fim if ev.hora_fim else time.max))
+        
+        # Otimização de devolução antecipada
+        if ev.data_devolucao_real:
+            ev_dt_fim = ev.data_devolucao_real
+        else:
+            ev_dt_fim = _make_aware_safe(datetime.combine(ev.data_fim, ev.hora_fim if ev.hora_fim else time.max))
         
         # Bloqueio inicia 24h antes da montagem agendada (buffer logístico)
         ev_dt_bloqueio_inicio = ev_dt_inicio - timedelta(hours=24)
@@ -54,15 +74,23 @@ def verificar_disponibilidade_item(item, data_montagem_nova, data_desmontagem_no
                     item_livre = _buscar_item_identico_livre(item, data_montagem_nova, data_desmontagem_nova, evento_id_ignorado)
                     if item_livre:
                         nome_livre = getattr(item_livre, 'codigo', getattr(item_livre, 'nome', str(item_livre)))
-                        return False, f"O item {nome_item} tem uma transição apertada neste dia pelo evento '{ev.nome}' até {ev_dt_fim.strftime('%d/%m/%Y %H:%M')}. Existe uma opção idêntica e 100% livre: selecione '{nome_livre}'."
+                        msg = f"O item {nome_item} tem uma transição apertada neste dia pelo evento '{ev.nome}' até {ev_dt_fim.strftime('%d/%m/%Y %H:%M')}. Existe uma opção idêntica e 100% livre: selecione '{nome_livre}'."
+                        cache.set(cache_key, (False, msg), 300)
+                        return False, msg
                     else:
                         # Não há opção idêntica, mas o horário permite transição
+                        cache.set(cache_key, (True, None), 300)
                         return True, None
                 else:
-                    return False, f"O item {nome_item} está em uso pelo evento '{ev.nome}' até {ev_dt_fim.strftime('%d/%m/%Y %H:%M')}. A nova montagem precisaria ser APÓS esse horário."
+                    msg = f"O item {nome_item} está em uso pelo evento '{ev.nome}' até {ev_dt_fim.strftime('%d/%m/%Y %H:%M')}. A nova montagem precisaria ser APÓS esse horário."
+                    cache.set(cache_key, (False, msg), 300)
+                    return False, msg
             
-            return False, f"O item {nome_item} está em uso/preparação pelo evento '{ev.nome}' até {ev_dt_fim.strftime('%d/%m/%Y %H:%M')}."
+            msg = f"O item {nome_item} está em uso/preparação pelo evento '{ev.nome}' até {ev_dt_fim.strftime('%d/%m/%Y %H:%M')}."
+            cache.set(cache_key, (False, msg), 300)
+            return False, msg
             
+    cache.set(cache_key, (True, None), 300)
     return True, None
 
 def _buscar_item_identico_livre(item, dt_inicio, dt_fim, evento_id_ignorado=None):
@@ -90,7 +118,10 @@ def _buscar_item_identico_livre(item, dt_inicio, dt_fim, evento_id_ignorado=None
         livre = True
         for ev in evs:
             e_inicio = _make_aware_safe(datetime.combine(ev.data_inicio, ev.hora_inicio if ev.hora_inicio else time.min))
-            e_fim = _make_aware_safe(datetime.combine(ev.data_fim, ev.hora_fim if ev.hora_fim else time.max))
+            if ev.data_devolucao_real:
+                e_fim = ev.data_devolucao_real
+            else:
+                e_fim = _make_aware_safe(datetime.combine(ev.data_fim, ev.hora_fim if ev.hora_fim else time.max))
             e_bloq = e_inicio - timedelta(hours=24)
             
             if dt_inicio <= e_fim and dt_fim >= e_bloq:

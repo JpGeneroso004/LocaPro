@@ -43,8 +43,11 @@ class Evento(models.Model):
     longitude  = models.DecimalField('Longitude', max_digits=10, decimal_places=7, null=True, blank=True)
     data_inicio = models.DateField('Data de Início', db_index=True)
     hora_inicio = models.TimeField('Horário de Início', null=True, blank=True)
-    data_fim    = models.DateField('Data de Fim', db_index=True)
-    hora_fim    = models.TimeField('Horário de Fim', null=True, blank=True)
+    data_fim    = models.DateField('Data de Desmontagem', db_index=True)
+    hora_fim    = models.TimeField('Horário de Desmontagem', null=True, blank=True)
+    
+    # Edge Case: Devoluções Antecipadas
+    data_devolucao_real = models.DateTimeField('Data e Hora Real de Devolução', null=True, blank=True, help_text="Preenchido caso o evento termine e os itens sejam devolvidos ANTES da Data de Desmontagem prevista.")
     status      = models.CharField('Status', max_length=20, choices=STATUS, default='agendado', db_index=True)
     observacoes = models.TextField('Observações', blank=True)
     tendas      = models.ManyToManyField(Tenda, blank=True, verbose_name='Tendas', related_name='eventos')

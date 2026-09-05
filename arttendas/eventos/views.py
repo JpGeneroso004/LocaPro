@@ -304,6 +304,7 @@ def concluir_evento(request, pk):
     
     if evento.status != 'concluido':
         evento.status = 'concluido'
+        evento.data_devolucao_real = timezone.now()
         evento.save()
         
         # Gera LocaPoints se tiver contrato e fidelidade ativa
