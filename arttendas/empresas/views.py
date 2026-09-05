@@ -179,3 +179,81 @@ def assinatura(request):
         context['dias_trial'] = max(0, delta.days)
         
     return render(request, 'empresas/assinatura.html', context)
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+
+@login_required
+def processar_assinatura(request):
+    org = request.user.organizacao
+    if org.asaas_subscription_id:
+        messages.info(request, "Você já possui uma assinatura ativa ou em processamento.")
+        return redirect('empresas:assinatura')
+        
+    from .asaas import criar_cliente, criar_assinatura
+    
+    # 1. Criar ou buscar Customer no Asaas
+    if not org.asaas_customer_id:
+        cliente_data = criar_cliente(org.nome, request.user.email, org.cnpj)
+        if cliente_data and cliente_data.get('id'):
+            org.asaas_customer_id = cliente_data['id']
+            org.save()
+        else:
+            messages.error(request, "Erro ao conectar com o gateway de pagamento (Asaas). Verifique a API Key.")
+            return redirect('empresas:assinatura')
+            
+    # 2. Criar Assinatura (ex: R$ 97,00 por mês)
+    # Você pode parametrizar esse valor depois
+    VALOR_PLANO = 97.00 
+    
+    assinatura_data = criar_assinatura(org.asaas_customer_id, VALOR_PLANO)
+    if assinatura_data and assinatura_data.get('id'):
+        org.asaas_subscription_id = assinatura_data['id']
+        org.save()
+        
+        # Redireciona para o link de pagamento da fatura gerada
+        # (O Asaas não retorna o invoiceUrl na assinatura, precisamos pegar da cobrança gerada,
+        # mas por simplicidade, podemos apenas informar o usuário ou buscar a cobrança).
+        messages.success(request, "Fatura gerada com sucesso! Verifique seu e-mail para pagamento.")
+    else:
+        messages.error(request, "Erro ao criar assinatura no gateway.")
+        
+    return redirect('empresas:assinatura')
+
+@csrf_exempt
+def webhook_asaas(request):
+    """
+    Recebe os pings do Asaas sobre o status do pagamento.
+    Deve ser configurado no painel do Asaas apontando para: https://seudominio.com/empresas/webhook/asaas/
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            event = data.get('event')
+            payment = data.get('payment', {})
+            
+            customer_id = payment.get('customer')
+            subscription_id = payment.get('subscription')
+            
+            if not customer_id:
+                return JsonResponse({"status": "ignored"})
+                
+            org = Organizacao.objects.filter(asaas_customer_id=customer_id).first()
+            if not org:
+                return JsonResponse({"status": "not_found"}, status=404)
+                
+            # Pagamento confirmado (PIX, Cartão ou Boleto pago)
+            if event in ['PAYMENT_RECEIVED', 'PAYMENT_CONFIRMED']:
+                org.status_assinatura = 'ativa'
+                org.save()
+                
+            # Pagamento atrasado ou recusado
+            elif event in ['PAYMENT_OVERDUE', 'PAYMENT_REFUNDED', 'PAYMENT_CHARGEBACK_REQUESTED']:
+                org.status_assinatura = 'inadimplente'
+                org.save()
+                
+            return JsonResponse({"status": "success"})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+    return JsonResponse({"error": "Method not allowed"}, status=405)
