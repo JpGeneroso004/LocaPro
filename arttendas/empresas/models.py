@@ -9,6 +9,7 @@ class Organizacao(models.Model):
     estado = models.CharField('Estado/Província', max_length=50, blank=True)
     pais = models.CharField('País', max_length=50, default='Brasil')
     moeda = models.CharField('Moeda Base', max_length=10, default='BRL', help_text='BRL, USD, EUR...')
+    chave_pix = models.CharField('Chave PIX (Recebimento)', max_length=100, blank=True, help_text='Se preenchida, aparecerá como QR Code/Chave nos contratos.')
     logo = models.ImageField('Logo da Empresa', upload_to='logos/', null=True, blank=True)
     cor_primaria = models.CharField('Cor Principal', max_length=7, default='#004581', help_text='Cor tema da locadora')
     clausulas_padrao = models.TextField('Cláusulas Padrão do Contrato', blank=True, default='1. RESPONSABILIDADE DO LOCAL: O Contratante é responsável por autorizações...\n2. FORÇA MAIOR: A Contratada isenta-se...')

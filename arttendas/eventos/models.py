@@ -5,6 +5,7 @@ from empresas.models import TenantManager
 
 class Cliente(models.Model):
     nome = models.CharField('Nome', max_length=200)
+    email = models.EmailField('E-mail do Cliente', blank=True, help_text='Necessário para avisos automáticos e envio de contratos')
     telefone = models.CharField('Telefone', max_length=20, blank=True)
     cpf_cnpj = models.CharField('CPF/CNPJ', max_length=30, blank=True)
     locapoints = models.PositiveIntegerField('LocaPoints Acumulados', default=0)

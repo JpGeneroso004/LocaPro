@@ -27,6 +27,30 @@
   </div>
 </div>
 
+<!-- NOVAS MÉTRICAS DE BI (Business Intelligence) -->
+<div class="row g-2 mb-4">
+  <div class="col-md-6">
+    <div class="card h-100 bg-primary bg-gradient text-white p-3 shadow-sm border-0 position-relative overflow-hidden">
+      <i class="bi bi-graph-up-arrow position-absolute" style="font-size: 4rem; opacity: 0.2; right: -10px; bottom: -10px;"></i>
+      <small class="fw-bold text-white-50 text-uppercase">Faturamento Anual (YTD)</small>
+      <h3 class="fw-bold mb-0 mt-1">R$ {{ faturamento_ano|floatformat:2 }}</h3>
+      <small class="mt-2 text-white"><i class="bi bi-calendar-check"></i> Receita total gerada no ano atual.</small>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100 bg-light p-3 shadow-sm border-0 border-start border-4 border-warning">
+      <small class="fw-bold text-muted text-uppercase">Material Mais Lucrativo</small>
+      {% if tenda_mais_alugada %}
+        <h4 class="fw-bold text-dark mb-0 mt-1"><i class="bi bi-star-fill text-warning"></i> {{ tenda_mais_alugada.identificacao }} ({{ tenda_mais_alugada.tamanho }})</h4>
+        <small class="mt-2 text-muted"><strong>{{ tenda_mais_alugada.num_alugueis }} locações</strong> neste ano.</small>
+      {% else %}
+        <h4 class="fw-bold text-muted mb-0 mt-1">Nenhum dado</h4>
+        <small class="mt-2 text-muted">Realize locações para gerar estatísticas.</small>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
 <div class="row g-2 mb-4">
   <div class="col-12 col-md-4">
     <div class="card h-100 bg-body border border-primary border-2 text-center p-3 shadow-sm">

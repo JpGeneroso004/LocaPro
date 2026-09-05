@@ -93,6 +93,19 @@ def dashboard(request):
     eventos_futuros = eventos.filter(status__in=['agendado', 'em_andamento'])
     previsao_faturamento = sum(e.contrato.valor_final for e in eventos_futuros if hasattr(e, 'contrato'))
 
+    # --- BI FINANCEIRO E MÉTRICAS ---
+    from django.db.models import Sum, Count
+    
+    # Faturamento do Mês Atual (Eventos concluídos ou agendados/em andamento neste mês)
+    eventos_mes = eventos.filter(data_inicio__month=hoje.month, data_inicio__year=hoje.year)
+    faturamento_mes = eventos_mes.exclude(status='cancelado').aggregate(total=Sum('valor_total'))['total'] or 0.00
+    
+    # Receita Anual (Eventos deste ano)
+    faturamento_ano = eventos.filter(data_inicio__year=hoje.year).exclude(status='cancelado').aggregate(total=Sum('valor_total'))['total'] or 0.00
+    
+    # Tenda mais popular (Mais alugada)
+    tenda_mais_alugada = Tenda.objects.filter(eventos__in=eventos.exclude(status='cancelado')).annotate(num_alugueis=Count('eventos')).order_by('-num_alugueis').first()
+
     context = {
         'total_eventos': total_eventos, 'ativos': ativos,
         'concluidos': concluidos, 'cancelados': cancelados,
@@ -104,6 +117,8 @@ def dashboard(request):
         'eventos_mapa_json': json.dumps(eventos_mapa, ensure_ascii=False),
         'faturamento_mes': faturamento_mes,
         'previsao_faturamento': previsao_faturamento,
+        'faturamento_ano': faturamento_ano,
+        'tenda_mais_alugada': tenda_mais_alugada,
     }
     return render(request, 'eventos/dashboard.html', context)
 

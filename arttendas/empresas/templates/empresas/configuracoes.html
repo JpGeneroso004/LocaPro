@@ -56,7 +56,14 @@
                             </div>
                         </div>
 
-                        <h5 class="fw-bold text-primary mt-4 mb-3 border-bottom pb-2">Identidade Visual</h5>
+                        <h5 class="fw-bold text-primary mt-4 mb-3 border-bottom pb-2">Identidade Visual & Recebimento</h5>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold"><i class="bi bi-qr-code text-success"></i> Chave PIX</label>
+                                {{ form.chave_pix }}
+                                <small class="text-muted">Se preenchida, um QR Code de pagamento será impresso nos contratos em PDF.</small>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Logo da Empresa</label>
