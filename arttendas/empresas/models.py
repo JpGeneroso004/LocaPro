@@ -2,7 +2,17 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class Organizacao(models.Model):
+    NICHOS = [
+        ('tendas', 'Tendas e Estruturas'),
+        ('som_luz', 'Som, Iluminação e Audiovisual'),
+        ('brinquedos', 'Brinquedos Infláveis e Recreação'),
+        ('mobiliario', 'Mobiliário (Mesas, Cadeiras, Louças)'),
+        ('geradores', 'Geradores e Climatização'),
+        ('multi', 'Multi-Segmento / Outros')
+    ]
+    
     nome = models.CharField('Nome da Empresa', max_length=150)
+    segmento = models.CharField('Nicho de Mercado', max_length=20, choices=NICHOS, default='multi')
     cnpj = models.CharField('CNPJ', max_length=20, blank=True)
     telefone = models.CharField('Telefone Principal', max_length=20, blank=True)
     cidade = models.CharField('Cidade Sede', max_length=100, blank=True, help_text='Ex: São Paulo, Miami')

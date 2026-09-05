@@ -8,8 +8,9 @@
 </div>
 
 <div class="card shadow-sm border-0 p-4 mb-5">
-  <form method="post">
+  <form method="post" id="eventoForm">
     {% csrf_token %}
+    <input type="hidden" name="itens_json" id="itens_json" value="[]">
     
     {% if form.errors %}
       <div class="alert alert-danger mb-4">
@@ -95,101 +96,119 @@
       {{ form.observacoes }}
     </div>
 
-    <h5 class="fw-bold mb-3 text-secondary border-bottom pb-2 mt-4">Alocação de Equipamentos</h5>
-    <div class="mb-4">
-      <label class="form-label fw-bold d-block"><i class="bi bi-tent"></i> Selecionar Tendas</label>
-      {{ form.tendas }}
-      <small class="text-muted d-block mt-1">Segure Ctrl (ou Cmd) para selecionar múltiplas tendas.</small>
-    </div>
+    <h5 class="fw-bold mb-3 text-secondary border-bottom pb-2 mt-4">Equipamentos do Evento</h5>
     
-    <div class="mb-4">
-      <label class="form-label fw-bold d-block"><i class="bi bi-box"></i> Selecionar Conjuntos</label>
-      {{ form.conjuntos }}
-      <small class="text-muted d-block mt-1">Segure Ctrl (ou Cmd) para selecionar múltiplos conjuntos.</small>
+    <!-- Painel de Seleção de Itens (Dinâmico) -->
+    <div id="dynamic-items-container" class="mb-4 p-3 border rounded bg-light">
+      <p class="text-muted small mb-2"><i class="bi bi-info-circle"></i> Preencha as datas acima para ver a disponibilidade do estoque.</p>
+      
+      <div class="input-group mb-3">
+        <select id="equipamentoSelect" class="form-select">
+          <option value="" disabled selected>Carregando catálogo...</option>
+        </select>
+        <input type="number" id="equipamentoQtd" class="form-control" placeholder="Qtd" value="1" min="1" style="max-width: 100px;">
+        <button type="button" id="btnAddItem" class="btn btn-outline-primary" disabled><i class="bi bi-plus-lg"></i> Adicionar</button>
+      </div>
+      
+      <ul id="listaItens" class="list-group">
+        <!-- Itens injetados via JS -->
+      </ul>
     </div>
 
     <div class="d-grid mt-5">
-      <button type="submit" class="btn btn-warning btn-lg shadow fw-bold text-dark">SALVAR EVENTO</button>
+      <button type="submit" id="submitBtn" class="btn btn-warning btn-lg shadow fw-bold text-dark">SALVAR EVENTO</button>
     </div>
   </form>
 </div>
 {% endblock %}
 
 {% block extra_head %}
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const dInicioDia = document.getElementById("id_data_inicio_0");
   const dInicioMes = document.getElementById("id_data_inicio_1");
   const dInicioAno = document.getElementById("id_data_inicio_2");
-  
   const dFimDia = document.getElementById("id_data_fim_0");
   const dFimMes = document.getElementById("id_data_fim_1");
   const dFimAno = document.getElementById("id_data_fim_2");
   
-  const horaInicio = document.getElementById("id_hora_inicio");
-  const horaFim = document.getElementById("id_hora_fim");
+  const selectEq = document.getElementById("equipamentoSelect");
+  const inputQtd = document.getElementById("equipamentoQtd");
+  const btnAdd = document.getElementById("btnAddItem");
+  const listaItens = document.getElementById("listaItens");
+  const hiddenJson = document.getElementById("itens_json");
+  const form = document.getElementById("eventoForm");
   
-  const tendasSelect = document.getElementById("id_tendas");
-  const conjuntosSelect = document.getElementById("id_conjuntos");
+  const eventoId = "{{ form.instance.id|default:'' }}";
   
-  const eventoId = "{{ evento.id|default:'' }}";
+  // Itens atuais (Edição)
+  let myItems = {{ itens_atuais_json|default:"[]"|safe }};
   
-  console.log('DEBUG JS:', dInicioDia, dFimDia, tendasSelect);
+  let catalogoDisponivel = []; // Array de objetos {id, nome, qtd_livre}
 
-  function getSelectedValues(selectEl) {
-    if (!selectEl) return [];
-    return Array.from(selectEl.selectedOptions).map(opt => opt.value);
+  function renderCart() {
+    listaItens.innerHTML = '';
+    myItems.forEach((item, index) => {
+      const li = document.createElement('li');
+      li.className = 'list-group-item d-flex justify-content-between align-items-center';
+      
+      let badgeColor = 'bg-primary';
+      
+      // Validação rápida de limite se o catálogo estiver carregado
+      const eq_cat = catalogoDisponivel.find(e => e.id == item.id);
+      if (eq_cat && item.qtd > eq_cat.qtd_livre) {
+         badgeColor = 'bg-danger';
+         li.innerHTML += `<div class="text-danger small w-100 mt-1">Conflito: Apenas ${eq_cat.qtd_livre} disponíveis no estoque neste período.</div>`;
+      }
+      
+      li.innerHTML = `
+        <div>
+           <strong>${item.nome}</strong>
+        </div>
+        <div class="d-flex align-items-center">
+           <span class="badge ${badgeColor} rounded-pill me-3">${item.qtd}x</span>
+           <button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="removeItem(${index})"><i class="bi bi-trash"></i></button>
+        </div>
+      `;
+      listaItens.appendChild(li);
+    });
+    hiddenJson.value = JSON.stringify(myItems);
   }
-
-  function setPlaceholder(selectEl, message) {
-    if (!selectEl) return;
-    selectEl.innerHTML = '';
-    const opt = document.createElement('option');
-    opt.text = message;
-    opt.disabled = true;
-    opt.selected = true;
-    selectEl.appendChild(opt);
+  
+  window.removeItem = function(index) {
+    myItems.splice(index, 1);
+    renderCart();
   }
-
-  function lockSelects() {
-    if (tendasSelect) {
-      tendasSelect.disabled = true;
-      setPlaceholder(tendasSelect, 'Preencha as datas de montagem e desmontagem primeiro');
-    }
-    if (conjuntosSelect) {
-      conjuntosSelect.disabled = true;
-      setPlaceholder(conjuntosSelect, 'Preencha as datas de montagem e desmontagem primeiro');
-    }
-  }
-
-  function populateSelect(selectEl, items, emptyMessage, selectedValues) {
-    if (!selectEl) return;
-    selectEl.innerHTML = '';
-    selectEl.disabled = false;
+  
+  btnAdd.addEventListener('click', () => {
+    const opt = selectEq.options[selectEq.selectedIndex];
+    if (!opt || opt.disabled) return;
     
-    if (items.length === 0) {
-      setPlaceholder(selectEl, emptyMessage);
+    const id = opt.value;
+    const nome = opt.text.split('(')[0].trim();
+    const qtd = parseInt(inputQtd.value) || 1;
+    
+    const max = parseInt(opt.dataset.max) || 0;
+    
+    // Verifica se já existe, se sim soma
+    const exist = myItems.find(i => i.id == id);
+    if (exist) {
+      if (exist.qtd + qtd > max) {
+         alert(`Não é possível adicionar. Estoque máximo disponível para a data é ${max}.`);
+         return;
+      }
+      exist.qtd += qtd;
     } else {
-      items.forEach(item => {
-        const opt = document.createElement('option');
-        opt.value = item.id;
-        opt.text = item.nome;
-        if (selectedValues.includes(String(item.id))) {
-          opt.selected = true;
-        }
-        selectEl.appendChild(opt);
-      });
+      if (qtd > max) {
+         alert(`Estoque insuficiente. Máximo disponível: ${max}.`);
+         return;
+      }
+      myItems.push({id: parseInt(id), nome: nome, qtd: qtd});
     }
     
-    // Atualiza o Select2
-    if (window.jQuery) {
-      $(selectEl).trigger('change.select2');
-    }
-  }
+    inputQtd.value = 1;
+    renderCart();
+  });
 
   function getIsoDate(diaEl, mesEl, anoEl) {
     if (!diaEl || !mesEl || !anoEl) return null;
@@ -204,124 +223,57 @@ document.addEventListener("DOMContentLoaded", function() {
     return null;
   }
 
-  function checkAvailability() {
+  function fetchDisponibilidade() {
     const dtInicio = getIsoDate(dInicioDia, dInicioMes, dInicioAno);
     const dtFim = getIsoDate(dFimDia, dFimMes, dFimAno);
     
     if (!dtInicio || !dtFim) {
-      lockSelects();
+      selectEq.innerHTML = '<option disabled selected>Preencha as datas para carregar o estoque</option>';
+      selectEq.disabled = true;
+      btnAdd.disabled = true;
       return;
     }
     
-    const hInicio = (horaInicio && horaInicio.value) ? horaInicio.value : '00:00';
-    const hFim = (horaFim && horaFim.value) ? horaFim.value : '23:59';
+    selectEq.innerHTML = '<option disabled selected>Carregando estoque do período...</option>';
     
-    const inicioIso = `${dtInicio}T${hInicio}`;
-    const fimIso = `${dtFim}T${hFim}`;
-    
-    console.log('Datas detectadas:', inicioIso, fimIso);
-    
-    const inicioObj = new Date(inicioIso);
-    const fimObj = new Date(fimIso);
-    const now = new Date();
-    
-    if (!eventoId && inicioObj < now) {
-      if (tendasSelect) {
-        tendasSelect.disabled = true;
-        setPlaceholder(tendasSelect, 'A data de montagem não pode ser no passado');
-      }
-      if (conjuntosSelect) {
-        conjuntosSelect.disabled = true;
-        setPlaceholder(conjuntosSelect, 'A data de montagem não pode ser no passado');
-      }
-      return;
-    }
-    
-    if (fimObj <= inicioObj) {
-      if (tendasSelect) {
-        tendasSelect.disabled = true;
-        setPlaceholder(tendasSelect, 'A desmontagem deve ser posterior à montagem');
-      }
-      if (conjuntosSelect) {
-        conjuntosSelect.disabled = true;
-        setPlaceholder(conjuntosSelect, 'A desmontagem deve ser posterior à montagem');
-      }
-      return;
-    }
-    
-    // Salvar seleções atuais para restaurar após popular
-    const tSelected = getSelectedValues(tendasSelect);
-    const cSelected = getSelectedValues(conjuntosSelect);
-    
-    // Feedback visual de busca (Spinner/Pulse)
-    if (tendasSelect) {
-      tendasSelect.classList.add('placeholder-glow', 'opacity-50');
-      setPlaceholder(tendasSelect, '⏳ Buscando equipamentos disponíveis...');
-    }
-    if (conjuntosSelect) {
-      conjuntosSelect.classList.add('placeholder-glow', 'opacity-50');
-      setPlaceholder(conjuntosSelect, '⏳ Buscando equipamentos disponíveis...');
-    }
-    
-    let url = `{% url 'eventos:equipamentos_disponiveis' %}?inicio=${encodeURIComponent(inicioIso)}&fim=${encodeURIComponent(fimIso)}`;
-    if (eventoId) {
-      url += `&evento_id=${encodeURIComponent(eventoId)}`;
-    }
+    let url = `/eventos/api/equipamentos-disponiveis/?inicio=${dtInicio}&fim=${dtFim}`;
+    if (eventoId) url += `&evento_id=${eventoId}`;
     
     fetch(url)
       .then(res => res.json())
       .then(data => {
-        if (tendasSelect) tendasSelect.classList.remove('placeholder-glow', 'opacity-50');
-        if (conjuntosSelect) conjuntosSelect.classList.remove('placeholder-glow', 'opacity-50');
-        
+        selectEq.innerHTML = '';
         if (data.sucesso) {
-          populateSelect(tendasSelect, data.tendas, 'Nenhum equipamento disponível para este período', tSelected);
-          populateSelect(conjuntosSelect, data.conjuntos, 'Nenhum equipamento disponível para este período', cSelected);
-        } else {
-          console.error("Erro retornado pela API:", data.erro);
-          if (tendasSelect) tendasSelect.disabled = false;
-          if (conjuntosSelect) conjuntosSelect.disabled = false;
+          catalogoDisponivel = data.equipamentos;
+          if (catalogoDisponivel.length === 0) {
+             selectEq.innerHTML = '<option disabled selected>Nenhum equipamento livre nestas datas</option>';
+             btnAdd.disabled = true;
+          } else {
+             catalogoDisponivel.forEach(eq => {
+                const opt = document.createElement('option');
+                opt.value = eq.id;
+                opt.text = `${eq.nome} (Máx: ${eq.qtd_livre})`;
+                opt.dataset.max = eq.qtd_livre;
+                selectEq.appendChild(opt);
+             });
+             selectEq.disabled = false;
+             btnAdd.disabled = false;
+          }
+          renderCart(); // Revalida os itens do carrinho com o novo catálogo
         }
-      })
-      .catch(err => {
-        console.error("Erro de rede ao buscar equipamentos:", err);
-        if (tendasSelect) { tendasSelect.disabled = false; tendasSelect.classList.remove('placeholder-glow', 'opacity-50'); }
-        if (conjuntosSelect) { conjuntosSelect.disabled = false; conjuntosSelect.classList.remove('placeholder-glow', 'opacity-50'); }
       });
   }
 
-  function addListeners(el) {
-    if (el) {
-      el.addEventListener("change", checkAvailability);
-      el.addEventListener("input", checkAvailability);
-    }
-  }
-
-  addListeners(dInicioDia);
-  addListeners(dInicioMes);
-  addListeners(dInicioAno);
-  addListeners(dFimDia);
-  addListeners(dFimMes);
-  addListeners(dFimAno);
-  addListeners(horaInicio);
-  addListeners(horaFim);
+  [dInicioDia, dInicioMes, dInicioAno, dFimDia, dFimMes, dFimAno].forEach(el => {
+    if (el) el.addEventListener("change", fetchDisponibilidade);
+  });
   
-  // Estado inicial
-  checkAvailability();
+  fetchDisponibilidade();
+  renderCart();
   
-  {% if is_reutilizar %}
-  if (dInicioDia) dInicioDia.focus();
-  {% endif %}
-  
-  // Inicializar Select2
-  if (window.jQuery) {
-    $('#id_tendas, #id_conjuntos').select2({
-      theme: 'bootstrap-5',
-      placeholder: 'Clique para selecionar equipamentos...',
-      allowClear: true,
-      width: '100%'
-    });
-  }
+  form.addEventListener('submit', function(e) {
+      hiddenJson.value = JSON.stringify(myItems);
+  });
 });
 </script>
 {% endblock %}

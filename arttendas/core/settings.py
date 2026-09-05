@@ -203,21 +203,25 @@ LOGGING = {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
         },
-        'logtail': {
-            'level': 'INFO',
-            'class': 'logtail.LogtailHandler',
-            'source_token': LOGTAIL_SOURCE_TOKEN,
-        } if LOGTAIL_SOURCE_TOKEN else {
+        'file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
             'filename': BASE_DIR / 'erros.log',
         },
     },
     'root': {
-        'handlers': ['console', 'logtail'] if LOGTAIL_SOURCE_TOKEN else ['console', 'file'],
+        'handlers': ['console', 'file'],
         'level': 'INFO',
     },
 }
+
+if LOGTAIL_SOURCE_TOKEN:
+    LOGGING['handlers']['logtail'] = {
+        'level': 'INFO',
+        'class': 'logtail.LogtailHandler',
+        'source_token': LOGTAIL_SOURCE_TOKEN,
+    }
+    LOGGING['root']['handlers'] = ['console', 'logtail']
 
 # Configuração de E-mail para "Esqueci a Senha"
 EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')

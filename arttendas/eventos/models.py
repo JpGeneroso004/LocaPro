@@ -1,7 +1,6 @@
 from django.db import models
-from inventario.models import Tenda, ConjuntoPalco
+from inventario.models import Equipamento
 from empresas.models import TenantManager
-
 
 class Cliente(models.Model):
     nome = models.CharField('Nome', max_length=200)
@@ -41,6 +40,7 @@ class Evento(models.Model):
     cidade     = models.CharField('Cidade', max_length=100, blank=True)
     latitude   = models.DecimalField('Latitude',  max_digits=10, decimal_places=7, null=True, blank=True)
     longitude  = models.DecimalField('Longitude', max_digits=10, decimal_places=7, null=True, blank=True)
+    
     data_inicio = models.DateField('Data de Início', db_index=True)
     hora_inicio = models.TimeField('Horário de Início', null=True, blank=True)
     data_fim    = models.DateField('Data de Desmontagem', db_index=True)
@@ -48,11 +48,10 @@ class Evento(models.Model):
     
     # Edge Case: Devoluções Antecipadas
     data_devolucao_real = models.DateTimeField('Data e Hora Real de Devolução', null=True, blank=True, help_text="Preenchido caso o evento termine e os itens sejam devolvidos ANTES da Data de Desmontagem prevista.")
+    
     status      = models.CharField('Status', max_length=20, choices=STATUS, default='agendado', db_index=True)
     observacoes = models.TextField('Observações', blank=True)
-    tendas      = models.ManyToManyField(Tenda, blank=True, verbose_name='Tendas', related_name='eventos')
-    conjuntos   = models.ManyToManyField(ConjuntoPalco, blank=True,
-                                         verbose_name='Conjuntos de Palco/Piso', related_name='eventos')
+    
     criado_em   = models.DateTimeField(auto_now_add=True)
     organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='eventos')
 
@@ -64,7 +63,7 @@ class Evento(models.Model):
         ordering = ['-data_inicio']
 
     def __str__(self):
-        return f'{self.nome} – {self.data_inicio}'
+        return f'{self.nome} — {self.data_inicio}'
 
     def get_status_class(self):
         return {
@@ -73,12 +72,23 @@ class Evento(models.Model):
             'concluido':    'badge-concluido',
             'cancelado':    'badge-cancelado',
         }.get(self.status, '')
+        
+    def total_itens(self):
+        return sum(item.quantidade for item in self.itens.all())
 
-    def total_tendas(self):
-        return self.tendas.count()
 
-    def total_placas(self):
-        return sum(c.quantidade_placas for c in self.conjuntos.all())
+class ItemEvento(models.Model):
+    """
+    Representa quantos equipamentos X foram alugados para o Evento Y.
+    Ex: 50 Cadeiras de Plástico para o Casamento da Maria.
+    """
+    evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='itens')
+    equipamento = models.ForeignKey(Equipamento, on_delete=models.PROTECT, related_name='alocacoes')
+    quantidade = models.PositiveIntegerField('Quantidade Alugada', default=1)
+    preco_fechado = models.DecimalField('Preço Total Cobrado (R$)', max_digits=10, decimal_places=2, default=0.00)
+    
+    def __str__(self):
+        return f"{self.quantidade}x {self.equipamento.nome} no {self.evento.nome}"
 
 
 class Contrato(models.Model):

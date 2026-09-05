@@ -1,0 +1,4 @@
+{
+  "summary":  "Refatoração do módulo de Eventos para suportar o novo banco de dados genérico. Foram removidas as associações diretas de 'Tenda' e criada a nova tabela relacional `ItemEvento`, que permite alugar N unidades de qualquer tipo de equipamento.",
+  "updatedAt":  "2026-09-05T22:56:15.023637600Z"
+}

@@ -84,37 +84,20 @@
 {% endif %}
 
 <div class="row g-4 mb-5">
-  <div class="col-12 col-md-6">
+  <div class="col-12">
     <div class="card shadow-sm h-100 p-3">
-      <h5 class="fw-bold mb-3"><i class="bi bi-tent"></i> Tendas Alocadas</h5>
-      {% if evento.tendas.all %}
+      <h5 class="fw-bold mb-3"><i class="bi bi-box"></i> Equipamentos Alocados</h5>
+      {% if evento.itens.all %}
         <ul class="list-group list-group-flush">
-          {% for t in evento.tendas.all %}
+          {% for i in evento.itens.all %}
             <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-              <span>{{ t.codigo }} - {{ t.get_tamanho_display }}</span>
-              <span class="badge bg-body-secondary text-body border">{{ t.get_tipo_display }}</span>
+              <span><strong>{{ i.quantidade }}x</strong> {{ i.equipamento.nome }}</span>
+              <span class="badge bg-body-secondary text-body border">{{ i.equipamento.categoria.nome }}</span>
             </li>
           {% endfor %}
         </ul>
       {% else %}
-        <p class="text-muted small">Nenhuma tenda alocada.</p>
-      {% endif %}
-    </div>
-  </div>
-  
-  <div class="col-12 col-md-6">
-    <div class="card shadow-sm h-100 p-3">
-      <h5 class="fw-bold mb-3"><i class="bi bi-box"></i> Palco / Piso</h5>
-      {% if evento.conjuntos.all %}
-        <ul class="list-group list-group-flush">
-          {% for c in evento.conjuntos.all %}
-            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-              <span>{{ c.nome }}</span>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="text-muted small">Nenhum conjunto alocado.</p>
+        <p class="text-muted small">Nenhum equipamento alocado.</p>
       {% endif %}
     </div>
   </div>

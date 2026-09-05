@@ -1,117 +1,91 @@
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
 from empresas.models import TenantManager
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
-
-def gerar_codigo_tenda(organizacao):
-    """Gera automaticamente o próximo código disponível: T-001, T-002..."""
-    if not organizacao:
-        return 'T-001'
-    ultimo = Tenda.objects.filter(organizacao=organizacao).order_by('-id').first()
-    if not ultimo:
-        return 'T-001'
-    # Pega todos os códigos numéricos existentes
-    codigos = []
-    for t in Tenda.objects.filter(organizacao=organizacao):
-        try:
-            num = int(t.codigo.replace('T-', ''))
-            codigos.append(num)
-        except ValueError:
-            pass
-    proximo = max(codigos) + 1 if codigos else 1
-    return f'T-{proximo:03d}'
-
-
-class Tenda(models.Model):
-    TAMANHOS = [
-        ('3x3',   '3x3 m'),
-        ('4x4',   '4x4 m'),
-        ('5x5',   '5x5 m'),
-        ('6x6',   '6x6 m'),
-        ('7x7',   '7x7 m'),
-        ('8x8',   '8x8 m'),
-        ('10x10', '10x10 m'),
-    ]
-
-    TIPOS = [
-        ('piramidal',    'Piramidal'),
-        ('chapeu_bruxa', 'Chapéu de Bruxa'),
-    ]
-
-    STATUS = [
-        ('ativo', 'Ativo'),
-        ('manutencao', 'Em Manutenção'),
-        ('baixado', 'Descartado/Vendido'),
-    ]
-
-    codigo    = models.CharField('Código', max_length=20)
-    tamanho   = models.CharField('Tamanho', max_length=10, choices=TAMANHOS)
-    tipo      = models.CharField('Tipo', max_length=20, choices=TIPOS, default='piramidal')
-    status    = models.CharField('Status', max_length=20, choices=STATUS, default='ativo')
-    observacoes = models.TextField('Observações', blank=True)
-    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='tendas')
-
-    objects = models.Manager() # The default one is needed sometimes
-    tenant_objects = models.Manager() # Wait, just override default manager
+class CategoriaEquipamento(models.Model):
+    nome = models.CharField('Nome da Categoria', max_length=50)
+    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='categorias')
     
-    # Actually let's just override objects
     objects = TenantManager()
 
     class Meta:
-        verbose_name = 'Tenda'
-        verbose_name_plural = 'Tendas'
-        ordering = ['tamanho', 'tipo', 'codigo']
-        unique_together = ('codigo', 'organizacao')
-
-    def __str__(self):
-        return f'{self.codigo} – {self.get_tamanho_display()} {self.get_tipo_display()}'
-
-    def get_status_class(self):
-        return {
-            'ativo': 'status-disponivel',
-            'manutencao': 'status-manutencao',
-        }.get(self.status, '')
-
-    def save(self, *args, **kwargs):
-        # Gera código automático se não informado
-        if not self.codigo:
-            self.codigo = gerar_codigo_tenda(self.organizacao)
-        super().save(*args, **kwargs)
-
-
-class ConjuntoPalco(models.Model):
-    """
-    Um conjunto de palco/piso é formado por N placas.
-    Exemplo: 'Palco Grande' com 20 placas.
-    """
-    STATUS = [
-        ('ativo', 'Ativo'),
-        ('manutencao', 'Em Manutenção'),
-        ('baixado', 'Descartado/Vendido'),
-    ]
-
-    nome             = models.CharField('Nome do Conjunto', max_length=100)
-    quantidade_placas = models.PositiveIntegerField(
-        'Número de Placas',
-        validators=[MinValueValidator(1), MaxValueValidator(30)],
-        help_text='Quantas placas formam este conjunto (máx. 30)'
-    )
-    status      = models.CharField('Status', max_length=20, choices=STATUS, default='ativo')
-    observacoes = models.TextField('Observações', blank=True)
-    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='conjuntos')
-
-    objects = TenantManager()
-
-    class Meta:
-        verbose_name = 'Conjunto de Palco/Piso'
-        verbose_name_plural = 'Conjuntos de Palco/Piso'
-        ordering = ['quantidade_placas']
+        verbose_name = 'Categoria de Equipamento'
+        verbose_name_plural = 'Categorias de Equipamentos'
+        ordering = ['nome']
+        unique_together = ('nome', 'organizacao')
 
     def __str__(self):
         return self.nome
 
+class Equipamento(models.Model):
+    STATUS = [
+        ('ativo', 'Ativo (Disponível)'),
+        ('inativo', 'Inativo / Manutenção'),
+    ]
+
+    codigo = models.CharField('Código (Opcional)', max_length=30, blank=True, help_text='Ex: CAIXA-01, MESA-PLAST')
+    nome = models.CharField('Nome do Item', max_length=150, help_text='Ex: Cadeira de Plástico, Tenda Piramidal 5x5, Pula-pula de Castelo')
+    categoria = models.ForeignKey(CategoriaEquipamento, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    # Ao invés de criar 500 linhas para 500 cadeiras, criamos 1 linha com quantidade = 500
+    quantidade_total = models.PositiveIntegerField('Quantidade em Estoque', default=1)
+    
+    valor_diaria = models.DecimalField('Valor da Diária Base (R$)', max_digits=10, decimal_places=2, default=0.00)
+    status = models.CharField('Status', max_length=20, choices=STATUS, default='ativo')
+    observacoes = models.TextField('Observações', blank=True)
+    
+    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='equipamentos')
+    
+    objects = TenantManager()
+
+    class Meta:
+        verbose_name = 'Equipamento / Item'
+        verbose_name_plural = 'Equipamentos / Itens'
+        ordering = ['nome']
+
+    def __str__(self):
+        return f"{self.nome} (Qtd: {self.quantidade_total})"
+
     def get_status_class(self):
         return {
             'ativo': 'status-disponivel',
-            'manutencao': 'status-manutencao',
+            'inativo': 'status-manutencao',
         }.get(self.status, '')
+
+    def save(self, *args, **kwargs):
+        # Auto-gerar código se vazio (facilita pro cliente)
+        if not self.codigo:
+            from django.utils.text import slugify
+            base = slugify(self.nome)[:6].upper()
+            count = Equipamento.objects.filter(organizacao=self.organizacao).count() + 1
+            self.codigo = f"{base}-{count:03d}"
+        super().save(*args, **kwargs)
+
+
+@receiver(post_save, sender='empresas.Organizacao')
+def criar_categorias_iniciais(sender, instance, created, **kwargs):
+    """
+    Quando uma nova empresa se cadastra no SaaS, lemos o 'Nicho de Mercado' dela
+    e populamos o banco de dados com as Categorias de Estoque mais comuns para aquele nicho.
+    Isso cria um efeito "Uau" de Onboarding (Software Inteligente).
+    """
+    if created:
+        categorias = []
+        nicho = instance.segmento
+        
+        if nicho == 'tendas':
+            categorias = ['Tendas Piramidais', 'Tendas Chapéu de Bruxa', 'Palcos e Pisos', 'Gradis']
+        elif nicho == 'som_luz':
+            categorias = ['Caixas de Som (P.A)', 'Microfones', 'Mesas de Som', 'Canhões de Luz (LED)', 'Máquinas de Fumaça']
+        elif nicho == 'brinquedos':
+            categorias = ['Camas Elásticas', 'Brinquedos Infláveis', 'Piscina de Bolinhas', 'Máquinas de Algodão Doce']
+        elif nicho == 'mobiliario':
+            categorias = ['Mesas de Plástico', 'Mesas Rústicas (Madeira)', 'Cadeiras', 'Toalhas e Capas', 'Louças e Talheres']
+        elif nicho == 'geradores':
+            categorias = ['Geradores a Diesel', 'Cabos e Extensões', 'Quadros de Distribuição']
+        else:
+            categorias = ['Equipamentos Principais', 'Acessórios', 'Estruturas']
+            
+        for cat in categorias:
+            CategoriaEquipamento.objects.get_or_create(nome=cat, organizacao=instance)

@@ -3,7 +3,7 @@ from google import genai
 from google.genai import types
 from django.conf import settings
 from .models import MensagemWhatsApp
-from inventario.models import Tenda
+from inventario.models import Equipamento
 
 def enviar_mensagem_whatsapp(telefone, texto, config):
     """
@@ -57,11 +57,12 @@ def gerar_resposta_ia(org, telefone_cliente, mensagem_recebida):
     
     historico = reversed(historico) # Do mais antigo pro mais novo (dentro dos últimos 10)
     
-    # 3. Puxa os dados reais da Empresa (Estoque)
-    tendas = Tenda.objects.filter(organizacao=org)
-    contexto_estoque = "Catálogo de Tendas:\n"
-    for t in tendas:
-        contexto_estoque += f"- {t.tamanho} (Qtd: {t.quantidade_total}) - Preço aprox: R${t.valor_diaria}\n"
+
+    # 3. Puxa os dados reais da Empresa (Estoque Universal)
+    itens = Equipamento.objects.filter(organizacao=org, status='ativo')
+    contexto_estoque = "Catálogo de Equipamentos Disponíveis:\n"
+    for item in itens:
+        contexto_estoque += f"- {item.nome} (Qtd em estoque: {item.quantidade_total}) - Preço aprox: R${item.valor_diaria}\n"
     
     # 4. Constrói o System Prompt (Injeção da Personalidade + Conhecimento de Negócio)
     system_instruction = f"""
@@ -69,10 +70,10 @@ Você é o assistente virtual '{config.nome_assistente}' da empresa {org.nome}.
 Sua personalidade: {config.prompt_personalidade}
 
 REGRA 1: Seja extremamente conciso. É o WhatsApp, não mande textos longos.
-REGRA 2: Você vende locação de tendas e estruturas. Tente convencer o cliente a fechar o aluguel.
-REGRA 3: Quando ele perguntar preço, use a base de dados abaixo. Nunca invente preços.
+REGRA 2: Você vende locações. Tente convencer o cliente a fechar o aluguel.
+REGRA 3: Quando ele perguntar preço ou o que temos, use a base de dados abaixo. NUNCA INVENTE PREÇOS NEM MATERIAIS.
 
-DADOS DA EMPRESA:
+DADOS DA EMPRESA (Catálogo Base):
 {contexto_estoque}
 """
 

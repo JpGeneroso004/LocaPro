@@ -1,10 +1,10 @@
-from django.urls import path
+﻿from django.urls import path
 from . import views
 
 app_name = 'eventos'
 
 urlpatterns = [
-    path('', views.dashboard, name='dashboard'),
+    path('', views.painel_eventos, name='dashboard'),
     path('lista/', views.lista_eventos, name='lista'),
     path('<int:pk>/', views.detalhe_evento, name='detalhe'),
     path('novo/', views.novo_evento, name='novo'),

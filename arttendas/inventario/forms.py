@@ -1,48 +1,28 @@
 from django import forms
-from .models import Tenda, ConjuntoPalco
+from .models import Equipamento, CategoriaEquipamento
 
-
-class TendaForm(forms.ModelForm):
+class CategoriaForm(forms.ModelForm):
     class Meta:
-        model = Tenda
-        # Código gerado automaticamente — não aparece no form
-        fields = ['tamanho', 'tipo', 'status', 'observacoes']
+        model = CategoriaEquipamento
+        fields = ['nome']
         widgets = {
-            'tamanho':    forms.Select(attrs={'class': 'form-control'}),
-            'tipo':       forms.Select(attrs={'class': 'form-control'}),
-            'status':     forms.Select(attrs={'class': 'form-control'}),
-            'observacoes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3,
-                                                 'placeholder': 'Ex: lona com rasgo pequeno...'}),
-        }
-        labels = {
-            'tamanho': 'Tamanho',
-            'tipo':    'Tipo',
-            'status':  'Status',
-            'observacoes': 'Observações (opcional)',
+            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: Iluminação'})
         }
 
-
-class ConjuntoPalcoForm(forms.ModelForm):
+class EquipamentoForm(forms.ModelForm):
     class Meta:
-        model = ConjuntoPalco
-        fields = ['nome', 'quantidade_placas', 'status', 'observacoes']
+        model = Equipamento
+        fields = ['codigo', 'nome', 'categoria', 'quantidade_total', 'valor_diaria', 'status', 'observacoes']
         widgets = {
-            'nome': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ex: Palco Principal, Piso Casamento...'
-            }),
-            'quantidade_placas': forms.NumberInput(attrs={
-                'class': 'form-control', 'min': '1', 'max': '30'
-            }),
-            'status':     forms.Select(attrs={'class': 'form-control'}),
-            'observacoes': forms.Textarea(attrs={
-                'class': 'form-control', 'rows': 3,
-                'placeholder': 'Ex: algumas placas com borda desgastada...'
-            }),
+            'codigo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Auto-gerado se vazio'}),
+            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: Cadeira Tiffany'}),
+            'categoria': forms.Select(attrs={'class': 'form-select'}),
+            'quantidade_total': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
+            'valor_diaria': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+            'observacoes': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
-        labels = {
-            'nome':              'Nome do Conjunto',
-            'quantidade_placas': 'Número de Placas (1–30)',
-            'status':            'Status',
-            'observacoes':       'Observações (opcional)',
-        }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # O queryset será sobrescrito na view para filtrar pelo tenant
