@@ -116,6 +116,10 @@
 {% endblock %}
 
 {% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const dInicioDia = document.getElementById("id_data_inicio_0");
@@ -181,8 +185,10 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     }
     
-    // Dispara evento change caso exista lib de UI (Select2/Choices)
-    selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+    // Atualiza o Select2
+    if (window.jQuery) {
+      $(selectEl).trigger('change.select2');
+    }
   }
 
   function getIsoDate(diaEl, mesEl, anoEl) {
@@ -297,6 +303,16 @@ document.addEventListener("DOMContentLoaded", function() {
   {% if is_reutilizar %}
   if (dInicioDia) dInicioDia.focus();
   {% endif %}
+  
+  // Inicializar Select2
+  if (window.jQuery) {
+    $('#id_tendas, #id_conjuntos').select2({
+      theme: 'bootstrap-5',
+      placeholder: 'Clique para selecionar equipamentos...',
+      allowClear: true,
+      width: '100%'
+    });
+  }
 });
 </script>
 {% endblock %}
