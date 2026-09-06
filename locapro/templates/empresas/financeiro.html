@@ -39,13 +39,37 @@
         </div>
     </div>
 
+    <!-- Gráficos Analíticos -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                    <h5 class="fw-bold"><i class="bi bi-graph-up text-primary me-2"></i> Faturamento (Últimos 6 meses)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="faturamentoChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                    <h5 class="fw-bold"><i class="bi bi-pie-chart text-primary me-2"></i> Top Equipamentos (Mês)</h5>
+                </div>
+                <div class="card-body d-flex justify-content-center align-items-center">
+                    <canvas id="equipamentosChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Seção de Contratos -->
     <div class="row g-4">
         <!-- Gráfico/Indicadores de Assinaturas -->
         <div class="col-md-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
-                    <h5 class="fw-bold"><i class="bi bi-pen me-2 text-primary"></i> Assinaturas</h5>
+                    <h5 class="fw-bold"><i class="bi bi-pen me-2 text-primary"></i> Assinaturas (Mês)</h5>
                 </div>
                 <div class="card-body text-center d-flex flex-column justify-content-center">
                     <div class="mb-3">
@@ -105,4 +129,98 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Obter as variáveis do contexto (injetadas pelo Django)
+        const meses_grafico = {{ meses_grafico|safe }};
+        const faturamento_grafico = {{ faturamento_grafico|safe }};
+        
+        const top_equipamentos_labels = {{ top_equipamentos_labels|safe }};
+        const top_equipamentos_data = {{ top_equipamentos_data|safe }};
+
+        // Cores (Baseadas no tema LocaPro)
+        const colorPrimary = '#004581';
+        const colorWarning = '#FFD600';
+        const colorSuccess = '#198754';
+        
+        // 1. Gráfico de Faturamento (Linha/Barra)
+        const ctxFaturamento = document.getElementById('faturamentoChart').getContext('2d');
+        new Chart(ctxFaturamento, {
+            type: 'line',
+            data: {
+                labels: meses_grafico,
+                datasets: [{
+                    label: 'Faturamento Bruto (R$)',
+                    data: faturamento_grafico,
+                    borderColor: colorPrimary,
+                    backgroundColor: 'rgba(0, 69, 129, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: colorWarning,
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'R$ ' + value.toLocaleString('pt-BR');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. Gráfico de Top Equipamentos (Doughnut)
+        const ctxEquipamentos = document.getElementById('equipamentosChart').getContext('2d');
+        
+        if(top_equipamentos_data.length > 0) {
+            new Chart(ctxEquipamentos, {
+                type: 'doughnut',
+                data: {
+                    labels: top_equipamentos_labels,
+                    datasets: [{
+                        data: top_equipamentos_data,
+                        backgroundColor: [
+                            colorPrimary,
+                            colorWarning,
+                            colorSuccess,
+                            '#6c757d',
+                            '#dc3545'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        } else {
+            // Se não houver dados
+            const canvas = document.getElementById('equipamentosChart');
+            const parent = canvas.parentNode;
+            canvas.style.display = 'none';
+            const emptyState = document.createElement('div');
+            emptyState.className = 'text-muted text-center p-4';
+            emptyState.innerHTML = '<i class="bi bi-box-seam fs-1 d-block mb-2"></i> Sem locações registradas neste mês';
+            parent.appendChild(emptyState);
+        }
+    });
+</script>
 {% endblock %}

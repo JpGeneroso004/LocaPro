@@ -389,7 +389,7 @@ def webhook_asaas(request):
 @login_required
 def dashboard_financeiro(request):
     from django.db.models import Sum, Count
-    from eventos.models import Contrato, Evento
+    from eventos.models import Contrato, Evento, ItemEvento
     from django.utils import timezone
     import datetime
 
@@ -410,6 +410,42 @@ def dashboard_financeiro(request):
     contratos_assinados_qtd = contratos_mes.filter(status_assinatura='assinado').count()
     contratos_pendentes_qtd = contratos_mes.filter(status_assinatura='pendente').count()
 
+    # --- Dados para os Gráficos ---
+
+    # 1. Faturamento dos últimos 6 meses
+    meses_grafico = []
+    faturamento_grafico = []
+    
+    for i in range(5, -1, -1):
+        m = mes_atual - i
+        y = ano_atual
+        if m <= 0:
+            m += 12
+            y -= 1
+            
+        data_mes = datetime.date(y, m, 1)
+        mes_str = data_mes.strftime('%b/%y').capitalize()
+        
+        contratos_daquele_mes = Contrato.objects.filter(
+            evento__data_inicio__month=m,
+            evento__data_inicio__year=y,
+            evento__status__in=['agendado', 'em_andamento', 'concluido']
+        )
+        total_mes = sum(c.valor_final for c in contratos_daquele_mes if c.valor_final)
+        
+        meses_grafico.append(mes_str)
+        faturamento_grafico.append(float(total_mes))
+        
+    # 2. Top Equipamentos mais locados neste mês
+    itens_top = ItemEvento.objects.filter(
+        evento__data_inicio__month=mes_atual,
+        evento__data_inicio__year=ano_atual,
+        evento__status__in=['agendado', 'em_andamento', 'concluido']
+    ).values('equipamento__nome').annotate(total_alugado=Sum('quantidade')).order_by('-total_alugado')[:5]
+    
+    top_equipamentos_labels = [item['equipamento__nome'] for item in itens_top]
+    top_equipamentos_data = [item['total_alugado'] for item in itens_top]
+
     context = {
         'faturamento_bruto': faturamento_bruto,
         'sinais_recebidos': sinais_recebidos,
@@ -418,7 +454,11 @@ def dashboard_financeiro(request):
         'contratos_pendentes_qtd': contratos_pendentes_qtd,
         'mes_atual': hoje.strftime('%B').capitalize(),
         'ano_atual': ano_atual,
-        'contratos': contratos_mes.order_by('-evento__data_inicio')
+        'contratos': contratos_mes.order_by('-evento__data_inicio'),
+        'meses_grafico': meses_grafico,
+        'faturamento_grafico': faturamento_grafico,
+        'top_equipamentos_labels': top_equipamentos_labels,
+        'top_equipamentos_data': top_equipamentos_data,
     }
     return render(request, 'empresas/financeiro.html', context)
 
