@@ -44,9 +44,9 @@
   <div class="col-md-6">
     <div class="card h-100 bg-light p-3 shadow-sm border-0 border-start border-4 border-warning">
       <small class="fw-bold text-muted text-uppercase">Material Mais Lucrativo</small>
-      {% if tenda_mais_alugada %}
-        <h4 class="fw-bold text-dark mb-0 mt-1"><i class="bi bi-star-fill text-warning"></i> {{ tenda_mais_alugada.identificacao }} ({{ tenda_mais_alugada.tamanho }})</h4>
-        <small class="mt-2 text-muted"><strong>{{ tenda_mais_alugada.num_alugueis }} locações</strong> neste ano.</small>
+      {% if equip_mais_alugado %}
+        <h4 class="fw-bold text-dark mb-0 mt-1"><i class="bi bi-star-fill text-warning"></i> {{ equip_mais_alugado.nome }}</h4>
+        <small class="mt-2 text-muted"><strong>{{ equip_mais_alugado.num_alugueis }} locações</strong> neste ano.</small>
       {% else %}
         <h4 class="fw-bold text-muted mb-0 mt-1">Nenhum dado</h4>
         <small class="mt-2 text-muted">Realize locações para gerar estatísticas.</small>

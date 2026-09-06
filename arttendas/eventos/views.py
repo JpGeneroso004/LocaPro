@@ -33,9 +33,29 @@ def painel_eventos(request):
             'itens': sum(i.quantidade for i in e.itens.all())
         })
         
+    # Financial metrics
+    faturamento_mes = Evento.objects.filter(status='concluido', data_fim__month=hoje.month, data_fim__year=hoje.year).aggregate(t=Sum('contrato__valor_total'))['t'] or 0.0
+    faturamento_ano = Evento.objects.filter(status='concluido', data_fim__year=hoje.year).aggregate(t=Sum('contrato__valor_total'))['t'] or 0.0
+    previsao_faturamento = Evento.objects.filter(status__in=['agendado', 'em_andamento']).aggregate(t=Sum('contrato__valor_total'))['t'] or 0.0
+    
+    # Material Mais Lucrativo (Mais Alugado)
+    equip_mais_alugado_info = ItemEvento.objects.filter(evento__data_inicio__year=hoje.year, evento__status='concluido').values('equipamento__nome', 'equipamento__pk').annotate(num_alugueis=Sum('quantidade')).order_by('-num_alugueis').first()
+    
+    if equip_mais_alugado_info:
+        equip_mais_alugado = {
+            'nome': equip_mais_alugado_info['equipamento__nome'],
+            'num_alugueis': equip_mais_alugado_info['num_alugueis']
+        }
+    else:
+        equip_mais_alugado = None
+        
     context = {
         'eventos': Evento.objects.all().order_by('-data_inicio')[:10], # Mostrar os ultimos 10 na lista geral
         'eventos_ativos_hoje': eventos_info,
+        'faturamento_mes': faturamento_mes,
+        'faturamento_ano': faturamento_ano,
+        'previsao_faturamento': previsao_faturamento,
+        'equip_mais_alugado': equip_mais_alugado,
         'total_equipamentos': total_equipamentos,
         'equip_disponivel': equip_disponivel,
         'equip_em_uso': equip_em_uso,
