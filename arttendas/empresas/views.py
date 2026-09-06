@@ -421,3 +421,10 @@ def dashboard_financeiro(request):
         'contratos': contratos_mes.order_by('-evento__data_inicio')
     }
     return render(request, 'empresas/financeiro.html', context)
+
+
+def privacidade(request):
+    return render(request, 'legais/privacidade.html')
+
+def cookies(request):
+    return render(request, 'legais/cookies.html')

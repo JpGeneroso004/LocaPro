@@ -231,21 +231,42 @@
 <body>
 
   <!-- Sidebar e Header -->
-  <nav class="navbar navbar-expand-md navbar-dark navbar-top d-none d-md-flex sticky-top shadow-sm py-2">
-    <div class="container">
-      <a class="navbar-brand d-flex align-items-center" href="{% url 'eventos:dashboard' %}">
+  
+<!-- Navbar Unificada e Minimalista -->
+<nav class="navbar navbar-expand-lg bg-body-tertiary mb-4 shadow-sm sticky-top">
+  <div class="container">
+    
+    <!-- Esquerda: Sair e Logo -->
+    <div class="d-flex align-items-center">
+      {% if user.is_authenticated %}
+      <a href="{% url 'account_logout' %}" class="btn btn-outline-danger border-0 me-3 d-none d-md-flex" title="Sair do Sistema">
+        <i class="bi bi-box-arrow-left me-1"></i> Sair
+      </a>
+      {% endif %}
+      
+      <a class="navbar-brand d-flex align-items-center m-0" href="{% url 'eventos:dashboard' %}">
         {% if user.is_authenticated and user.organizacao and user.organizacao.logo %}
           <img src="{{ user.organizacao.logo.url }}" alt="Logo" height="40" class="me-2 rounded">
         {% else %}
-          <img src="{% static 'img/locapro_logo.jpg' %}" alt="LocaPro" height="40" class="me-2 rounded">
+          <img src="{% static 'img/logo.png' %}?v=3" alt="LocaPro" height="40" class="me-2 rounded">
         {% endif %}
         <span class="fs-4 fw-bold">LocaPro</span>
       </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto">
+    </div>
+
+    <!-- Mobile Toggles na Direita -->
+    <div class="d-flex align-items-center d-lg-none">
+      <button class="btn btn-link theme-toggle-icon text-decoration-none theme-toggle p-0 fs-4 me-3" title="Alternar tema">
+        <i class="bi bi-moon-stars-fill"></i>
+      </button>
+      <button class="navbar-toggler border-0 p-0 fs-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar">
+        <i class="bi bi-list"></i>
+      </button>
+    </div>
+
+    <!-- Desktop Abas Centrais e Ações -->
+    <div class="collapse navbar-collapse d-none d-lg-flex" id="navbarNavDesktop">
+      <ul class="navbar-nav mx-auto">
         <li class="nav-item">
           <a class="nav-link fw-bold {% block nav_dashboard %}{% endblock %}" href="{% url 'eventos:dashboard' %}">Início</a>
         </li>
@@ -253,73 +274,74 @@
           <a class="nav-link fw-bold {% block nav_eventos %}{% endblock %}" href="{% url 'eventos:lista' %}">Eventos</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link fw-bold {% block nav_inventario %}{% endblock %}" href="{% url 'inventario:inventario' %}">Inventário</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link fw-bold {% block nav_contratos %}{% endblock %}" href="{% url 'eventos:contratos_lista' %}">Contratos</a>
-        </li>
-        <li class="nav-item me-2">
-          <a class="nav-link fw-bold {% block nav_financeiro %}{% endblock %}" href="{% url 'empresas:financeiro' %}">Financeiro</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link fw-bold {% block nav_ia %}{% endblock %}" href="{% url 'assistente_ia:painel' %}">
-            <i class="bi bi-robot text-warning"></i> IA do Zap
+          <a class="nav-link fw-bold text-warning {% block nav_ia %}{% endblock %}" href="{% url 'assistente_ia:painel' %}">
+            <i class="bi bi-robot"></i> IA do Zap
           </a>
         </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'configuracoes' %}active{% endif %}" href="{% url 'empresas:configuracoes' %}">
-              <i class="bi bi-building"></i> <span>Empresa</span>
-            </a>
-          </li>
-          
-          {% if user.cargo == 'dono' %}
-          <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'assinatura' %}active text-warning fw-bold{% endif %}" href="{% url 'empresas:assinatura' %}">
-              <i class="bi bi-star-fill text-warning"></i> <span>Planos LocaPro</span>
-            </a>
-          </li>
-          {% endif %}
-          
-          <li class="nav-item">
-            <a class="nav-link fw-bold {% block nav_equipe %}{% endblock %}" href="{% url 'empresas:equipe' %}">Equipe</a>
-          </li>
-          
-          {% if user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link fw-bold text-danger" href="{% url 'admin:index' %}">Painel Admin</a>
-          </li>
-          {% endif %}
-          
-          <li class="nav-item">
-            <a class="nav-link fw-bold text-danger" href="{% url 'account_logout' %}"><i class="bi bi-box-arrow-right"></i> Sair</a>
-          </li>
       </ul>
-      <a href="{% url 'eventos:novo' %}" class="btn btn-dark fw-bold me-3">+ Novo Evento</a>
-      <button class="btn btn-link theme-toggle-icon text-decoration-none theme-toggle p-0 fs-5" title="Alternar tema">
-        <i class="bi bi-moon-stars-fill"></i>
-      </button>
+      
+      <div class="d-flex align-items-center">
+        <a href="{% url 'eventos:novo' %}" class="btn btn-dark fw-bold rounded-pill px-3 me-3">+ Novo Evento</a>
+        <button class="btn btn-link theme-toggle-icon text-decoration-none theme-toggle p-0 fs-5 me-3" title="Alternar tema">
+          <i class="bi bi-moon-stars-fill"></i>
+        </button>
+        <!-- Botão Menu Hambúrguer -->
+        <button class="btn btn-outline-secondary border-0 fs-4 p-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" title="Menu Completo">
+          <i class="bi bi-list"></i>
+        </button>
+      </div>
     </div>
+
   </div>
 </nav>
 
-<!-- Mobile Navbar Top -->
-<div class="d-md-none navbar-top p-3 sticky-top mb-3 shadow-sm d-flex justify-content-between align-items-center">
-  <div style="width: 32px;"></div> <!-- Spacer -->
-  <a href="{% url 'eventos:dashboard' %}" class="text-decoration-none text-light d-flex align-items-center">
-    {% if user.is_authenticated and user.organizacao and user.organizacao.logo %}
-      <img src="{{ user.organizacao.logo.url }}" alt="Logo" height="30" class="me-2 rounded">
-    {% else %}
-      <img src="{% static 'img/locapro_logo.jpg' %}" alt="LocaPro" height="30" class="me-2 rounded">
-    {% endif %}
-    <h4 class="m-0 fw-bold">LocaPro</h4>
-  </a>
-  <div>
-      <button class="btn btn-link theme-toggle-icon text-decoration-none theme-toggle p-0 fs-4 me-2" title="Alternar tema">
-        <i class="bi bi-moon-stars-fill"></i>
-      </button>
-      <a href="{% url 'logout' %}" class="text-danger fs-4 text-decoration-none" title="Sair"><i class="bi bi-box-arrow-right"></i></a>
+<!-- Offcanvas (Menu Lateral Hambúrguer) -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+  <div class="offcanvas-header bg-body-tertiary border-bottom">
+    <h5 class="offcanvas-title fw-bold" id="offcanvasNavbarLabel">Menu LocaPro</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body d-flex flex-column">
+    
+    <!-- Mobile Ações Rápidas -->
+    <div class="d-lg-none mb-4">
+      <a href="{% url 'eventos:novo' %}" class="btn btn-dark w-100 fw-bold py-2 mb-2">+ Novo Evento</a>
+      <a href="{% url 'account_logout' %}" class="btn btn-outline-danger w-100 fw-bold py-2"><i class="bi bi-box-arrow-left"></i> Sair do Sistema</a>
+    </div>
+
+    <!-- Navegação Mobile Core -->
+    <ul class="navbar-nav d-lg-none mb-3 border-bottom pb-3">
+      <li class="nav-item"><a class="nav-link fs-5" href="{% url 'eventos:dashboard' %}"><i class="bi bi-house-door me-2"></i> Início</a></li>
+      <li class="nav-item"><a class="nav-link fs-5" href="{% url 'eventos:lista' %}"><i class="bi bi-calendar-event me-2"></i> Eventos</a></li>
+      <li class="nav-item"><a class="nav-link fs-5 text-warning" href="{% url 'assistente_ia:painel' %}"><i class="bi bi-robot me-2"></i> IA do Zap</a></li>
+    </ul>
+
+    <!-- Administração e Gestão -->
+    <h6 class="text-uppercase text-muted fw-bold mb-3 mt-lg-0">Gestão & Finanças</h6>
+    <ul class="navbar-nav mb-4">
+      <li class="nav-item"><a class="nav-link fs-5" href="{% url 'inventario:inventario' %}"><i class="bi bi-box-seam me-2"></i> Estoque & Inventário</a></li>
+      <li class="nav-item"><a class="nav-link fs-5" href="{% url 'eventos:contratos_lista' %}"><i class="bi bi-file-earmark-text me-2"></i> Contratos Gerados</a></li>
+      <li class="nav-item"><a class="nav-link fs-5" href="{% url 'empresas:financeiro' %}"><i class="bi bi-wallet2 me-2"></i> Painel Financeiro</a></li>
+    </ul>
+
+    <!-- Configurações -->
+    <h6 class="text-uppercase text-muted fw-bold mb-3">Configurações</h6>
+    <ul class="navbar-nav mb-auto">
+      <li class="nav-item"><a class="nav-link fs-5" href="{% url 'empresas:configuracoes' %}"><i class="bi bi-building me-2"></i> Perfil da Empresa</a></li>
+      <li class="nav-item"><a class="nav-link fs-5" href="{% url 'empresas:equipe' %}"><i class="bi bi-people me-2"></i> Minha Equipe</a></li>
+      
+      {% if user.cargo == 'dono' %}
+      <li class="nav-item"><a class="nav-link fs-5 text-primary" href="{% url 'empresas:assinatura' %}"><i class="bi bi-star-fill me-2"></i> Planos LocaPro</a></li>
+      {% endif %}
+      
+      {% if user.is_superuser %}
+      <li class="nav-item mt-3"><a class="nav-link fs-5 text-danger fw-bold" href="{% url 'admin:index' %}"><i class="bi bi-shield-lock me-2"></i> Painel Admin (Master)</a></li>
+      {% endif %}
+    </ul>
+    
   </div>
 </div>
+
 
 <div class="container pb-5">
   {% if messages %}
@@ -334,34 +356,71 @@
   {% block content %}{% endblock %}
 </div>
 
-<nav class="bottom-nav d-md-none">
+<nav class="bottom-nav d-md-none border-top bg-body-tertiary">
   <a href="{% url 'eventos:dashboard' %}" class="bottom-nav-item {% block mob_dashboard %}{% endblock %}">
-    <i class="bi bi-house-door-fill"></i>
-    Início
+    <i class="bi bi-house-door-fill"></i> Início
   </a>
   <a href="{% url 'eventos:lista' %}" class="bottom-nav-item {% block mob_eventos %}{% endblock %}">
-    <i class="bi bi-calendar-event-fill"></i>
-    Eventos
+    <i class="bi bi-calendar-event-fill"></i> Eventos
   </a>
-  <a href="{% url 'inventario:inventario' %}" class="bottom-nav-item {% block mob_inventario %}{% endblock %}">
-    <i class="bi bi-box-seam-fill"></i>
-    Estoque
+  <a href="{% url 'assistente_ia:painel' %}" class="bottom-nav-item text-warning {% block mob_ia %}{% endblock %}">
+    <i class="bi bi-robot"></i> IA Zap
   </a>
-  <a href="{% url 'empresas:financeiro' %}" class="bottom-nav-item {% block mob_financeiro %}{% endblock %}">
-    <i class="bi bi-wallet2"></i>
-    Finanças
-  </a>
-  <a href="{% url 'assistente_ia:painel' %}" class="bottom-nav-item {% block mob_ia %}{% endblock %}">
-    <i class="bi bi-robot"></i>
-    IA Zap
-  </a>
-  <a href="{% url 'empresas:configuracoes' %}" class="bottom-nav-item">
-    <i class="bi bi-gear-fill"></i>
-    Empresa
+  <a href="#" class="bottom-nav-item" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar">
+    <i class="bi bi-list fs-3"></i> Menu
   </a>
 </nav>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Rodapé Global -->
+<footer class="bg-dark text-light py-5 mt-auto">
+  <div class="container">
+    <div class="row g-4">
+      
+      <!-- Coluna 1: Marca e Infos -->
+      <div class="col-12 col-md-4 mb-3 mb-md-0">
+        <h5 class="fw-bold mb-3"><i class="bi bi-box-seam me-2"></i> LocaPro</h5>
+        <p class="text-secondary small mb-1">A plataforma inteligente para locadoras de equipamentos e eventos.</p>
+        <p class="text-secondary small">&copy; 2026 LocaPro SaaS. Todos os direitos reservados.</p>
+      </div>
+      
+      <!-- Coluna 2: Contato e Ajuda -->
+      <div class="col-12 col-md-4 mb-3 mb-md-0">
+        <h6 class="fw-bold text-uppercase mb-3">Atendimento</h6>
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2"><a href="mailto:suporte@locapro.com.br" class="text-light text-decoration-none small"><i class="bi bi-envelope me-2"></i> suporte@locapro.com.br</a></li>
+          <li class="mb-2"><a href="#" class="text-light text-decoration-none small"><i class="bi bi-whatsapp me-2"></i> (11) 99999-9999</a></li>
+          <li><a href="#" class="text-light text-decoration-none small"><i class="bi bi-question-circle me-2"></i> Central de Ajuda & Tutoriais</a></li>
+        </ul>
+      </div>
+      
+      <!-- Coluna 3: Legal -->
+      <div class="col-12 col-md-4">
+        <h6 class="fw-bold text-uppercase mb-3">Jurídico & Privacidade</h6>
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2"><a href="{% url 'privacidade' %}" class="text-light text-decoration-none small"><i class="bi bi-shield-check me-2"></i> Política de Privacidade</a></li>
+          <li><a href="{% url 'cookies' %}" class="text-light text-decoration-none small"><i class="bi bi-cookie me-2"></i> Uso de Cookies</a></li>
+        </ul>
+      </div>
+      
+    </div>
+  </div>
+</footer>
+<!-- Fim do Rodapé -->
+<style>
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  /* Spacer to avoid footer being hidden behind bottom-nav on mobile */
+  @media (max-width: 767px) {
+    footer {
+      padding-bottom: 80px !important; 
+    }
+  }
+</style>
+\n<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const themeToggles = document.querySelectorAll('.theme-toggle');
