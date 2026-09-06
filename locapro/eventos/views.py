@@ -209,6 +209,18 @@ def salvar_contrato(request, evento_id):
 def imprimir_contrato(request, contrato_id):
     contrato = get_object_or_404(Contrato, pk=contrato_id)
     return render(request, 'eventos/imprimir_contrato.html', {'contrato': contrato})
+    
+@login_required
+def disparar_geracao_pdf(request, contrato_id):
+    contrato = get_object_or_404(Contrato, pk=contrato_id)
+    if contrato.organizacao != request.user.organizacao:
+        return JsonResponse({'error': 'Acesso negado'}, status=403)
+        
+    # Chama a task do Celery de forma assíncrona
+    from .tasks import gerar_pdf_contrato
+    gerar_pdf_contrato.delay(contrato.id)
+    
+    return JsonResponse({'message': 'Task iniciada com sucesso. O PDF será gerado em background.', 'status': 'processing'})
 
 def deletar_contrato(request, contrato_id):
     contrato = get_object_or_404(Contrato, pk=contrato_id)
@@ -240,6 +252,19 @@ def obter_equipamentos_disponiveis(request):
         if timezone.is_naive(dt_inicio): dt_inicio = timezone.make_aware(dt_inicio)
         if timezone.is_naive(dt_fim): dt_fim = timezone.make_aware(dt_fim)
             
+        from django.core.cache import cache
+        
+        # Versão do cache para invalidação O(1)
+        org_id = request.user.organizacao.id
+        inv_version = cache.get(f'inv_version_{org_id}', 1)
+        
+        # Chave de cache super rápida (lê do Redis em milissegundos)
+        cache_key = f"disp_{org_id}_v{inv_version}_{dt_inicio.timestamp()}_{dt_fim.timestamp()}_{evento_id}"
+        cached_res = cache.get(cache_key)
+        
+        if cached_res is not None:
+            return JsonResponse({'sucesso': True, 'equipamentos': cached_res, 'source': 'redis_cache'})
+            
         # Bloqueio logístico de 24h
         bloqueio_inicio = dt_inicio - timedelta(hours=24)
         bloqueio_fim = dt_fim + timedelta(hours=24)
@@ -250,7 +275,7 @@ def obter_equipamentos_disponiveis(request):
             data_fim__gte=bloqueio_inicio,
             organizacao=request.user.organizacao
         )
-        if evento_id and evento_id.isdigit():
+        if evento_id and str(evento_id).isdigit():
             eventos_conflitantes = eventos_conflitantes.exclude(pk=int(evento_id))
             
         # Puxa o total alugado por equipamento nestes eventos
@@ -271,7 +296,10 @@ def obter_equipamentos_disponiveis(request):
                     'valor': float(eq.valor_diaria)
                 })
         
-        return JsonResponse({'sucesso': True, 'equipamentos': res})
+        # Salva no Redis (Cache)
+        cache.set(cache_key, res, timeout=86400) # 24 horas (invalidado via signal)
+        
+        return JsonResponse({'sucesso': True, 'equipamentos': res, 'source': 'db'})
     except Exception as e:
         return JsonResponse({'sucesso': False, 'erro': str(e)}, status=400)
 
@@ -320,6 +348,10 @@ def excluir_evento(request, pk):
     if request.method == 'POST' or request.method == 'GET':
         evento.status = 'cancelado'
         evento.save()
+        
+        if request.headers.get('Accept') == 'application/json':
+            return JsonResponse({'sucesso': True, 'evento_id': evento.id, 'novo_status': 'cancelado'})
+            
         messages.success(request, 'Evento cancelado.')
     return redirect('eventos:dashboard')
 
@@ -328,6 +360,15 @@ def concluir_evento(request, pk):
     evento = get_object_or_404(Evento, pk=pk)
     evento.status = 'concluido'
     evento.save()
+    
+    if request.headers.get('Accept') == 'application/json':
+        return JsonResponse({
+            'sucesso': True,
+            'evento_id': evento.id,
+            'novo_status': 'concluido',
+            'data_fim_real': evento.data_devolucao_real.isoformat() if evento.data_devolucao_real else None
+        })
+        
     messages.success(request, 'Evento concluído.')
     return redirect('eventos:dashboard')
 

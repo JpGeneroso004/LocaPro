@@ -130,6 +130,9 @@ class Contrato(models.Model):
     data_assinatura = models.DateTimeField('Data da Assinatura', null=True, blank=True)
     ip_assinatura = models.GenericIPAddressField('IP da Assinatura', null=True, blank=True)
     token_assinatura = models.CharField('Token Seguro de Assinatura', max_length=100, unique=True, null=True, blank=True)
+    
+    # PDF Gerado Assíncronamente
+    pdf_file = models.FileField('Contrato em PDF', upload_to='contratos_pdfs/', null=True, blank=True)
 
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)

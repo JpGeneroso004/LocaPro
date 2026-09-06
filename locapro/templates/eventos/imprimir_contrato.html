@@ -158,9 +158,9 @@
   ⬅ Voltar para Contratos
   </a>
 
-  <!-- Botão Imprimir Centralizado -->
-  <button onclick="window.print()" style="background: #FFD600; color: #000; padding: 9px 24px; border-radius: 6px; font-weight: bold; font-size: 15px; border: none; cursor: pointer;">
-    🖨️ Imprimir / Salvar PDF
+  <!-- Botão Gerar PDF Assíncrono -->
+  <button id="btn-gerar-pdf" onclick="gerarPDFAsync()" class="btn btn-warning" style="background: #FFD600; color: #000; padding: 9px 24px; border-radius: 6px; font-weight: bold; font-size: 15px; border: none; cursor: pointer;">
+    🖨️ Gerar PDF do Contrato
   </button>
   
   <!-- Assinatura WhatsApp -->
@@ -269,6 +269,43 @@
   </div>
 
   <script>
+      const contratoId = "{{ contrato.id }}";
+      
+      // Conectar WebSocket
+      const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+      const wsPath = wsScheme + '://' + window.location.host + '/ws/contratos/' + contratoId + '/';
+      const socket = new WebSocket(wsPath);
+
+      socket.onmessage = function(e) {
+          const data = JSON.parse(e.data);
+          console.log(data);
+          if (data.status === 'done') {
+              alert('PDF gerado com sucesso! Você pode fazer o download agora.');
+              document.getElementById('btn-gerar-pdf').innerHTML = '✅ PDF Pronto (Baixar)';
+              document.getElementById('btn-gerar-pdf').classList.replace('btn-warning', 'btn-success');
+              document.getElementById('btn-gerar-pdf').onclick = function() {
+                  window.open(data.url, '_blank');
+              };
+          } else if (data.status === 'error') {
+              alert('Erro ao gerar PDF: ' + data.message);
+              document.getElementById('btn-gerar-pdf').innerHTML = '❌ Erro ao Gerar PDF';
+          }
+      };
+      
+      function gerarPDFAsync() {
+          const btn = document.getElementById('btn-gerar-pdf');
+          btn.innerHTML = '⏳ Gerando PDF... (Não feche a página)';
+          btn.disabled = true;
+          
+          fetch("{% url 'eventos:gerar_pdf_async' contrato.id %}", {
+              method: 'GET'
+          })
+          .then(response => response.json())
+          .then(data => {
+              console.log('Task iniciada', data);
+          });
+      }
+
       function copiarLinkAssinatura() {
           const url = window.location.origin + "{% url 'eventos:assinatura_cliente' contrato.token_assinatura %}";
           const mensagem = `Olá ${"{{ contrato.contratante_nome }}"}!\nSegue o link seguro para você revisar e assinar nosso contrato de locação referente ao evento ${"{{ contrato.evento.nome }}"}:\n\n${url}`;
