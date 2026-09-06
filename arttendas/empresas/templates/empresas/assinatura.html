@@ -130,7 +130,7 @@ input:checked ~ .toggle-labels .label-anual { color: #fff; }
         <div class="col">
             <div class="card shadow-sm border-0 h-100 {% if user.organizacao.plano == "starter" %}border-warning border-3 shadow-lg{% endif %}">
                 <div class="card-header py-4 bg-light border-bottom-0">
-                    <h4 class="my-0 fw-bold text-dark">LocaPro Essencial</h4>
+                    <h4 class="my-0 fw-bold text-body">LocaPro Essencial</h4>
                     <p class="text-muted small mt-2">Para locadoras em crescimento</p>
                 </div>
                 <div class="card-body d-flex flex-column">
@@ -251,44 +251,44 @@ input:checked ~ .toggle-labels .label-anual { color: #fff; }
                     <small>Meses de Parceria Ativa</small>
                 </div>
             </div>
-            <div class="col-md-8 p-5 bg-white">
+            <div class="col-md-8 p-5 bg-body">
                 <h4 class="fw-bold mb-4 border-bottom pb-2">Suas Conquistas</h4>
                 
                 <div class="d-flex align-items-center mb-4">
                     <div class="flex-shrink-0">
-                        <div class="rounded-circle {% if user.organizacao.meses_pagos >= 6 %}bg-secondary text-white shadow-lg{% else %}bg-light text-muted{% endif %} d-flex justify-content-center align-items-center" style="width: 60px; height: 60px;">
+                        <div class="rounded-circle {% if user.organizacao.meses_pagos >= 6 %}bg-secondary text-white shadow-lg{% else %}bg-body-secondary text-secondary{% endif %} d-flex justify-content-center align-items-center" style="width: 60px; height: 60px;">
                             <i class="bi bi-shield-check fs-2"></i>
                         </div>
                     </div>
                     <div class="flex-grow-1 ms-4">
-                        <h5 class="mb-1 fw-bold {% if user.organizacao.meses_pagos >= 6 %}text-dark{% else %}text-muted{% endif %}">Embaixador Prata (6 Meses)</h5>
-                        <p class="mb-0 text-muted small">Selo especial "Locadora Ouro Verificada" adicionado automaticamente aos seus contratos PDF (Gera extrema autoridade no mercado).</p>
+                        <h5 class="mb-1 fw-bold {% if user.organizacao.meses_pagos >= 6 %}text-body{% else %}text-muted{% endif %}">Embaixador Prata (6 Meses)</h5>
+                        <p class="mb-0 text-body-secondary small">Selo especial "Locadora Ouro Verificada" adicionado automaticamente aos seus contratos PDF (Gera extrema autoridade no mercado).</p>
                     </div>
                     {% if user.organizacao.meses_pagos >= 6 %}<i class="bi bi-check-lg text-success fs-2 ms-3"></i>{% endif %}
                 </div>
 
                 <div class="d-flex align-items-center mb-4">
                     <div class="flex-shrink-0">
-                        <div class="rounded-circle {% if user.organizacao.meses_pagos >= 12 %}bg-warning text-dark shadow-lg{% else %}bg-light text-muted{% endif %} d-flex justify-content-center align-items-center" style="width: 60px; height: 60px;">
+                        <div class="rounded-circle {% if user.organizacao.meses_pagos >= 12 %}bg-warning text-dark shadow-lg{% else %}bg-body-secondary text-secondary{% endif %} d-flex justify-content-center align-items-center" style="width: 60px; height: 60px;">
                             <i class="bi bi-trophy fs-2"></i>
                         </div>
                     </div>
                     <div class="flex-grow-1 ms-4">
-                        <h5 class="mb-1 fw-bold {% if user.organizacao.meses_pagos >= 12 %}text-dark{% else %}text-muted{% endif %}">Embaixador Ouro (1 Ano)</h5>
-                        <p class="mb-0 text-muted small"><strong>Upgrade Automático!</strong> Se estiver no plano Essencial, você ganha o LocaPro Master permanentemente sem pagar 1 centavo a mais.</p>
+                        <h5 class="mb-1 fw-bold {% if user.organizacao.meses_pagos >= 12 %}text-body{% else %}text-muted{% endif %}">Embaixador Ouro (1 Ano)</h5>
+                        <p class="mb-0 text-body-secondary small"><strong>Upgrade Automático!</strong> Se estiver no plano Essencial, você ganha o LocaPro Master permanentemente sem pagar 1 centavo a mais.</p>
                     </div>
                     {% if user.organizacao.meses_pagos >= 12 %}<i class="bi bi-check-lg text-success fs-2 ms-3"></i>{% endif %}
                 </div>
 
                 <div class="d-flex align-items-center">
                     <div class="flex-shrink-0">
-                        <div class="rounded-circle {% if user.organizacao.meses_pagos >= 24 %}bg-info text-dark shadow-lg{% else %}bg-light text-muted{% endif %} d-flex justify-content-center align-items-center" style="width: 60px; height: 60px;">
+                        <div class="rounded-circle {% if user.organizacao.meses_pagos >= 24 %}bg-info text-dark shadow-lg{% else %}bg-body-secondary text-secondary{% endif %} d-flex justify-content-center align-items-center" style="width: 60px; height: 60px;">
                             <i class="bi bi-diamond fs-2"></i>
                         </div>
                     </div>
                     <div class="flex-grow-1 ms-4">
-                        <h5 class="mb-1 fw-bold {% if user.organizacao.meses_pagos >= 24 %}text-dark{% else %}text-muted{% endif %}">Embaixador Diamante (2 Anos)</h5>
-                        <p class="mb-0 text-muted small">Suporte técnico VIP, prioridade no desenvolvimento de novas features e destaque no portal regional de locadoras LocaPro.</p>
+                        <h5 class="mb-1 fw-bold {% if user.organizacao.meses_pagos >= 24 %}text-body{% else %}text-muted{% endif %}">Embaixador Diamante (2 Anos)</h5>
+                        <p class="mb-0 text-body-secondary small">Suporte técnico VIP, prioridade no desenvolvimento de novas features e destaque no portal regional de locadoras LocaPro.</p>
                     </div>
                     {% if user.organizacao.meses_pagos >= 24 %}<i class="bi bi-check-lg text-success fs-2 ms-3"></i>{% endif %}
                 </div>
