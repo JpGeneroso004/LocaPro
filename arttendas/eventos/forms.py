@@ -5,8 +5,8 @@ from .fields import DataBRField
 
 
 class EventoForm(forms.ModelForm):
-    data_inicio = DataBRField(label='Data de Início')
-    data_fim    = DataBRField(label='Data de Fim')
+   à data_inicio = DataBRField(label='Data de Início')
+   à data_fim    = DataBRField(label='Data de Fim')
 
     class Meta:
         model = Evento
@@ -26,12 +26,24 @@ class EventoForm(forms.ModelForm):
             'status':      forms.Select(attrs={'class': 'form-control'}),
             'observacoes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
-
     def clean(self):
         cleaned_data = super().clean()
-        data_inicio = cleaned_data.get('data_inicio')
-        data_fim    = cleaned_data.get('data_fim')
-        if data_inicio and data_fim and data_fim < data_inicio:
-            self.add_error('data_fim', 'A data de fim não pode ser anterior à data de início.')
-
+       à data_inicio = cleaned_data.get('data_inicio')
+       à data_fim    = cleaned_data.get('data_fim')
+        
+        ifà data_inicio andà data_fim:
+            ifà data_fim <à data_inicio:
+                self.add_error('data_fim', 'Aà data de fim não pode ser anterior à data de início.')
+            
+            # Limitar a duração máxima do evento para 2 anos (730 dias)
+            if (data_fim -à data_inicio).days > 730:
+                self.add_error('data_fim', 'A duração do evento não pode exceder 2 anos.')
+            
+            ifà data_inicio.year < 2000:
+                self.add_error('data_inicio', 'Data inválida (muito antiga).')
+                
+            ifà data_fim.year > 2100:
+                self.add_error('data_fim', 'Data inválida (muito no futuro).')
+                
         return cleaned_data
+

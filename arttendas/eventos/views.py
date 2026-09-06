@@ -67,19 +67,27 @@ def painel_eventos(request):
 def novo_evento(request):
     if request.method == 'POST':
         form = EventoForm(request.POST)
+        itens_str = request.POST.get('itens_json', '[]')
+        
+        import json
+        itens = []
+        try:
+            itens = json.loads(itens_str)
+        except Exception:
+            pass
+            
+        if not itens:
+            form.add_error(None, 'Você precisa adicionar pelo menos um equipamento ao evento.')
+            
         if form.is_valid():
             evento = form.save(commit=False)
             evento.organizacao = request.user.organizacao
             evento.save()
             
-            # Salvar itens dinâmicos
-            itens_str = request.POST.get('itens_json', '[]')
-            import json
-            try:
-                itens = json.loads(itens_str)
-                for item in itens:
-                    eq_id = item.get('id')
-                    qtd = int(item.get('qtd', 1))
+            for item in itens:
+                eq_id = item.get('id')
+                qtd = int(item.get('qtd', 1))
+                try:
                     eq = Equipamento.objects.get(id=eq_id, organizacao=request.user.organizacao)
                     ItemEvento.objects.create(
                         evento=evento,
@@ -87,11 +95,13 @@ def novo_evento(request):
                         quantidade=qtd,
                         preco_fechado=eq.valor_diaria * qtd
                     )
-            except Exception as e:
-                print('Erro ao salvar itens:', e)
+                except Equipamento.DoesNotExist:
+                    pass
             
             messages.success(request, 'Evento cadastrado com sucesso!')
             return redirect('eventos:detalhe', pk=evento.pk)
+        else:
+            messages.error(request, 'Erro ao criar evento. Verifique os campos.')
     else:
         form = EventoForm()
     return render(request, 'eventos/form_evento.html', {'form': form, 'titulo': 'Novo Evento'})
@@ -101,19 +111,26 @@ def editar_evento(request, pk):
     evento = get_object_or_404(Evento, pk=pk)
     if request.method == 'POST':
         form = EventoForm(request.POST, instance=evento)
+        itens_str = request.POST.get('itens_json', '[]')
+        
+        import json
+        itens = []
+        try:
+            itens = json.loads(itens_str)
+        except Exception:
+            pass
+            
+        if not itens:
+            form.add_error(None, 'Você precisa ter pelo menos um equipamento no evento.')
+            
         if form.is_valid():
             form.save()
             
-            # Atualizar itens dinâmicos
-            itens_str = request.POST.get('itens_json', '[]')
-            import json
-            try:
-                itens = json.loads(itens_str)
-                # Remove itens antigos para simplificar atualização
-                evento.itens.all().delete()
-                for item in itens:
-                    eq_id = item.get('id')
-                    qtd = int(item.get('qtd', 1))
+            evento.itens.all().delete()
+            for item in itens:
+                eq_id = item.get('id')
+                qtd = int(item.get('qtd', 1))
+                try:
                     eq = Equipamento.objects.get(id=eq_id, organizacao=request.user.organizacao)
                     ItemEvento.objects.create(
                         evento=evento,
@@ -121,20 +138,16 @@ def editar_evento(request, pk):
                         quantidade=qtd,
                         preco_fechado=eq.valor_diaria * qtd
                     )
-            except Exception as e:
-                print('Erro ao salvar itens:', e)
-                
-            messages.success(request, 'Evento atualizado!')
+                except Equipamento.DoesNotExist:
+                    pass
+            
+            messages.success(request, 'Evento atualizado com sucesso!')
             return redirect('eventos:detalhe', pk=evento.pk)
+        else:
+            messages.error(request, 'Erro ao atualizar evento. Verifique os campos.')
     else:
         form = EventoForm(instance=evento)
-        
-    # Passa os itens atuais para o template (para preencher o JS)
-    itens_atuais = [{'id': i.equipamento.id, 'nome': i.equipamento.nome, 'qtd': i.quantidade, 'max_qtd': i.equipamento.quantidade_total} for i in evento.itens.all()]
-    import json
-    itens_json = json.dumps(itens_atuais)
-    
-    return render(request, 'eventos/form_evento.html', {'form': form, 'titulo': f'Editar {evento.nome}', 'itens_atuais_json': itens_json})
+    return render(request, 'eventos/form_evento.html', {'form': form, 'evento': evento, 'titulo': 'Editar Evento'})
 
 @login_required
 def detalhe_evento(request, pk):
