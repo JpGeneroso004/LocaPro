@@ -93,7 +93,21 @@
 </head>
 <body>
 
+  
+  <script>
+    function smartBack() {
+      if (document.referrer && document.referrer.includes(window.location.host)) {
+        window.history.back();
+      } else {
+        window.location.href = "/";
+      }
+    }
+  </script>
   <div class="auth-card">
+    <a href="javascript:void(0)" onclick="smartBack()" style="text-decoration:none; color:#666; font-weight:bold; display:inline-block; margin-bottom: 20px;">
+      &larr; Voltar
+    </a>
+
     <div class="logo-container">
       <img src="{% static 'img/locapro_logo.jpg' %}" alt="LocaPro">
     </div>

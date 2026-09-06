@@ -40,6 +40,12 @@
   <!-- Right Panel -->
   <div class="right-panel">
     <div class="form-container">
+        <div class="mb-4">
+          <a href="javascript:void(0)" onclick="smartBack()" class="btn btn-outline-secondary rounded-pill px-4 btn-sm fw-bold">
+            <i class="bi bi-arrow-left"></i> Voltar
+          </a>
+        </div>
+
       
       <h3 class="fw-bold text-dark mb-1">Acessar Sistema</h3>
       <p class="text-muted mb-4">Insira suas credenciais para continuar.</p>
@@ -110,6 +116,16 @@
       icon.classList.add('bi-eye-slash-fill');
     }
   });
+</script>
+
+<script>
+  function smartBack() {
+    if (document.referrer && document.referrer.includes(window.location.host)) {
+      window.history.back();
+    } else {
+      window.location.href = "/";
+    }
+  }
 </script>
 </body>
 </html>
