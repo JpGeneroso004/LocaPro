@@ -1,0 +1,12 @@
+﻿{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-5 text-center">
+            <h2 class="text-success fw-bold"><i class="bi bi-whatsapp"></i> IA Zap (Em Breve)</h2>
+            <p class="lead mt-3">O assistente IA de WhatsApp está em desenvolvimento e será ativado em breve na sua organização!</p>
+            <a href="{% url 'eventos:dashboard' %}" class="btn btn-primary mt-3">Voltar ao Painel</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
