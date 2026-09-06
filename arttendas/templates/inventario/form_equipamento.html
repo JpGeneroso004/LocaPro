@@ -1,5 +1,5 @@
 ﻿{% extends 'base.html' %}
-{% load widget_tweaks %}
+
 {% block title %}{{ titulo }}{% endblock %}
 
 {% block content %}
@@ -15,25 +15,25 @@
           
           <div class="mb-3">
             <label class="form-label fw-bold">Categoria</label>
-            {% render_field form.categoria class="form-select" %}
+            {{ form.categoria }}
             {% if form.categoria.errors %}<div class="text-danger small">{{ form.categoria.errors }}</div>{% endif %}
           </div>
           
           <div class="mb-3">
             <label class="form-label fw-bold">Nome do Equipamento / Modelo</label>
-            {% render_field form.nome class="form-control" placeholder="Ex: Tenda Sanfonada 3x3 Branca" %}
+            {{ form.nome }}
             {% if form.nome.errors %}<div class="text-danger small">{{ form.nome.errors }}</div>{% endif %}
           </div>
           
           <div class="mb-3">
             <label class="form-label fw-bold">Quantidade Total Adquirida</label>
-            {% render_field form.quantidade_total class="form-control" type="number" min="1" %}
+            {{ form.quantidade_total }}
             {% if form.quantidade_total.errors %}<div class="text-danger small">{{ form.quantidade_total.errors }}</div>{% endif %}
           </div>
           
           <div class="mb-4">
             <label class="form-label fw-bold">Status do Item</label>
-            {% render_field form.status class="form-select" %}
+            {{ form.status }}
             <div class="form-text">Itens em Manutenção/Inativos não aparecem para locação.</div>
           </div>
           
