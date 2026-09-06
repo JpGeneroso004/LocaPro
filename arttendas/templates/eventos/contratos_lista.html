@@ -84,7 +84,7 @@
 <nav aria-label="Navegação de páginas" class="mt-4">
   <ul class="pagination justify-content-center">
     {% if contratos.has_previous %}
-      <li class="page-item"><a class="page-link text-dark" href="?page={{ contratos.previous_page_number }}">Anterior</a></li>
+      <li class="page-item"><a class="page-link text-body" href="?page={{ contratos.previous_page_number }}">Anterior</a></li>
     {% else %}
       <li class="page-item disabled"><span class="page-link">Anterior</span></li>
     {% endif %}
@@ -93,12 +93,12 @@
       {% if contratos.number == i %}
         <li class="page-item active" aria-current="page"><span class="page-link bg-warning border-warning text-dark">{{ i }}</span></li>
       {% else %}
-        <li class="page-item"><a class="page-link text-dark" href="?page={{ i }}">{{ i }}</a></li>
+        <li class="page-item"><a class="page-link text-body" href="?page={{ i }}">{{ i }}</a></li>
       {% endif %}
     {% endfor %}
     
     {% if contratos.has_next %}
-      <li class="page-item"><a class="page-link text-dark" href="?page={{ contratos.next_page_number }}">Próxima</a></li>
+      <li class="page-item"><a class="page-link text-body" href="?page={{ contratos.next_page_number }}">Próxima</a></li>
     {% else %}
       <li class="page-item disabled"><span class="page-link">Próxima</span></li>
     {% endif %}
