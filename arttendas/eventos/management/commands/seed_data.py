@@ -11,7 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         self.stdout.write('🌱 Criando dados de demonstração...')
 
-        org, _ = Organizacao.objects.get_or_create(nome='Art.Tendas Locações')
+        org, _ = Organizacao.objects.get_or_create(nome='LocaPro Locações')
         
         # Cria superusuário para testes
         if not Usuario.objects.filter(username='admin').exists():

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================
-#  Art.Tendas — Script de Configuração Inicial
+#  LocaPro — Script de Configuração Inicial
 # ============================================
 echo ""
 echo "  ████████╗███████╗███╗   ██╗██████╗  █████╗ ███████╗"
@@ -10,7 +10,7 @@ echo "     ██║   ██╔══╝  ██║╚██╗██║██�
 echo "     ██║   ███████╗██║ ╚████║██████╔╝██║  ██║███████║"
 echo "     ╚═╝   ╚══════╝╚═╝  ╚═══╝╚═════╝ ╚═╝  ╚═╝╚══════╝"
 echo ""
-echo "  Art.Tendas — Sistema de Gestão de Eventos"
+echo "  LocaPro — Sistema de Gestão de Eventos"
 echo "  ==========================================="
 echo ""
 

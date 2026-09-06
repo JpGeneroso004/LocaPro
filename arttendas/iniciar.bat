@@ -1,11 +1,11 @@
 @echo off
-title Art.Tendas - Sistema de Gestao
+title LocaPro - Sistema de Gestao
 color 0A
 cd /d "%~dp0"
 
 echo.
 echo  ==========================================
-echo    ART.TENDAS - Sistema de Gestao
+echo    LOCAPRO - Sistema de Gestao
 echo  ==========================================
 echo.
 

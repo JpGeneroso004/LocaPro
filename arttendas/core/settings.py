@@ -10,7 +10,7 @@ env = environ.Env(
 
 environ.Env.read_env(BASE_DIR / '.env')
 
-SECRET_KEY = env('SECRET_KEY', default='arttendas-local-app-key-nao-usar-em-producao')
+SECRET_KEY = env('SECRET_KEY', default='locapro-local-app-key-nao-usar-em-producao')
 
 DEBUG = env('DEBUG')
 

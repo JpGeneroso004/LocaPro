@@ -1,6 +1,6 @@
 # ⛺ LocaPro — SaaS de Gestão para Locadoras de Estruturas
 
-O **LocaPro** (anteriormente Art.Tendas) é uma plataforma SaaS (Software as a Service) de nível empresarial, projetada arquitetonicamente para resolver os maiores gargalos logísticos, contratuais e financeiros de empresas de locação de tendas, palcos e estruturas para eventos.
+O **LocaPro**  é uma plataforma SaaS (Software as a Service) de nível empresarial, projetada arquitetonicamente para resolver os maiores gargalos logísticos, contratuais e financeiros de empresas de locação de tendas, palcos e estruturas para eventos.
 
 ---
 
@@ -37,7 +37,7 @@ O projeto atingiu maturidade de produção e conta com as melhores práticas par
 
 ```bash
 # 1. Entre na pasta do projeto
-cd arttendas
+cd locapro
 
 # 2. Crie e ative o ambiente virtual
 python -m venv venv

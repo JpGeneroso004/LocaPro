@@ -1,5 +1,5 @@
 @echo off
-cd /d "C:\ArtTendas\arttendas"
+cd /d "C:\ArtTendas\locapro"
 start /b py manage.py runserver --noreload >nul 2>&1
 timeout /t 3 /nobreak >nul
 
