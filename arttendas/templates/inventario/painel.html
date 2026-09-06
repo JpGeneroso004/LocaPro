@@ -1,150 +1,79 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% block title %}Inventário{% endblock %}
 {% block nav_inventario %}active{% endblock %}
 {% block mob_inventario %}active{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <h3 class="fw-bold mb-0">Estoque</h3>
-  <div class="dropdown d-none d-md-block">
-    <button class="btn btn-warning fw-bold dropdown-toggle" type="button" data-bs-toggle="dropdown">
+  <h3 class="fw-bold mb-0">Estoque Geral</h3>
+  <div class="d-none d-md-block">
+    <a class="btn btn-warning fw-bold" href="{% url 'inventario:novo_equipamento' %}">
       + Novo Item
-    </button>
-    <ul class="dropdown-menu">
-      <li><a class="dropdown-item fw-bold" href="{% url 'inventario:nova_tenda' %}"><i class="bi bi-tent"></i> Nova Tenda</a></li>
-      <li><a class="dropdown-item fw-bold" href="{% url 'inventario:novo_conjunto' %}"><i class="bi bi-box"></i> Novo Conjunto</a></li>
-    </ul>
+    </a>
   </div>
 </div>
 
 <ul class="nav nav-pills nav-fill mb-4 p-1 bg-body-tertiary rounded-pill shadow-sm" id="pills-tab" role="tablist">
   <li class="nav-item" role="presentation">
-    <button class="nav-link active rounded-pill fw-bold" data-bs-toggle="pill" data-bs-target="#tendas" type="button">Tendas</button>
+    <button class="nav-link active rounded-pill fw-bold" data-bs-toggle="pill" data-bs-target="#ativos" type="button">Ativos</button>
   </li>
   <li class="nav-item" role="presentation">
-    <button class="nav-link rounded-pill fw-bold" data-bs-toggle="pill" data-bs-target="#palcos" type="button">Palcos/Pisos</button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link rounded-pill fw-bold text-secondary" data-bs-toggle="pill" data-bs-target="#baixados" type="button"><i class="bi bi-archive"></i> Arquivo</button>
+    <button class="nav-link rounded-pill fw-bold text-secondary" data-bs-toggle="pill" data-bs-target="#inativos" type="button"><i class="bi bi-archive"></i> Arquivo</button>
   </li>
 </ul>
 
 <div class="tab-content" id="pills-tabContent">
-  <!-- TENDAS TAB -->
-  <div class="tab-pane fade show active" id="tendas" role="tabpanel">
+  <!-- ATIVOS TAB -->
+  <div class="tab-pane fade show active" id="ativos" role="tabpanel">
     <div class="row g-3">
-      {% for tenda in tendas %}
+      {% for eq in equipamentos %}
         <div class="col-12 col-md-6 col-lg-4">
-          <div class="card p-3 shadow-sm h-100 border-start border-4 
-            {% if tenda.current_state == 'disponivel' %}border-success{% elif tenda.current_state == 'em_uso' %}border-warning{% else %}border-danger{% endif %}">
+          <div class="card p-3 shadow-sm h-100 border-start border-4 border-success">
             
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h5 class="fw-bold mb-0">{{ tenda.codigo }}</h5>
-              <a href="{% url 'inventario:editar_tenda' tenda.pk %}" class="btn btn-sm btn-outline-secondary border-0 rounded-circle"><i class="bi bi-pencil"></i></a>
+              <h5 class="fw-bold mb-0">{{ eq.nome }}</h5>
+              <a href="{% url 'inventario:editar_equipamento' eq.pk %}" class="btn btn-sm btn-outline-secondary border-0 rounded-circle"><i class="bi bi-pencil"></i></a>
             </div>
             
-            <p class="mb-1 text-muted"><i class="bi bi-arrows-fullscreen"></i> {{ tenda.get_tamanho_display }}</p>
-            <p class="mb-2 text-muted"><i class="bi bi-tags"></i> {{ tenda.get_tipo_display }}</p>
+            <p class="mb-1 text-muted"><i class="bi bi-tag"></i> Categoria: {{ eq.categoria.nome|default:"Geral" }}</p>
+            <h3 class="fw-bold text-center my-3">{{ eq.quantidade_total }} <span class="fs-6 text-muted fw-normal">unidades</span></h3>
             
             <div class="mt-auto">
-              {% if tenda.current_state == 'disponivel' %}
-                <span class="badge bg-success w-100 py-2">Disponível</span>
-              {% elif tenda.current_state == 'em_uso' %}
-                <span class="badge bg-warning text-dark w-100 py-2">Em Uso</span>
-              {% else %}
-                <span class="badge bg-danger w-100 py-2">Manutenção</span>
-              {% endif %}
+                <span class="badge bg-success w-100 py-2">Pronto para Locação</span>
             </div>
           </div>
         </div>
       {% empty %}
         <div class="col-12 text-center py-5 text-muted">
           <i class="bi bi-box-seam fs-1 mb-2"></i>
-          <p>Nenhuma tenda cadastrada no inventário.</p>
+          <p>Nenhum equipamento cadastrado no inventário.</p>
         </div>
       {% endfor %}
     </div>
   </div>
 
-  <!-- PALCOS TAB -->
-  <div class="tab-pane fade" id="palcos" role="tabpanel">
+  <!-- INATIVOS / ARQUIVO TAB -->
+  <div class="tab-pane fade" id="inativos" role="tabpanel">
     <div class="row g-3">
-      {% for c in conjuntos %}
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="card p-3 shadow-sm h-100 border-start border-4 
-            {% if c.current_state == 'disponivel' %}border-success{% elif c.current_state == 'em_uso' %}border-warning{% else %}border-danger{% endif %}">
-            
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h5 class="fw-bold mb-0">{{ c.nome }}</h5>
-              <a href="{% url 'inventario:editar_conjunto' c.pk %}" class="btn btn-sm btn-outline-secondary border-0 rounded-circle"><i class="bi bi-pencil"></i></a>
-            </div>
-            
-            <h2 class="fw-bold text-center my-3">{{ c.quantidade_placas }} <span class="fs-6 text-muted fw-normal">placas</span></h2>
-            
-            <div class="mt-auto">
-              {% if c.current_state == 'disponivel' %}
-                <span class="badge bg-success w-100 py-2">Disponível</span>
-              {% elif c.current_state == 'em_uso' %}
-                <span class="badge bg-warning text-dark w-100 py-2">Em Uso</span>
-              {% else %}
-                <span class="badge bg-danger w-100 py-2">Manutenção</span>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-      {% empty %}
-        <div class="col-12 text-center py-5 text-muted">
-          <i class="bi bi-grid-3x3 fs-1 mb-2"></i>
-          <p>Nenhum conjunto cadastrado.</p>
-        </div>
-      {% endfor %}
-    </div>
-  </div>
-
-  <!-- BAIXADOS / ARQUIVO TAB -->
-  <div class="tab-pane fade" id="baixados" role="tabpanel">
-    
-    <h5 class="fw-bold text-muted mb-3"><i class="bi bi-tent"></i> Tendas Baixadas / Vendidas</h5>
-    <div class="row g-3 mb-5">
-      {% for tenda in tendas_baixadas %}
+      {% for eq in inativos %}
         <div class="col-12 col-md-6 col-lg-4">
           <div class="card p-3 shadow-sm h-100 border-start border-4 border-secondary bg-body-tertiary opacity-75">
-            <h5 class="fw-bold text-decoration-line-through mb-2 text-muted">{{ tenda.codigo }}</h5>
-            <p class="mb-1 small text-muted"><i class="bi bi-arrows-fullscreen"></i> {{ tenda.get_tamanho_display }}</p>
-            <p class="mb-2 small text-muted"><i class="bi bi-tags"></i> {{ tenda.get_tipo_display }}</p>
-            <span class="badge bg-secondary w-100 py-2 mt-auto"><i class="bi bi-archive-fill"></i> Arquivada</span>
+            <h5 class="fw-bold text-decoration-line-through mb-2 text-muted">{{ eq.nome }}</h5>
+            <h3 class="fw-bold text-center my-3 text-muted opacity-50">{{ eq.quantidade_total }} <span class="fs-6 fw-normal">unidades</span></h3>
+            <span class="badge bg-secondary w-100 py-2 mt-auto"><i class="bi bi-archive-fill"></i> Arquivado / Quebrado</span>
           </div>
         </div>
       {% empty %}
-        <div class="col-12 text-muted small"><p>Nenhuma tenda no histórico.</p></div>
-      {% endfor %}
-    </div>
-
-    <h5 class="fw-bold text-muted mb-3"><i class="bi bi-grid-3x3"></i> Palcos/Pisos Baixados</h5>
-    <div class="row g-3">
-      {% for c in conjuntos_baixados %}
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="card p-3 shadow-sm h-100 border-start border-4 border-secondary bg-body-tertiary opacity-75">
-            <h5 class="fw-bold text-decoration-line-through mb-2 text-muted">{{ c.nome }}</h5>
-            <h3 class="fw-bold text-center my-3 text-muted opacity-50">{{ c.quantidade_placas }} <span class="fs-6 fw-normal">placas</span></h3>
-            <span class="badge bg-secondary w-100 py-2 mt-auto"><i class="bi bi-archive-fill"></i> Arquivado</span>
-          </div>
-        </div>
-      {% empty %}
-        <div class="col-12 text-muted small"><p>Nenhum conjunto no histórico.</p></div>
+        <div class="col-12 text-muted small text-center py-4"><p>Nenhum equipamento no histórico.</p></div>
       {% endfor %}
     </div>
   </div>
 </div>
 
 <!-- Modal Bottom Sheet / Dropup menu for mobile Fab -->
-<div class="dropdown d-md-none">
-  <button class="fab" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+<div class="d-md-none">
+  <a class="fab" href="{% url 'inventario:novo_equipamento' %}">
     <i class="bi bi-plus"></i>
-  </button>
-  <ul class="dropdown-menu dropdown-menu-end shadow border-0 mb-2 p-2">
-    <li><a class="dropdown-item py-2 fw-bold" href="{% url 'inventario:nova_tenda' %}"><i class="bi bi-tent me-2 text-warning"></i> Nova Tenda</a></li>
-    <li><a class="dropdown-item py-2 fw-bold" href="{% url 'inventario:novo_conjunto' %}"><i class="bi bi-box me-2 text-warning"></i> Novo Conjunto</a></li>
-  </ul>
+  </a>
 </div>
 {% endblock %}
