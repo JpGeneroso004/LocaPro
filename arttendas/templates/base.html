@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br" data-bs-theme="light">
 <head>
@@ -248,7 +248,7 @@
         {% if user.is_authenticated and user.organizacao and user.organizacao.logo %}
           <img src="{{ user.organizacao.logo.url }}" alt="Logo" height="40" class="me-2 rounded">
         {% else %}
-          <img src="{% static 'img/logo.png' %}?v=3" alt="LocaPro" height="40" class="me-2 rounded">
+          <img src="{% static 'img/logo.png' %}?v=4" alt="LocaPro" height="40" class="me-2 rounded">
         {% endif %}
         <span class="fs-4 fw-bold">LocaPro</span>
       </a>
@@ -477,3 +477,4 @@
   </script>
 </body>
 </html>
+
