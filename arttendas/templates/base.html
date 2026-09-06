@@ -227,7 +227,13 @@
   </style>
   {% endif %}
   {% block extra_head %}{% endblock %}
+
+  <style>
+    html[data-bs-theme="light"] .logo-dark-mode { display: none !important; }
+    html[data-bs-theme="dark"] .logo-light-mode { display: none !important; }
+  </style>
 </head>
+
 <body>
 
   <!-- Sidebar e Header -->
@@ -248,7 +254,8 @@
         {% if user.is_authenticated and user.organizacao and user.organizacao.logo %}
           <img src="{{ user.organizacao.logo.url }}" alt="Logo" height="40" class="me-2 rounded">
         {% else %}
-          <img src="{% static 'img/logo.png' %}?v=4" alt="LocaPro" height="40" class="me-2 rounded">
+          <img src="{% static 'img/logo.png' %}?v=5" alt="LocaPro" height="40" class="me-2 rounded logo-light-mode">
+          <img src="{% static 'img/logo_alt.png' %}?v=1" alt="LocaPro" height="40" class="me-2 rounded logo-dark-mode">
         {% endif %}
         <span class="fs-4 fw-bold">LocaPro</span>
       </a>
