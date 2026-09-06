@@ -12,29 +12,36 @@ from django.db.models import Sum
 
 @login_required
 def painel_eventos(request):
-    eventos = Evento.objects.all()
-    hoje = timezone.localdate()
-    eventos_ativos_hoje = eventos.filter(status__in=['agendado', 'em_andamento'], data_inicio__lte=hoje, data_fim__gte=hoje)
+    from django.db.models import Sum, Prefetch
     
-    total_equipamentos = sum(e.quantidade_total for e in Equipamento.objects.filter(status='ativo'))
-    equip_em_uso = sum(ie.quantidade for ev in eventos_ativos_hoje for ie in ev.itens.all())
+    hoje = timezone.localdate()
+    eventos_ativos_hoje = Evento.objects.filter(
+        status__in=['agendado', 'em_andamento'], 
+        data_inicio__lte=hoje, 
+        data_fim__gte=hoje
+    ).prefetch_related('itens')
+    
+    total_equipamentos = Equipamento.objects.filter(status='ativo').aggregate(t=Sum('quantidade_total'))['t'] or 0
+    
+    equip_em_uso = ItemEvento.objects.filter(evento__in=eventos_ativos_hoje).aggregate(t=Sum('quantidade'))['t'] or 0
     equip_disponivel = total_equipamentos - equip_em_uso
     
     eventos_info = []
     for e in eventos_ativos_hoje:
         eventos_info.append({
             'evento': e,
-            'itens': e.total_itens()
+            'itens': sum(i.quantidade for i in e.itens.all())
         })
         
     context = {
-        'eventos': eventos,
+        'eventos': Evento.objects.all().order_by('-data_inicio')[:10], # Mostrar os ultimos 10 na lista geral
         'eventos_ativos_hoje': eventos_info,
         'total_equipamentos': total_equipamentos,
         'equip_disponivel': equip_disponivel,
         'equip_em_uso': equip_em_uso,
     }
     return render(request, 'eventos/dashboard.html', context)
+
 
 @login_required
 def novo_evento(request):
