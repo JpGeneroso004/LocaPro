@@ -56,3 +56,10 @@ Daqui pra frente, podemos desenvolver features novas, como Automação por Whats
 ### Módulo de IA (Assistente de WhatsApp)
 - **Integração Gemini SDK:** Implementado script ot.py que puxa o estoque real da locadora e usa LLM para responder clientes.
 - **Webhook Assíncrono:** Django configurado para escutar a API da Meta, extrair o texto via payload do WhatsApp Cloud API, e disparar o Bot em uma nova Thread.
+
+
+### Arquitetura Enterprise (Padrões Airbnb, Turo, Shopify, Ifood)
+- **Motor de Disponibilidade de Alta Performance:** Cache implementado via Redis com django-redis e signals de invalidação O(1) (semelhante ao Airbnb).
+- **Assincronicidade e WebSockets:** Geração de Contratos em PDF passada para o background via Celery + ReportLab, com notificação push em tempo real pro frontend usando Django Channels e WebSockets (Padrão Turo/Uber).
+- **Multi-Tenant Consolidado:** Revisão completa da arquitetura (Padrão Shopify) confirmando que o TenantManager blinda com sucesso o vazamento de dados entre empresas.
+- **Optimistic UI / Resiliência:** APIs refatoradas para Content Negotiation (JSON vs HTML). Retornos leves viabilizando mudanças de status instantâneas na tela do celular mesmo no 3G (Padrão Ifood).
