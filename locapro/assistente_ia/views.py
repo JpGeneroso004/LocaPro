@@ -61,7 +61,7 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def painel_ia(request):
     if request.user.cargo != "dono":
-        return redirect("eventos:dashboard")
+        return redirect("eventos:lista_eventos")
     
     config, _ = ConfiguracaoIA.objects.get_or_create(
         organizacao=request.user.organizacao,
@@ -80,4 +80,5 @@ def painel_ia(request):
         return redirect("assistente_ia:painel")
         
     return render(request, "assistente_ia/painel.html", {"config": config})
+
 

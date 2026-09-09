@@ -1,4 +1,4 @@
-﻿import os
+import os
 
 # 1. Patch base.html
 base_path = 'templates/base.html'
@@ -8,13 +8,13 @@ with open(base_path, 'r', encoding='utf-8') as f:
 back_button = '''
       <div class="d-flex align-items-center">
         <!-- Smart Back Button (Visible when not on Dashboard) -->
-        {% if request.resolver_match.view_name != 'eventos:dashboard' and request.resolver_match.view_name != 'home' %}
+        {% if request.resolver_match.view_name != 'eventos:lista_eventos' and request.resolver_match.view_name != 'home' %}
         <a href="javascript:void(0)" onclick="smartBack()" class="btn btn-link text-body p-0 me-3 text-decoration-none" title="Voltar">
           <i class="bi bi-arrow-left fs-2"></i>
         </a>
         {% endif %}
         
-        <a class="navbar-brand d-flex align-items-center m-0" href="{% url 'eventos:dashboard' %}">
+        <a class="navbar-brand d-flex align-items-center m-0" href="{% url 'eventos:lista_eventos' %}">
 '''
 base_content = base_content.replace('<div class="d-flex align-items-center">\n        {% if user.is_authenticated %}', back_button + '        {% if user.is_authenticated %}')
 base_content = base_content.replace('<div class="d-flex align-items-center">\n        <a href="{% url \'account_logout\' %}"', back_button + '        <a href="{% url \'account_logout\' %}"')
@@ -25,7 +25,7 @@ js_script = '''
       if (document.referrer && document.referrer.includes(window.location.host)) {
         window.history.back();
       } else {
-        window.location.href = "{% url 'eventos:dashboard' %}";
+        window.location.href = "{% url 'eventos:lista_eventos' %}";
       }
     }
 '''
@@ -68,3 +68,4 @@ for path in ['templates/account/login.html', 'empresas/templates/empresas/cadast
         f.write(content)
 
 print('Patched base, login, and cadastro with Smart Back Button.')
+

@@ -8,7 +8,7 @@ from django.db import transaction
 def cadastro_locadora(request):
     # Se já está logado E já tem empresa, não precisa cadastrar
     if request.user.is_authenticated and getattr(request.user, 'organizacao_id', None):
-        return redirect('eventos:dashboard')
+        return redirect('eventos:lista_eventos')
         
     if request.method == 'POST':
         empresa_nome = request.POST.get('empresa_nome')
@@ -232,7 +232,7 @@ def assinatura(request):
         
     if request.user.cargo != 'dono':
         messages.error(request, 'Apenas o proprietário (dono) da locadora pode gerenciar a assinatura.')
-        return redirect('eventos:dashboard')
+        return redirect('eventos:lista_eventos')
         
     context = {
         'org': org,
@@ -255,7 +255,7 @@ def processar_assinatura(request):
     org = request.user.organizacao
     if request.user.cargo != 'dono':
         messages.error(request, 'Acesso Negado.')
-        return redirect('eventos:dashboard')
+        return redirect('eventos:lista_eventos')
         
     if request.method == 'POST':
         novo_plano = request.POST.get('plano')
@@ -484,4 +484,5 @@ class VitrinePublicaView(DetailView):
         context = super().get_context_data(**kwargs)
         context['equipamentos'] = Equipamento._base_manager.filter(organizacao=self.object, status='ativo', deletado_em__isnull=True)
         return context
+
 
