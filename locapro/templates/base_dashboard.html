@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Gestão - LocaPro</title>
+    <title>{% block title %}Painel de Gestão - LocaPro{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    {% block extra_head %}{% endblock %}
     <style>
         :root {
             --cor-primaria: {{ request.user.organizacao.cor_primaria|default:'#004581' }};
@@ -89,5 +90,7 @@
             </div>
         </main>
     </div>
+    
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>
