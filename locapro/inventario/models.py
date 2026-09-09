@@ -1,9 +1,9 @@
 from django.db import models
-from empresas.models import TenantManager
+from empresas.models import TenantManager, SoftDeleteModel, Organizacao
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-class CategoriaEquipamento(models.Model):
+class CategoriaEquipamento(SoftDeleteModel):
     nome = models.CharField('Nome da Categoria', max_length=50)
     organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='categorias')
     
@@ -18,18 +18,22 @@ class CategoriaEquipamento(models.Model):
     def __str__(self):
         return self.nome
 
-class Equipamento(models.Model):
+class Equipamento(SoftDeleteModel):
     STATUS = [
         ('ativo', 'Ativo (Disponível)'),
         ('inativo', 'Inativo / Manutenção'),
     ]
+    TIPO_RASTREAMENTO = [
+        ('lote', 'Por Lote (Quantidade)'),
+        ('serializado', 'Único/Serializado (Patrimônio)'),
+    ]
 
     codigo = models.CharField('Código (Opcional)', max_length=30, blank=True, help_text='Ex: CAIXA-01, MESA-PLAST')
-    nome = models.CharField('Nome do Item', max_length=150, help_text='Ex: Cadeira de Plástico, Tenda Piramidal 5x5, Pula-pula de Castelo')
+    nome = models.CharField('Nome do Item', max_length=150, help_text='Ex: Cadeira de Plástico, Tenda Piramidal 5x5')
     categoria = models.ForeignKey(CategoriaEquipamento, on_delete=models.SET_NULL, null=True, blank=True)
     
-    # Ao invés de criar 500 linhas para 500 cadeiras, criamos 1 linha com quantidade = 500
-    quantidade_total = models.PositiveIntegerField('Quantidade em Estoque', default=1)
+    tipo_rastreamento = models.CharField('Tipo de Controle', max_length=20, choices=TIPO_RASTREAMENTO, default='lote')
+    quantidade_lote = models.PositiveIntegerField('Quantidade em Lote', default=1, help_text='Usado apenas se for rastreado por Lote')
     
     valor_diaria = models.DecimalField('Valor da Diária Base (R$)', max_digits=10, decimal_places=2, default=0.00)
     status = models.CharField('Status', max_length=20, choices=STATUS, default='ativo')
@@ -45,7 +49,9 @@ class Equipamento(models.Model):
         ordering = ['nome']
 
     def __str__(self):
-        return f"{self.nome} (Qtd: {self.quantidade_total})"
+        if self.tipo_rastreamento == 'lote':
+            return f"{self.nome} (Qtd: {self.quantidade_lote})"
+        return f"{self.nome} (Serializado)"
 
     def get_status_class(self):
         return {
@@ -54,7 +60,6 @@ class Equipamento(models.Model):
         }.get(self.status, '')
 
     def save(self, *args, **kwargs):
-        # Auto-gerar código se vazio (facilita pro cliente)
         if not self.codigo:
             from django.utils.text import slugify
             base = slugify(self.nome)[:6].upper()
@@ -62,18 +67,33 @@ class Equipamento(models.Model):
             self.codigo = f"{base}-{count:03d}"
         super().save(*args, **kwargs)
 
+class Patrimonio(SoftDeleteModel):
+    STATUS_PATRIMONIO = [
+        ('disponivel', 'Disponível'),
+        ('em_manutencao', 'Em Manutenção'),
+        ('inativo', 'Inativo / Danificado'),
+    ]
+    
+    equipamento = models.ForeignKey(Equipamento, on_delete=models.CASCADE, related_name='patrimonios')
+    numero_serie_ou_tag = models.CharField('Número de Série / Tag ID', max_length=100)
+    status = models.CharField('Status', max_length=20, choices=STATUS_PATRIMONIO, default='disponivel')
+    
+    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='patrimonios')
+    
+    objects = TenantManager()
+
+    class Meta:
+        verbose_name = 'Patrimônio (Item Único)'
+        verbose_name_plural = 'Patrimônios'
+
+    def __str__(self):
+        return f"{self.equipamento.nome} - {self.numero_serie_ou_tag}"
 
 @receiver(post_save, sender='empresas.Organizacao')
 def criar_categorias_iniciais(sender, instance, created, **kwargs):
-    """
-    Quando uma nova empresa se cadastra no SaaS, lemos o 'Nicho de Mercado' dela
-    e populamos o banco de dados com as Categorias de Estoque mais comuns para aquele nicho.
-    Isso cria um efeito "Uau" de Onboarding (Software Inteligente).
-    """
     if created:
         categorias = []
         nicho = instance.segmento
-        
         if nicho == 'tendas':
             categorias = ['Tendas Piramidais', 'Tendas Chapéu de Bruxa', 'Palcos e Pisos', 'Gradis']
         elif nicho == 'som_luz':

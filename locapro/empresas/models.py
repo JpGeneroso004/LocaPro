@@ -1,7 +1,20 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
+from django.utils.text import slugify
 
-class Organizacao(models.Model):
+class SoftDeleteModel(models.Model):
+    deletado_em = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+    def delete(self, *args, **kwargs):
+        self.deletado_em = timezone.now()
+        self.save(update_fields=['deletado_em'])
+
+class Organizacao(SoftDeleteModel):
+    slug = models.SlugField('Slug (URL Pública)', max_length=150, unique=True, blank=True)
     NICHOS = [
         ('tendas', 'Tendas e Estruturas'),
         ('som_luz', 'Som, Iluminação e Audiovisual'),
@@ -72,15 +85,20 @@ class Organizacao(models.Model):
         return self.nome
 
     def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.nome)
+            slug = base_slug
+            counter = 1
+            while Organizacao.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
         if not self.pk and not self.vencimento_trial:
-            from django.utils import timezone
-            import datetime
-            self.vencimento_trial = timezone.localdate() + datetime.timedelta(days=7)
+            self.vencimento_trial = timezone.localdate() + timezone.timedelta(days=7)
         super().save(*args, **kwargs)
 
     @property
     def is_bloqueada(self):
-        from django.utils import timezone
         if self.status_assinatura == 'inadimplente' or self.status_assinatura == 'cancelada':
             return True
         if self.status_assinatura == 'trial' and self.vencimento_trial:
@@ -88,7 +106,7 @@ class Organizacao(models.Model):
                 return True
         return False
 
-class Usuario(AbstractUser):
+class Usuario(AbstractUser, SoftDeleteModel):
     CARGOS = [
         ('dono', 'Dono/Administrador'),
         ('funcionario', 'Funcionário')
@@ -110,25 +128,20 @@ class Usuario(AbstractUser):
 
 class TenantManager(models.Manager):
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = super().get_queryset().filter(deletado_em__isnull=True)
         from .middleware import get_current_user
         user = get_current_user()
         
-        # 1. Se não houver requisição (ex: terminal manage.py), retorna tudo.
         if user is None:
             return qs
             
-        # 2. Se for uma requisição de um usuário não autenticado, não deve ver nada.
         if not user.is_authenticated:
             return qs.none()
             
-        # 3. Se for Superuser, deixamos ver tudo (útil para o painel de admin).
         if user.is_superuser:
             return qs
             
-        # 4. Se for usuário normal autenticado, filtra estritamente pela sua organização.
         if getattr(user, 'organizacao_id', None):
             return qs.filter(organizacao=user.organizacao)
             
-        # 5. Segurança Final: Usuário logado mas sem organização (ex: logou pelo Google mas não criou locadora). NÃO DEVE VER NADA.
         return qs.none()

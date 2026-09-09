@@ -1,10 +1,10 @@
 import threading
 import logging
 from django.shortcuts import redirect, render
+from django.contrib import messages
 from django.http import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 from django.conf import settings
-from django.urls import resolve
 
 logger = logging.getLogger(__name__)
 
@@ -27,17 +27,53 @@ def get_current_user():
     return getattr(_thread_locals, 'user', None)
 
 class TenantMiddleware:
+    """
+    Identifica o usuário logado e o injeta na ThreadLocal para ser consumido
+    pelo TenantManager globalmente, isolando os dados (SaaS Multi-Tenant).
+    """
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
+        # 1. Injeta o usuário da requisição atual na memória local da thread
         _thread_locals.user = getattr(request, 'user', None)
-        try:
-            response = self.get_response(request)
-            return response
-        finally:
-            if hasattr(_thread_locals, 'user'):
-                del _thread_locals.user
+        
+        # 2. Processa a view
+        response = self.get_response(request)
+        
+        # 3. Limpa a memória para não vazar usuário entre requisições (workers assíncronos)
+        _thread_locals.user = None
+        
+        return response
+
+class BloqueioInadimplenteMiddleware:
+    """
+    Verifica se o usuário logado pertence a uma organização inadimplente.
+    Se estiver inadimplente, bloqueia o acesso e redireciona para a página de assinatura.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.user.is_authenticated and hasattr(request.user, 'organizacao') and request.user.organizacao:
+            org = request.user.organizacao
+            if org.status_assinatura == 'inadimplente' and not request.user.is_superuser:
+                # Exceção para não causar loop infinito em rotas cruciais
+                allowed_paths = [
+                    '/empresas/assinatura/',
+                    '/empresas/assinatura/processar/',
+                    '/empresas/webhook/asaas/',
+                    '/accounts/logout/',
+                    '/admin/logout/'
+                ]
+                
+                path = request.path_info
+                
+                if not any(path.startswith(p) for p in allowed_paths):
+                    messages.error(request, 'Sua assinatura está suspensa por inadimplência. Regularize para voltar a acessar o painel.')
+                    return redirect('empresas:assinatura')
+                    
+        return self.get_response(request)
 
 class LoginRequiredMiddleware(MiddlewareMixin):
     def process_request(self, request):
@@ -47,33 +83,11 @@ class LoginRequiredMiddleware(MiddlewareMixin):
         if not request.user.is_authenticated:
             allowed = ['/admin', getattr(settings, 'LOGIN_URL', '/accounts/login/'), '/empresas/cadastro', '/empresas/webhook/asaas/', '/accounts/', '/static/', '/media/', '/eventos/contrato/assinatura/']
             if not any(path.startswith(p) for p in allowed):
-                return redirect(f"/accounts/login/?next={path}")
+                if not path.startswith('/empresas/c/'): # Liberar a vitrine publica
+                    return redirect(f"/accounts/login/?next={path}")
                 
         # 2. Usuário autenticado, mas SEM organização (ex: Logou pelo Google pela primeira vez)
         elif not getattr(request.user, 'organizacao_id', None) and not request.user.is_superuser:
             allowed_for_no_tenant = ['/empresas/cadastro', '/accounts/logout', '/static/', '/media/']
             if not any(path.startswith(p) for p in allowed_for_no_tenant):
                 return redirect('empresas:cadastro')
-
-class BloqueioInadimplenteMiddleware(MiddlewareMixin):
-    def process_request(self, request):
-        if request.user.is_authenticated and hasattr(request.user, 'organizacao') and request.user.organizacao:
-            path = request.path_info
-            
-            # Rotas permitidas mesmo se bloqueado
-            allowed = [
-                '/empresas/assinatura/', 
-                '/empresas/configuracoes/excluir/',
-                '/admin/logout/', 
-                '/accounts/logout/'
-            ]
-            
-            if any(path.startswith(p) for p in allowed):
-                return None
-                
-            # Se for superuser, não bloqueia (para suporte)
-            if request.user.is_superuser:
-                return None
-                
-            if request.user.organizacao.is_bloqueada:
-                return redirect('empresas:assinatura')

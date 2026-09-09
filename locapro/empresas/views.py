@@ -468,3 +468,20 @@ def privacidade(request):
 
 def cookies(request):
     return render(request, 'legais/cookies.html')
+
+
+from django.views.generic import DetailView
+from inventario.models import Equipamento
+
+class VitrinePublicaView(DetailView):
+    model = Organizacao
+    template_name = 'empresas/vitrine.html'
+    context_object_name = 'empresa'
+    slug_field = 'slug'
+    slug_url_kwarg = 'slug'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['equipamentos'] = Equipamento._base_manager.filter(organizacao=self.object, status='ativo', deletado_em__isnull=True)
+        return context
+

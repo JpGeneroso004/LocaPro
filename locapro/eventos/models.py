@@ -1,8 +1,8 @@
 from django.db import models
-from inventario.models import Equipamento
-from empresas.models import TenantManager
+from inventario.models import Equipamento, Patrimonio
+from empresas.models import TenantManager, SoftDeleteModel
 
-class Cliente(models.Model):
+class Cliente(SoftDeleteModel):
     nome = models.CharField('Nome', max_length=200)
     email = models.EmailField('E-mail do Cliente', blank=True, help_text='Necessário para avisos automáticos e envio de contratos')
     telefone = models.CharField('Telefone', max_length=20, blank=True)
@@ -21,7 +21,7 @@ class Cliente(models.Model):
     def __str__(self):
         return f"{self.nome} - {self.locapoints} pts"
 
-class Evento(models.Model):
+class Evento(SoftDeleteModel):
     STATUS = [
         ('agendado',     'Agendado'),
         ('em_andamento', 'Em Andamento'),
@@ -46,7 +46,6 @@ class Evento(models.Model):
     data_fim    = models.DateField('Data de Desmontagem', db_index=True)
     hora_fim    = models.TimeField('Horário de Desmontagem', null=True, blank=True)
     
-    # Edge Case: Devoluções Antecipadas
     data_devolucao_real = models.DateTimeField('Data e Hora Real de Devolução', null=True, blank=True, help_text="Preenchido caso o evento termine e os itens sejam devolvidos ANTES da Data de Desmontagem prevista.")
     
     status      = models.CharField('Status', max_length=20, choices=STATUS, default='agendado', db_index=True)
@@ -77,50 +76,45 @@ class Evento(models.Model):
         return sum(item.quantidade for item in self.itens.all())
 
 
-class ItemEvento(models.Model):
-    """
-    Representa quantos equipamentos X foram alugados para o Evento Y.
-    Ex: 50 Cadeiras de Plástico para o Casamento da Maria.
-    """
+class ItemEvento(SoftDeleteModel):
     evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='itens')
     equipamento = models.ForeignKey(Equipamento, on_delete=models.PROTECT, related_name='alocacoes')
+    patrimonio = models.ForeignKey(Patrimonio, on_delete=models.SET_NULL, null=True, blank=True, related_name='alocacoes_serial')
     quantidade = models.PositiveIntegerField('Quantidade Alugada', default=1)
     preco_fechado = models.DecimalField('Preço Total Cobrado (R$)', max_digits=10, decimal_places=2, default=0.00)
+    organizacao = models.ForeignKey('empresas.Organizacao', on_delete=models.CASCADE, related_name='itens_evento', null=True, blank=True)
+    
+    objects = TenantManager()
     
     def __str__(self):
         return f"{self.quantidade}x {self.equipamento.nome} no {self.evento.nome}"
 
 
-class Contrato(models.Model):
+class Contrato(SoftDeleteModel):
     evento = models.OneToOneField(Evento, on_delete=models.CASCADE, related_name='contrato', verbose_name='Evento')
+    ativo = models.BooleanField('Contrato Ativo (Não Cancelado)', default=True)
     
-    # Dados do Contratante
     contratante_nome = models.CharField('Nome', max_length=200)
     contratante_cpf_cnpj = models.CharField('CPF/CNPJ', max_length=30)
     contratante_telefone = models.CharField('Telefone', max_length=20)
     contratante_endereco = models.CharField('Endereço', max_length=300)
     
-    # Dados da Locação
     data_montagem = models.DateTimeField('Data/Hora Montagem', null=True, blank=True)
     data_desmontagem = models.DateTimeField('Data/Hora Desmontagem', null=True, blank=True)
     endereco_montagem = models.CharField('Endereço da Montagem', max_length=300)
     
-    # Valores e Pagamento
     valor_total = models.DecimalField('Valor Total (Base)', max_digits=10, decimal_places=2, default=0.00)
     sinal = models.DecimalField('Sinal', max_digits=10, decimal_places=2, default=0.00, null=True, blank=True)
     forma_pagamento = models.CharField('Forma de Pagamento', max_length=100)
     
-    # Fidelidade (LocaPoints)
     pontos_utilizados = models.PositiveIntegerField('Pontos Utilizados (Desconto)', default=0)
     desconto_fidelidade = models.DecimalField('Desconto Fidelidade (R$)', max_digits=10, decimal_places=2, default=0.00)
     pontos_gerados = models.PositiveIntegerField('Pontos Gerados (Para o futuro)', default=0)
     pontos_creditados = models.BooleanField('Pontos já creditados na carteira?', default=False)
     
-    # Itens e Cláusulas
     itens_locados = models.TextField('Itens Locados')
     clausulas = models.TextField('Cláusulas')
 
-    # Assinatura Eletrônica (SaaS)
     status_assinatura = models.CharField(
         'Status da Assinatura', 
         max_length=20, 
@@ -131,7 +125,6 @@ class Contrato(models.Model):
     ip_assinatura = models.GenericIPAddressField('IP da Assinatura', null=True, blank=True)
     token_assinatura = models.CharField('Token Seguro de Assinatura', max_length=100, unique=True, null=True, blank=True)
     
-    # PDF Gerado Assíncronamente
     pdf_file = models.FileField('Contrato em PDF', upload_to='contratos_pdfs/', null=True, blank=True)
 
     criado_em = models.DateTimeField(auto_now_add=True)

@@ -63,3 +63,9 @@ Daqui pra frente, podemos desenvolver features novas, como Automação por Whats
 - **Assincronicidade e WebSockets:** Geração de Contratos em PDF passada para o background via Celery + ReportLab, com notificação push em tempo real pro frontend usando Django Channels e WebSockets (Padrão Turo/Uber).
 - **Multi-Tenant Consolidado:** Revisão completa da arquitetura (Padrão Shopify) confirmando que o TenantManager blinda com sucesso o vazamento de dados entre empresas.
 - **Optimistic UI / Resiliência:** APIs refatoradas para Content Negotiation (JSON vs HTML). Retornos leves viabilizando mudanças de status instantâneas na tela do celular mesmo no 3G (Padrão Ifood).
+### 🛡️ Nível Tier-1 Atingido (Auditoria Final)
+- **Motor Transacional Absoluto:** Eventos agora rodam sob 	ransaction.atomic() com bloqueio de concorrência (select_for_update). Impossível realizar overbooking ou negativar estoque.
+- **Imutabilidade Contratual Jurídica:** Uma vez que o cliente assinou digitalmente via WhatsApp, o backend trava edições no evento/contrato, protegendo a validade jurídica.
+- **Fim do Extermínio Financeiro:** Implementado Soft Delete na deleção de contratos (tivo=False). Nenhum registro financeiro do passado desaparecerá do banco.
+- **Ambiente Local Estável:** Variáveis de ambiente configuradas no .env para evitar Loop de Login em conexões sem HTTPS.
+- **Inicialização Otimizada:** Arquivo iniciar_sistema.bat reescrito para emular um console real, sem crashes de I/O em background.

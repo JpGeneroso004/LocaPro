@@ -1,0 +1,82 @@
+{% extends 'base_dashboard.html' %}
+
+{% block content %}
+<div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-800 tracking-tight">Estoque</h1>
+        <p class="text-sm text-gray-500 mt-1">Gerencie os equipamentos, lotes e seriais da sua locadora.</p>
+    </div>
+    <a href="{% url 'inventario:novo_equipamento' %}" class="bg-tenant text-white px-5 py-2.5 rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        Adicionar Equipamento
+    </a>
+</div>
+
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-50 border-b border-gray-100">
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Item / Código</th>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Categoria</th>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tipo (Rastreio)</th>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Qtd Total</th>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Valor Diária</th>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50 text-sm">
+                {% for item in equipamentos %}
+                <tr class="hover:bg-gray-50/80 transition-colors group">
+                    <td class="px-6 py-4">
+                        <p class="font-bold text-gray-900 group-hover:text-tenant transition-colors">{{ item.nome }}</p>
+                        {% if item.codigo %}
+                        <p class="text-xs text-gray-400 font-mono mt-0.5">{{ item.codigo }}</p>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">{{ item.categoria.nome|default:'—' }}</td>
+                    <td class="px-6 py-4">
+                        {% if item.tipo_rastreamento == 'lote' %}
+                            <span class="inline-flex items-center gap-1.5 text-blue-700 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-md text-xs font-semibold">
+                                Lote (Genérico)
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center gap-1.5 text-purple-700 bg-purple-50 border border-purple-100 px-2.5 py-1 rounded-md text-xs font-semibold">
+                                Serial (Único)
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 font-medium text-gray-900 text-right">
+                        <span class="bg-gray-100 px-2 py-1 rounded-md">
+                            {% if item.tipo_rastreamento == 'lote' %}
+                                {{ item.quantidade_lote }}
+                            {% else %}
+                                {{ item.patrimonios.count }}
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-600 text-right font-medium">R$ {{ item.valor_diaria }}</td>
+                    <td class="px-6 py-4 text-center">
+                        {% if item.status == 'ativo' %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Ativo</span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Inativo</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-16 text-center">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 mb-4">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900">Seu estoque está vazio</h3>
+                        <p class="text-gray-500 mt-1">Comece adicionando tendas, mesas, cadeiras ou brinquedos.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

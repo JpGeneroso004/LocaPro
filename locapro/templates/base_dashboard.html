@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Gestão - LocaPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --cor-primaria: {{ request.user.organizacao.cor_primaria|default:'#004581' }};
+        }
+        .bg-tenant { background-color: var(--cor-primaria); }
+        .text-tenant { color: var(--cor-primaria); }
+        .border-tenant { border-color: var(--cor-primaria); }
+        .hover-bg-tenant:hover { background-color: var(--cor-primaria); color: white; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans h-screen flex overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg flex flex-col hidden md:flex z-10">
+        <div class="p-6 border-b border-gray-100 flex flex-col items-center">
+            {% if request.user.organizacao.logo %}
+                <img src="{{ request.user.organizacao.logo.url }}" alt="Logo" class="max-h-16 object-contain mb-3">
+            {% else %}
+                <div class="h-16 w-16 rounded-full bg-tenant text-white flex items-center justify-center font-bold text-2xl mb-3 shadow-md">
+                    {{ request.user.organizacao.nome|slice:":1" }}
+                </div>
+            {% endif %}
+            <h2 class="text-lg font-bold text-gray-800 text-center leading-tight">{{ request.user.organizacao.nome }}</h2>
+            <span class="text-xs text-tenant bg-blue-50 px-2 py-1 rounded-full mt-2 font-semibold">Plano {{ request.user.organizacao.get_plano_display }}</span>
+        </div>
+        
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+            <a href="{% url 'eventos:lista_eventos' %}" class="flex items-center gap-3 px-4 py-3 text-gray-600 rounded-lg hover-bg-tenant transition-colors font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Agenda (Eventos)
+            </a>
+            <a href="{% url 'inventario:lista_equipamentos' %}" class="flex items-center gap-3 px-4 py-3 text-gray-600 rounded-lg hover-bg-tenant transition-colors font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                Estoque
+            </a>
+            <a href="{% url 'empresas:financeiro' %}" class="flex items-center gap-3 px-4 py-3 text-gray-600 rounded-lg hover-bg-tenant transition-colors font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Financeiro
+            </a>
+            <a href="{% url 'empresas:configuracoes' %}" class="flex items-center gap-3 px-4 py-3 text-gray-600 rounded-lg hover-bg-tenant transition-colors font-medium mt-8 border-t border-gray-100 pt-5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Configurações
+            </a>
+            
+            <!-- Botão da Vitrine Injetando o Slug do Tenant Atual -->
+            <a href="{% url 'empresas:vitrine' request.user.organizacao.slug %}" target="_blank" class="flex items-center gap-3 px-4 py-3 text-tenant bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors font-medium mt-4 shadow-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                Ver Vitrine Pública
+            </a>
+        </nav>
+        
+        <div class="p-4 border-t border-gray-100 bg-gray-50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-600 shadow-inner">
+                    {{ request.user.first_name|slice:":1" }}
+                </div>
+                <div class="flex-1 overflow-hidden">
+                    <p class="text-sm font-bold text-gray-800 truncate">{{ request.user.first_name }}</p>
+                    <p class="text-xs text-gray-500 truncate">{{ request.user.cargo|title }}</p>
+                </div>
+                <a href="{% url 'logout' %}" class="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50" title="Sair">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden relative">
+        <!-- Topbar Mobile -->
+        <header class="md:hidden bg-white shadow-sm p-4 flex items-center justify-between z-10">
+            <h1 class="font-bold text-tenant text-xl">{{ request.user.organizacao.nome }}</h1>
+            <button class="text-gray-500 hover:text-tenant p-2 bg-gray-50 rounded-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 overflow-y-auto bg-gray-50/50 p-4 md:p-8">
+            <div class="max-w-6xl mx-auto">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+</body>
+</html>

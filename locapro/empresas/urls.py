@@ -15,4 +15,5 @@ urlpatterns = [
     path('assinatura/processar/', views.processar_assinatura, name='processar_assinatura'),
     path('webhook/asaas/', views.webhook_asaas, name='webhook_asaas'),
     path('super-admin/', views.super_admin_dashboard, name='super_admin'),
+    path('c/<slug:slug>/', views.VitrinePublicaView.as_view(), name='vitrine'),
 ]

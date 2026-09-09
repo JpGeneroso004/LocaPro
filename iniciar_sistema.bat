@@ -1,6 +1,10 @@
 @echo off
-cd /d "C:\ArtTendas\locapro"
-start /b py manage.py runserver --noreload >nul 2>&1
+cd /d "%~dp0locapro"
+
+:: Iniciar o servidor em uma nova janela de terminal para evitar erro de redirecionamento
+start "Servidor Django LocaPro" cmd /c "py manage.py runserver"
+
+:: Aguardar 3 segundos para o servidor ligar
 timeout /t 3 /nobreak >nul
 
 :: Tenta abrir no modo app do Edge
@@ -13,4 +17,4 @@ if errorlevel 1 (
     start "" http://127.0.0.1:8000
   )
 )
-py manage.py runserver --noreload >nul 2>&1
+exit
