@@ -38,13 +38,14 @@ class TenantMiddleware:
         # 1. Injeta o usuário da requisição atual na memória local da thread
         _thread_locals.user = getattr(request, 'user', None)
         
-        # 2. Processa a view
-        response = self.get_response(request)
-        
-        # 3. Limpa a memória para não vazar usuário entre requisições (workers assíncronos)
-        _thread_locals.user = None
-        
-        return response
+        try:
+            # 2. Processa a view
+            response = self.get_response(request)
+            return response
+        finally:
+            # 3. CRÍTICO: Limpa a memória SEMPRE (mesmo se der erro 500) 
+            # para não vazar a sessão de um Tenant para outro na mesma Thread.
+            _thread_locals.user = None
 
 class BloqueioInadimplenteMiddleware:
     """
@@ -57,14 +58,16 @@ class BloqueioInadimplenteMiddleware:
     def __call__(self, request):
         if request.user.is_authenticated and hasattr(request.user, 'organizacao') and request.user.organizacao:
             org = request.user.organizacao
+            
             if org.status_assinatura == 'inadimplente' and not request.user.is_superuser:
                 # Exceção para não causar loop infinito em rotas cruciais
                 allowed_paths = [
                     '/empresas/assinatura/',
-                    '/empresas/assinatura/processar/',
                     '/empresas/webhook/asaas/',
                     '/accounts/logout/',
-                    '/admin/logout/'
+                    '/admin/logout/',
+                    '/static/', # CRÍTICO: Sem isso, a página de pagamento carregava sem CSS
+                    '/media/'
                 ]
                 
                 path = request.path_info
@@ -81,10 +84,23 @@ class LoginRequiredMiddleware(MiddlewareMixin):
         
         # 1. Redireciona usuários não autenticados para o login
         if not request.user.is_authenticated:
-            allowed = ['/admin', getattr(settings, 'LOGIN_URL', '/accounts/login/'), '/empresas/cadastro', '/empresas/webhook/asaas/', '/accounts/', '/static/', '/media/', '/eventos/contrato/assinatura/']
-            if not any(path.startswith(p) for p in allowed):
-                if not path.startswith('/empresas/c/'): # Liberar a vitrine publica
-                    return redirect(f"/accounts/login/?next={path}")
+            allowed_prefixes = [
+                '/admin', 
+                getattr(settings, 'LOGIN_URL', '/accounts/login/'), 
+                '/empresas/cadastro', 
+                '/empresas/webhook/asaas/', 
+                '/accounts/', 
+                '/static/', 
+                '/media/', 
+                '/eventos/contrato/assinatura/',
+                '/empresas/c/' # Vitrine pública
+            ]
+            
+            # Permite exatamente a raiz (Landing Page) ou os prefixos liberados
+            is_allowed = (path == '/') or any(path.startswith(p) for p in allowed_prefixes)
+            
+            if not is_allowed:
+                return redirect(f"/accounts/login/?next={path}")
                 
         # 2. Usuário autenticado, mas SEM organização (ex: Logou pelo Google pela primeira vez)
         elif not getattr(request.user, 'organizacao_id', None) and not request.user.is_superuser:
