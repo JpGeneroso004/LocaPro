@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Painel de Gestão - LocaPro{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     {% block extra_head %}{% endblock %}
     <style>
         :root {
@@ -14,6 +15,19 @@
         .text-tenant { color: var(--cor-primaria); }
         .border-tenant { border-color: var(--cor-primaria); }
         .hover-bg-tenant:hover { background-color: var(--cor-primaria); color: white; }
+
+        /* Dark Mode */
+        html[data-bs-theme="dark"] body { background-color: #121212 !important; color: #e0e0e0 !important; }
+        html[data-bs-theme="dark"] .bg-white { background-color: #1e1e1e !important; }
+        html[data-bs-theme="dark"] .bg-gray-50, html[data-bs-theme="dark"] .bg-gray-100 { background-color: #121212 !important; }
+        html[data-bs-theme="dark"] .text-gray-900, html[data-bs-theme="dark"] .text-gray-800 { color: #ffffff !important; }
+        html[data-bs-theme="dark"] .text-gray-600, html[data-bs-theme="dark"] .text-gray-500 { color: #b0b0b0 !important; }
+        html[data-bs-theme="dark"] .border-gray-100, html[data-bs-theme="dark"] .border-gray-200 { border-color: #333333 !important; }
+        html[data-bs-theme="dark"] table thead tr { background-color: #2a2a2a !important; border-bottom: 1px solid #444 !important; }
+        html[data-bs-theme="dark"] table tbody tr { border-bottom: 1px solid #333 !important; }
+        html[data-bs-theme="dark"] table tbody tr:hover { background-color: #2a2a2a !important; }
+        html[data-bs-theme="dark"] .shadow-sm, html[data-bs-theme="dark"] .shadow-lg { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5) !important; }
+        html[data-bs-theme="dark"] input, html[data-bs-theme="dark"] select, html[data-bs-theme="dark"] textarea { background-color: #2a2a2a !important; color: #fff !important; border-color: #444 !important; }
     </style>
 </head>
 <body class="bg-gray-100 font-sans h-screen flex overflow-hidden">
@@ -66,6 +80,9 @@
                     <p class="text-sm font-bold text-gray-800 truncate">{{ request.user.first_name }}</p>
                     <p class="text-xs text-gray-500 truncate">{{ request.user.cargo|title }}</p>
                 </div>
+                <button class="theme-toggle text-gray-400 hover:text-tenant transition-colors p-2 rounded-lg hover:bg-gray-200" title="Alternar Modo Escuro">
+                    <i class="bi bi-moon-stars-fill theme-icon text-lg"></i>
+                </button>
                 <a href="{% url 'logout' %}" class="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50" title="Sair">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 </a>
@@ -78,9 +95,14 @@
         <!-- Topbar Mobile -->
         <header class="md:hidden bg-white shadow-sm p-4 flex items-center justify-between z-10">
             <h1 class="font-bold text-tenant text-xl">{{ request.user.organizacao.nome }}</h1>
-            <button class="text-gray-500 hover:text-tenant p-2 bg-gray-50 rounded-lg">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </button>
+            <div class="flex items-center gap-2">
+                <button class="theme-toggle text-gray-500 hover:text-tenant p-2 bg-gray-50 rounded-lg">
+                    <i class="bi bi-moon-stars-fill theme-icon text-lg"></i>
+                </button>
+                <button class="text-gray-500 hover:text-tenant p-2 bg-gray-50 rounded-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+            </div>
         </header>
 
         <!-- Page Content -->
@@ -91,6 +113,42 @@
         </main>
     </div>
     
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const themeToggles = document.querySelectorAll('.theme-toggle');
+        const updateTheme = (theme) => {
+          document.documentElement.setAttribute('data-bs-theme', theme);
+          document.querySelectorAll('.theme-icon').forEach(icon => {
+            if (theme === 'dark') {
+              icon.classList.remove('bi-moon-stars-fill');
+              icon.classList.add('bi-sun-fill');
+            } else {
+              icon.classList.remove('bi-sun-fill');
+              icon.classList.add('bi-moon-stars-fill');
+            }
+          });
+        };
+
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        updateTheme(currentTheme);
+
+        themeToggles.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-bs-theme');
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            updateTheme(newTheme);
+          });
+        });
+
+        // UX Premium: Tailwind Forms Auto-Styling
+        const premiumClasses = "w-full rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm text-gray-900 focus:border-tenant focus:ring-2 focus:ring-tenant/20 transition-all shadow-sm".split(" ");
+        document.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, textarea').forEach(el => {
+            el.classList.remove('form-control', 'form-select');
+            el.classList.add(...premiumClasses);
+        });
+      });
+    </script>
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>

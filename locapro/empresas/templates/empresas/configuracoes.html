@@ -12,7 +12,7 @@
 
     <div class="row">
         <div class="col-md-8 mx-auto">
-            <div class="card shadow-sm border-0">
+            <div class="card shadow-sm hover:shadow-md transition-shadow border-0">
                 <div class="card-body">
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
@@ -123,7 +123,7 @@
         </div>
         
         <div class="col-md-4">
-            <div class="card shadow-sm border-0 bg-dark text-white mb-4">
+            <div class="card shadow-sm hover:shadow-md transition-shadow border-0 bg-dark text-white mb-4">
                 <div class="card-body">
                     <h5 class="fw-bold text-warning"><i class="bi bi-gift-fill"></i> Indique e Ganhe (SaaS)</h5>
                     <p class="small">Indique o LocaPro para outras locadoras e ganhe <strong>1 MÊS GRÁTIS</strong> na sua assinatura por cada amigo que assinar!</p>
@@ -145,7 +145,7 @@
         </div>
         
         {% if request.user.cargo == 'dono' %}
-        <div class="card shadow-sm border-danger mt-4">
+        <div class="card shadow-sm hover:shadow-md transition-shadow border-danger mt-4">
             <div class="card-body text-center">
                 <h5 class="text-danger fw-bold"><i class="bi bi-exclamation-octagon-fill"></i> Zona de Perigo</h5>
                 <p class="small text-muted mb-3">Isso apagará permanentemente todos os clientes, eventos e itens do seu estoque. Esta ação não pode ser desfeita.</p>

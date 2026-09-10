@@ -312,7 +312,7 @@
       </ul>
       
       <div class="d-flex align-items-center">
-        <a href="{% url 'eventos:novo' %}" class="btn btn-dark fw-bold rounded-pill px-3 me-3 {% if request.resolver_match.view_name == 'eventos:novo' %}active fw-bolder{% endif %}">+ Novo Evento</a>
+        <a href="{% url 'eventos:novo_evento' %}" class="btn btn-dark fw-bold rounded-pill px-3 me-3 {% if request.resolver_match.view_name == 'eventos:novo_evento' %}active fw-bolder{% endif %}">+ Novo Evento</a>
         <button class="btn btn-link theme-toggle-icon text-decoration-none theme-toggle p-0 fs-5 me-3" title="Alternar tema">
           <i class="bi bi-moon-stars-fill"></i>
         </button>
@@ -336,7 +336,7 @@
     
     <!-- Mobile Ações Rápidas -->
     <div class="d-lg-none mb-4">
-      <a href="{% url 'eventos:novo' %}" class="btn btn-dark w-100 fw-bold py-2 mb-2 {% if request.resolver_match.view_name == 'eventos:novo' %}active fw-bolder{% endif %}">+ Novo Evento</a>
+      <a href="{% url 'eventos:novo_evento' %}" class="btn btn-dark w-100 fw-bold py-2 mb-2 {% if request.resolver_match.view_name == 'eventos:novo_evento' %}active fw-bolder{% endif %}">+ Novo Evento</a>
       <a href="{% url 'account_logout' %}" class="btn btn-outline-danger w-100 fw-bold py-2 {% if request.resolver_match.view_name == 'account_logout' %}active fw-bolder{% endif %}"><i class="bi bi-box-arrow-left"></i> Sair do Sistema</a>
     </div>
 
